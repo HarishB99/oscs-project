@@ -31,6 +31,16 @@ html, body {
 .demo-drawer {
   border: none;
 }
+.page-content {
+  padding: 2.5%;
+}
+.mdl-data-table__holder {
+  width: 100%;
+  overflow-x: auto;
+}
+.action-bar {
+  margin-top: 2.5%;
+}
 /* iOS Safari specific workaround */
 .demo-drawer .mdl-menu__container {
   z-index: -1;
