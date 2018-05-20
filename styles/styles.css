@@ -41,6 +41,12 @@ html, body {
 .action-bar {
     margin-top: 2.5%;
 }
+.action-bar.mdl-layout__header-row {
+    padding: 0% !important;
+}
+.action-bar button {
+    margin: 0% 1%;
+}
 /* iOS Safari specific workaround */
 .demo-drawer .mdl-menu__container {
     z-index: -1;
