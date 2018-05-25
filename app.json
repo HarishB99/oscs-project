@@ -1,0 +1,42 @@
+{
+    "rewrites": {
+        "html": [
+            {
+                "source": "/",
+                "destination": "/index.html"
+            },
+            {
+                "source": "/not_found",
+                "destination": "/contents/error/404.html"
+            },
+            {
+                "source": "/login_username", 
+                "destination": "/contents/accounts/login.html"
+            },
+            {
+                "source": "/login_otp",
+                "destination": "/contents/accounts/otp.html"
+            },
+            {
+                "source": "/password_first_time",
+                "destination": "/contents/accounts/pass_ft.html"
+            },
+            {
+                "source": "/password_reset",
+                "destination": "/contents/accounts/pass_rst.html"
+            },
+            {
+                "source": "/password_change_successfull",
+                "destination": "/contents/accounts/pass_ft_success.html"
+            },
+            {
+                "source": "/login_password",
+                "destination": "/contents/accounts/pass.html"
+            },
+            {
+                "source": "/firewall",
+                "destination": "/contents/firewall.html"
+            }
+        ]
+    }
+}
