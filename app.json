@@ -36,6 +36,10 @@
             {
                 "source": "/firewall",
                 "destination": "/contents/firewall.html"
+            },
+            {
+                "source": "/add_rule",
+                "destination": "/contents/rules/rule.html"
             }
         ]
     }
