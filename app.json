@@ -6,7 +6,7 @@
                 "destination": "/index.html"
             },
             {
-                "source": "/not_found",
+                "source": "/resource_not_found",
                 "destination": "/contents/error/404.html"
             },
             {
