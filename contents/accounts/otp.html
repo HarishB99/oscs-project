@@ -70,7 +70,7 @@
         <header class="mdl-layout__header">
             <div class="mdl-layout__header-row">
                 <!-- Title -->
-                <span class="mdl-layout-title">Title</span>
+                <span class="mdl-layout-title">Login - OTP</span>
                 <!-- Add spacer, to align navigation to the right -->
                 <div class="mdl-layout-spacer"></div>
                 <!-- Navigation. We hide it in small screens. -->
@@ -102,8 +102,9 @@
                         <div class="mdl-card__supporting-text">
                             <!-- Textfield with Floating Label -->
                             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                <input class="mdl-textfield__input" type="password" id="otp">
-                                <label class="mdl-textfield__label" for="otp">OTP...</label>
+                                <input class="mdl-textfield__input" pattern="\d{6,6}" type="password" maxlength="6" id="otp">
+                                <label class="mdl-textfield__label" for="otp">One-Time Pin...</label>
+                                <span class="mdl-textfield__error">Please enter a six-digit number.</span>
                             </div>
                         </div>
                     </div>
