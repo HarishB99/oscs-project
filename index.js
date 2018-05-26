@@ -1,6 +1,15 @@
 var http = require("http");
 var url = require("url");
 var fs = require("fs");
+var path = require("path");
+var os = require("os");
+var tls = require("tls");
+var util = require("util");
+var crypto = require("crypto");
+var assert = require("assert");
+var https = require("https");
+
+console.log("Starting http server...");
 
 http.createServer(function(req, res) {
     var q = url.parse(req.url, true);
@@ -12,7 +21,13 @@ http.createServer(function(req, res) {
 
     var filename = "unknown";
 
-    if (!requested_path.includes(".html"))
+    // Filter out all html files. 
+    // This is because all direct access to 
+    // html files will be restricted.
+    //
+    // html files will be accessed via 
+    // index values instead (refer to /app.json)
+    if (!(requested_path.includes(".html") || requested_path.includes(".json")))
         filename = "." + requested_path;
     
     if (!requested_path.includes(".")) {
@@ -39,3 +54,9 @@ http.createServer(function(req, res) {
         return res.end();
     });
 }).listen(80);
+
+var dirname = __dirname;
+var foldernames = dirname.split("\\");
+
+console.log("Started http server on \"" + foldernames[foldernames.length - 1] + "\"");
+console.log("Serving on at http://localhost");
