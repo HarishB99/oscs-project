@@ -8,8 +8,8 @@ Download the repository.
 * Change to the directory<br/>
 `cd /path/to/oscs-project`
 
-* Install and run the http-server<br/>
+* Execute server-side javascript<br/>
 ```
-npm i -g http-server
-http-server -p 8080 -a localhost -c 0
+node index.js
 ```
+* Open up a browser and navigate to http://localhost/
