@@ -58,5 +58,5 @@ http.createServer(function(req, res) {
 var dirname = __dirname;
 var foldernames = dirname.split("\\");
 
-console.log("Started http server on \"" + foldernames[foldernames.length - 1] + "\"");
-console.log("Serving on at http://localhost");
+console.log("Started http server serving resources from \"" + dirname + "\"");
+console.log("Serving at http://localhost");
