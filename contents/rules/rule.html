@@ -89,6 +89,25 @@
             color: #000;
         } */
     </style>
+    <script>
+        function isAValidPort(el) {
+            console.log(el);
+    var port_enterd = el.value;
+    var parsed_port = 0;
+    try {
+        parsed_port = parseInt(el.value);
+    } catch (error) {
+        el.classList.add("is-invalid");
+    }
+    if (parsed_port < 0 || parsed_port > 65535) {
+        el.classList.add("is-invalid");
+        return;
+    }
+    if (el.classList.contains("is-invalid")) {
+        el.classList.remove("is-invalid");
+    }
+}
+    </script>
 </head>
 <body>
     <div class="demo-layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
@@ -134,7 +153,7 @@
                 </div>
             </header>
             <nav class="demo-navigation mdl-navigation mdl-color--blue-grey-800">
-                <a class="mdl-navigation__link btn--home"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">home</i>Home</a>
+                <a class="mdl-navigation__link btn--home"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dashboard</i>Dashboard</a>
                 <a class="mdl-navigation__link btn--rules"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">flag</i>Rules & Policies</a>
                 <!-- <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">delete</i>Trash</a>
                 <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">report</i>Spam</a>
@@ -169,20 +188,20 @@
                                     <tr>
                                         <td>
                                             <div class="mdl-textfield mdl-js-textfield">
-                                                <input class="mdl-textfield__input" type="text" id="rule_name">
+                                                <input class="mdl-textfield__input" pattern="^[A-Za-z0-9 ]{1,30}$" type="text" maxlength="30" autofocus id="rule_name">
                                                 <label class="mdl-textfield__label" for="rule_name">Name...</label>
-                                                <span class="mdl-textfield__error">Digits only</span>
+                                                <span class="mdl-textfield__error">Only alphanumeric and space characters are allowed.</span>
                                             </div>
                                         </td>
                                         <td>
                                             <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="rule_access">
-                                                <input type="checkbox" id="rule_access" class="mdl-checkbox__input">
+                                                <input type="checkbox" id="rule_access" class="mdl-checkbox__input" checked>
                                                 <span class="mdl-checkbox__label">Allowed</span>
                                             </label>
                                         </td>
                                         <td>
                                             <div class="mdl-textfield mdl-js-textfield">
-                                                <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="rule_priority">
+                                                <input class="mdl-textfield__input" type="text" pattern="^[0-9]{1,5}$" maxlength="5" onkeyup="isAValidPriorityNum(this)" id="rule_priority"> <!-- -?[0-9]*(\.[0-9]+)? -->
                                                 <label class="mdl-textfield__label" for="rule_priority">Priority...</label>
                                                 <span class="mdl-textfield__error">Digits only</span>
                                             </div>
@@ -202,9 +221,9 @@
                                         </td>
                                         <td>
                                             <div class="mdl-textfield mdl-js-textfield">
-                                                <input class="mdl-textfield__input" onkeyup="isAValidPort(this);" type="text" id="rule_sport">
+                                                <input class="mdl-textfield__input" onkeyup="isAValidPort(this);" maxlength="5" type="text" id="rule_sport">
                                                 <label class="mdl-textfield__label" for="rule_sport">Source Port Range...</label>
-                                                <span class="mdl-textfield__error">Please enter number between 0 and 65,535</span>
+                                                <span class="mdl-textfield__error">Please enter a port number between 0 and 65,535</span>
                                             </div>
                                         </td>
                                     </tr>
@@ -218,9 +237,9 @@
                                         </td>
                                         <td>
                                             <div class="mdl-textfield mdl-js-textfield">
-                                                <input class="mdl-textfield__input" onkeyup="isAValidPort(this);" type="text" id="rule_dport">
+                                                <input class="mdl-textfield__input" onkeyup="isAValidPort(this);" maxlength="5" type="text" id="rule_dport">
                                                 <label class="mdl-textfield__label" for="rule_dport">Destination Port Range...</label>
-                                                <span class="mdl-textfield__error">Please enter number between 0 and 65,535</span>
+                                                <span class="mdl-textfield__error">Please enter a port number between 0 and 65,535</span>
                                             </div>
                                         </td>
                                     </tr>

@@ -1,5 +1,5 @@
-var home_btns = document.querySelectorAll(".btn--home");
-var rule_btns = document.querySelectorAll(".btn--rules");
+var home_btn = document.querySelector(".btn--home");
+var rule_btn = document.querySelector(".btn--rules");
 var port_inputs = document.querySelectorAll(".rule__ports");
 // Add rule button is to proceed to the "Add Rule" page to add a rule.
 var add_rule_btn = document.querySelector(".firewall-button--add");
@@ -17,11 +17,10 @@ var cancel_rule_btn = document.querySelector(".firewall-button--cancel");
 var path_prefix = "/";
 
 // Set actions for buttons
-if (home_btns.length !== 0) {
-    for (var i in home_btns) home_btns[i].href = "/";
-} if (rule_btns.length !== 0) {
-    for (var i in rule_btns) rule_btns[i].href = "/firewall";
-}
+if (home_btn !== null) home_btn.href = "/";
+if (rule_btn !== null) rule_btn.href = "/firewall";
+
+
 
 function isAValidPort(el) {
     var port_enterd = el.value;
@@ -43,6 +42,13 @@ function isAValidPort(el) {
 if (add_rule_btn !== null) {
     add_rule_btn.onclick = function(e) {
         location.href = "/add_rule";
+    };
+}
+
+if (update_rule_btn !== null) {
+    update_rule_btn.onclick = function(el) {
+        // localStorage["edit_rule_name"]
+        location.href = "/edit_rule";
     };
 }
 

@@ -17,7 +17,7 @@ http.createServer(function(req, res) {
     var json_data = JSON.parse(fs.readFileSync("./app.json", "utf8"));
     var html_rewrites = json_data.rewrites.html;
     
-    console.log("requested_path", requested_path);
+    // console.log("requested_path", requested_path);
 
     var filename = "unknown";
 
@@ -31,25 +31,34 @@ http.createServer(function(req, res) {
         filename = "." + requested_path;
     
     if (!requested_path.includes(".")) {
-        console.log("html_rewrites_last", html_rewrites);
+        // console.log("html_rewrites_last", html_rewrites);
         for (var i in html_rewrites) {
-            console.log(i + " - requested path = " + requested_path + ", source = " + html_rewrites[i].source);
-            console.log(requested_path === html_rewrites[i].source);
+            // console.log(i + " - requested path = " + requested_path + ", source = " + html_rewrites[i].source);
+            // console.log(requested_path === html_rewrites[i].source);
             if (requested_path === html_rewrites[i].source) {
                 filename = "." + html_rewrites[i].destination;
             }
         }
     }
 
-    console.log("filename", filename);
-
+    // console.log("filename", filename);
     fs.readFile(filename, function(err, data) {
         if (err) {
             res.writeHead(404);
             return res.end("404 Not Found");
         }
 
-        res.writeHead(200);
+        var contentType = "text/plain";
+
+        if (filename.endsWith(".css")) {
+            contentType = "text/css";
+        } else if (filename.endsWith(".js")) {
+            contentType = "application/javascript";
+        } else if (filename.endsWith(".html")) {
+            contentType = "text/html";
+        }
+
+        res.writeHead(200, {"Content-Type": contentType});
         res.write(data);
         return res.end();
     });
