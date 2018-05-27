@@ -40,6 +40,10 @@
             {
                 "source": "/add_rule",
                 "destination": "/contents/rules/rule.html"
+            },
+            {
+                "source": "/edit_rule",
+                "destination": "/contents/rules/rule.html"
             }
         ]
     }
