@@ -52,6 +52,14 @@
             {
                 "source": "/edit_rule",
                 "destination": "/contents/rules/rule.html"
+            },
+            {
+                "source": "/create_account",
+                "destination": "/contents/accounts/account.html"
+            },
+            {
+                "source": "/profile",
+                "destination": "/contents/accounts/profile.html"
             }
         ]
     }
