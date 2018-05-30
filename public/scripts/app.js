@@ -18,7 +18,7 @@ var path_prefix = "/";
 
 // Set actions for buttons
 if (home_btn !== null) home_btn.href = "/";
-if (rule_btn !== null) rule_btn.href = "/firewall";
+if (rule_btn !== null) rule_btn.href = "/contents/firewall.html";
 
 
 
@@ -41,19 +41,19 @@ function isAValidPort(el) {
 
 if (add_rule_btn !== null) {
     add_rule_btn.onclick = function(e) {
-        location.href = "/add_rule";
+        location.href = "/contents/rules/rule.html";
     };
 }
 
 if (update_rule_btn !== null) {
     update_rule_btn.onclick = function(el) {
         // localStorage["edit_rule_name"]
-        location.href = "/edit_rule";
+        location.href = "/contents/rules/rule.html";
     };
 }
 
 if (cancel_rule_btn !== null) {
     cancel_rule_btn.onclick = function(e) {
-        location.href = "/firewall";
+        location.href = "/contents/firewall.html";
     };
 }
