@@ -5,10 +5,10 @@
         "priority": 100,
         "name": "http",
         "allow": true,
-        "sourceip" : "*.*.*.*",
-        "sourceport": "*",
-        "destip": "*.*.*.*",
-        "destport": "80",
+        "sourceip" : "0.0.0.0",
+        "sourceport": "80",
+        "destip": "0.0.0.0",
+        "destport": "*",
         "protocol" : "tcp",
         "state" : "NEW,ESTABLISHED,RELATED"
       },
@@ -16,20 +16,31 @@
         "priority": 200,
         "name": "ssh",
         "allow": true,
-        "sourceip" : "*.*.*.*",
-        "sourceport": "*",
-        "destip": "*.*.*.*",
-        "destport": "22",
+        "sourceip" : "0.0.0.0",
+        "sourceport": "22",
+        "destip": "0.0.0.0",
+        "destport": "*",
         "protocol" : "tcp",
+        "state" : "NEW,ESTABLISHED,RELATED"
+      },
+      {
+        "priority": 300,
+        "name": "proxyserver",
+        "allow": true,
+        "sourceip": "0.0.0.0",
+        "sourceport" : "*",
+        "destip": "0.0.0.0",
+        "destport": "8080",
+        "protocol": "tcp",
         "state" : "NEW,ESTABLISHED,RELATED"
       },
       {
         "priority": 1000,
         "name": "denyAll",
         "allow": false,
-        "sourceip" : "*.*.*.*",
+        "sourceip" : "0.0.0.0",
         "sourceport": "*",
-        "destip": "*.*.*.*",
+        "destip": "0.0.0.0",
         "destport": "*",
         "protocol" : "*",
         "state" : "NEW,ESTABLISHED,RELATED"
@@ -40,22 +51,20 @@
         "priority": 1000,
         "name": "allowAll",
         "allow": true,
-        "sourceip" : "*.*.*.*",
+        "sourceip" : "0.0.0.0",
         "sourceport": "*",
-        "destip": "*.*.*.*",
+        "destip": "0.0.0.0",
         "destport": "*",
         "protocol" : "*",
         "state" : "NEW,ESTABLISHED,RELATED"
       }
     ],
     "webfilter" : {
-      "global" : {
-        "mode": "blacklist",
-        "domainGroups" : ["socialMedia"],
-        "domains": [
-          "www.deviantart.com"
-        ]
-      }
+      "mode": "blacklist",
+      "domainGroups" : ["socialMedia"],
+      "domains": [
+        "www.kongregate.com"
+      ]
     }
   },
   "dpi" : true,
