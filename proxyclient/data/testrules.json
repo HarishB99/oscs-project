@@ -58,14 +58,16 @@
         "protocol" : "*",
         "state" : "NEW,ESTABLISHED,RELATED"
       }
-    ],
-    "webfilter" : {
-      "mode": "blacklist",
-      "domainGroups" : ["socialMedia"],
-      "domains": [
-        "www.kongregate.com"
-      ]
-    }
+    ]
+  },
+  "webfilter" : {
+    "mode": "blacklist",
+    "blockAds": true,
+    "blockMalicious": true,
+    "domainGroups" : ["socialMedia"],
+    "domains": [
+      "www.kongregate.com"
+    ]
   },
   "dpi" : true,
   "virusScan" : true
