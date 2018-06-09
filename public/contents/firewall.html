@@ -106,8 +106,8 @@
             </div>
             <!-- Tabs -->
             <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
-                <a href="#firewall-rules" class="mdl-layout__tab">Network Rules</a>
-                <a href="#web-filter" class="mdl-layout__tab is-active">Web Filter</a>
+                <a href="#firewall-rules" class="mdl-layout__tab is-active">Network Rules</a>
+                <a href="#web-filter" class="mdl-layout__tab">Web Filter</a>
             </div>
         </header>
         <div class="demo-drawer mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50">
@@ -134,7 +134,7 @@
             </nav>
         </div>
         <main class="mdl-layout__content mdl-color--grey-100">
-            <section class="mdl-layout__tab-panel" id="firewall-rules">
+            <section class="mdl-layout__tab-panel is-active" id="firewall-rules">
                 <div class="search-box">
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                         <input class="mdl-textfield__input" type="text" id="rule_name" onkeyup="search()">
@@ -221,7 +221,7 @@
                     </div>
                 </div>
             </section>
-            <section class="mdl-layout__tab-panel is-active" id="web-filter">
+            <section class="mdl-layout__tab-panel" id="web-filter">
                 <div class="page-content">
                     <div class="demo-card-wide mdl-card mdl-shadow--2dp demo-card--margin-bottom">
                         <div class="form-holder">
