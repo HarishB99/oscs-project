@@ -82,7 +82,7 @@ app.get("/rules.json", (request, response) => {
             } else {
                 console.error("There was an error parsing rules retrieved from database. Database may be corrupted.");
             }
-        })
+        });
         
         response.json(responseJson);
     }).catch(err => {
