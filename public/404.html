@@ -74,17 +74,34 @@
         .page-content {
             padding: 2.5%;
         }
+        .invert {
+            -moz-transform: scale(-1, 1);
+            -webkit-transform: scale(-1, 1);
+            -o-transform: scale(-1, 1);
+            -ms-transform: scale(-1, 1);
+            transform: scale(-1, 1);
+        }
         .demo-card-wide.mdl-card {
-            width: 512px;
+            width: 60%;
             margin: auto;
         }
         .demo-card-wide > .mdl-card__title {
             color: #fff;
             height: 176px;
-            background: url('/images/404.png') center / cover;
+            margin: auto;
+            font-size: 5em;
         }
-        .demo-card-wide > .mdl-card__menu {
-            color: #fff;
+
+        @media only screen and (max-width: 1200px) {
+            .demo-card-wide.mdl-card {
+                width: 70%;
+            }
+        }
+
+        @media only screen and (max-width: 800px) {
+            .demo-card-wide.mdl-card {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -131,7 +148,9 @@
             <div class="page-content">
                 <!-- Wide card -->
                 <div class="demo-card-wide mdl-card mdl-shadow--2dp">
-                    <div class="mdl-card__title"></div>
+                    <div class="mdl-card__title">
+                        40<span class="invert">4</span>
+                    </div>
                     <div class="mdl-card__supporting-text">
                         We are extremely sorry but we could not find the resource you are looking for. Perhaps you would like to explore your dashboard?
                     </div>
