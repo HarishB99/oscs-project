@@ -2,22 +2,12 @@ const functions = require('firebase-functions');
 const firebase = require("firebase-admin");
 const express = require("express");
 
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase!");
-// });
-
 const firebaseApp = firebase.initializeApp(
     functions.config().firebase
 );
 
 const db = firebaseApp.firestore();
 
-// function getRules() {
-//     return db.collection('rules').get();
-// }
 // let rules = [];
 
 // db.collection('rules').get().then(snapshot => {
@@ -100,14 +90,6 @@ app.get("/rules.json", (request, response) => {
         // There is a reason why I am not sending error 500
         response.send("An unexpected error occurred.");
     });
-    
-    // getRules().then(doc => {
-    //     return rules.push(doc.data());
-    // }).catch(err => {
-    //     console.error("Error while retrieving rules.json", err);
-    //     response.send("Not found");
-    // });
-    //response.send(`${Date.now()}`);
 });
 
 exports.app = functions.https.onRequest(app);
