@@ -1,6 +1,6 @@
 from mitmproxy import ctx, http
 from bs4 import BeautifulSoup
-import subprocess
+import subprocess, json
 
 options = {
     "block-ads" : True,
@@ -20,10 +20,38 @@ def addDomainsF(fileName, category):
         for d in domains:
             blockedDomains[category][d] = True
 
+def addDomainGroup(groupNames):
+    with open('../data/domaingroups.json', 'r') as dg:
+        domainGroups = json.loads(dg.read())
+
+        for dgName in groupNames:
+            for dgDomain in domainGroups[dgName]:
+                blockedDomains["user"][dgDomain] = True
+
 def load(l):
     #build hash table of domains to block
     addDomainsF("../data/ad-domains-list.txt", "ad")
     addDomainsF("../data/malicious-domains-list.txt", "malicious")
+    #load user defined domains
+    with open('../data/temprules.json', 'r') as rules:
+        rules = json.loads(rules.read())
+        r = rules["webfilter"]
+        #set options
+        #mode
+        if r["mode"] == "blacklist": options["isBlacklist"] = True
+        else: options["isBlacklist"] = False
+        #blocking of ads and malicious sites
+        if r["blockAds"]: options["block-ads"] = True
+        else: options["block-ads"] = False
+        if r["blockMalicious"]: options["block-malicious"] = True
+        else: options["block-malicious"] = False
+
+        #get domain groups
+        addDomainGroup(r["domainGroups"])
+        #add user-defined domains
+        for domain in r["domains"]:
+            blockedDomains["user"][domain] = True
+
 
 
 def request(flow):

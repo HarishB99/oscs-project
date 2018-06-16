@@ -15,6 +15,10 @@ with open('../data/testrules.json', 'r') as ruleJson:
         IptablesHandler.createRule(r, True)
     for r2 in rules["firewallRules"]["outgoing"]:
         IptablesHandler.createRule(r2, False)
+    #write test rules to file for proxy script
+    with open('../data/temprules.json', 'rw+') as rulefile:
+        rulefile.write(json.dumps(rules))
+
 
 #start mitmdump for web filter
 print("Proxy Server IP:")
