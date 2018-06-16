@@ -33,108 +33,6 @@ interface Rule {
     state: string
 }
 
-async function setUp() {
-    const rules = {
-        "firewallRules": {
-            "incoming": [
-                {
-                    "priority": 100,
-                    "name": "http",
-                    "allow": true,
-                    "sourceip" : "0.0.0.0",
-                    "sourceport": "80",
-                    "destip": "0.0.0.0",
-                    "destport": "*",
-                    "protocol" : "tcp",
-                    "state" : "NEW,ESTABLISHED,RELATED"
-                },
-                {
-                    "priority": 200,
-                    "name": "ssh",
-                    "allow": true,
-                    "sourceip" : "0.0.0.0",
-                    "sourceport": "22",
-                    "destip": "0.0.0.0",
-                    "destport": "*",
-                    "protocol" : "tcp",
-                    "state" : "NEW,ESTABLISHED,RELATED"
-                },
-                {
-                    "priority": 300,
-                    "name": "proxyserver",
-                    "allow": true,
-                    "sourceip": "0.0.0.0",
-                    "sourceport" : "*",
-                    "destip": "0.0.0.0",
-                    "destport": "8080",
-                    "protocol": "tcp",
-                    "state" : "NEW,ESTABLISHED,RELATED"
-                },
-                {
-                    "priority": 1000,
-                    "name": "denyAll",
-                    "allow": false,
-                    "sourceip" : "0.0.0.0",
-                    "sourceport": "*",
-                    "destip": "0.0.0.0",
-                    "destport": "*",
-                    "protocol" : "*",
-                    "state" : "NEW,ESTABLISHED,RELATED"
-                }
-            ],
-            "outgoing": [
-                {
-                    "priority": 1000,
-                    "name": "allowAll",
-                    "allow": true,
-                    "sourceip" : "0.0.0.0",
-                    "sourceport": "*",
-                    "destip": "0.0.0.0",
-                    "destport": "*",
-                    "protocol" : "*",
-                    "state" : "NEW,ESTABLISHED,RELATED"
-                }
-            ],
-            "webfilter" : {
-                "mode": "blacklist",
-                "domainGroups" : ["socialMedia"],
-                "domains": [
-                    "www.kongregate.com"
-                ]
-            }
-        },
-        "dpi" : true,
-        "virusScan" : true
-    }
-
-    const writeStatus = []
-    rules.firewallRules.incoming.forEach(rule => {
-        writeStatus.push(db.collection('incoming').doc(rule.name).set({
-            priority: rule.priority,
-            allow: rule.allow,
-            sourceip: rule.sourceip,
-            sourceport: rule.sourceport,
-            destip: rule.destip,
-            destport: rule.destport,
-            protocol: rule.protocol,
-            state: rule.state
-        }))
-    })
-    rules.firewallRules.outgoing.forEach(rule => {
-        writeStatus.push(db.collection('outgoing').doc(rule.name).set({
-            priority: rule.priority,
-            allow: rule.allow,
-            sourceip: rule.sourceip,
-            sourceport: rule.sourceport,
-            destip: rule.destip,
-            destport: rule.destport,
-            protocol: rule.protocol,
-            state: rule.state
-        }))
-    })
-    return Promise.all(writeStatus)
-}
-
 app.get('/rules.json', async (request, response) => {
     // The following line sets the Cache Control such that 
     // the firewall rules can be cached to a CDN server (hence 
@@ -144,7 +42,6 @@ app.get('/rules.json', async (request, response) => {
     // s-max-age: store the cache in the CDN for 600s
     // response.set('Cache-Control', 'public, max-age=300, s-maxage=600');
     try {
-        await setUp()
         const incomingRules = await incomingRulesRef.get()
         const outgoingRules = await outgoingRulesRef.get()
         // const webfilter = await webFilterRef.get()
