@@ -1,0 +1,11 @@
+service cloud.firestore {
+    match /database/{database}/documents {
+        match /users/{uid}/rules/{rule} {
+            allow read, write: if request.auth.uid === uid;
+        }
+
+        match /users/{uid}/filters/filter {
+            allow read, write: if request.auth.uid === uid;
+        }
+    }
+}

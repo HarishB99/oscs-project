@@ -20,10 +20,19 @@ var path_prefix = "/";
 if (home_btn !== null) home_btn.href = "/";
 if (rule_btn !== null) rule_btn.href = "/contents/firewall.html";
 
-
+function showSnackbar(message) {
+    var notification = document.querySelector('.mdl-js-snackbar');
+    var data = {
+        message: message,
+        // actionHandler: function(event) {},
+        // actionText: 'Undo',
+        timeout: 10000
+    };
+    notification.MaterialSnackbar.showSnackbar(data);
+}
 
 function isAValidPort(el) {
-    var port_enterd = el.value;
+    // var port_enterd = el.value;
     var parsed_port = 0;
     try {
         parsed_port = parseInt(el.value);
@@ -39,6 +48,29 @@ function isAValidPort(el) {
     }
 }
 
+function retrieveProfile() {
+    return axios.post("/profile-retrieve").then(function(response) {
+        return JSON.response(response.data);
+    });
+    // return Ajax.post("/profile-retrieve").then(JSON.parse);
+}
+
+function retrieveRules() {
+    return Ajax.post("/rules.json");
+}
+
+function updateRule() {
+
+}
+
+function addRule() {
+
+}
+
+function deleteRule() {
+    
+}
+
 if (add_rule_btn !== null) {
     add_rule_btn.onclick = function(e) {
         location.href = "/contents/rules/rule.html";
@@ -47,7 +79,6 @@ if (add_rule_btn !== null) {
 
 if (update_rule_btn !== null) {
     update_rule_btn.onclick = function(el) {
-        // localStorage["edit_rule_name"]
         location.href = "/contents/rules/rule.html";
     };
 }
