@@ -23,6 +23,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Network Rules</title>
 
+    <!-- TODO: Set up PWA/AMP when possible -->
     <!-- Add to homescreen for Chrome on Android -->
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="icon" sizes="192x192" href="../images/android-desktop.png">
@@ -45,45 +46,40 @@
         https://developers.google.com/webmasters/smartphone-sites/feature-phones 
     -->
     <!--
-        <link rel="canonical" href="http://www.example.com/">
+    <link rel="canonical" href="http://www.example.com/">
     -->
 
+    <!-- TODO: Use the online versions of the following assets -->
     <link rel="stylesheet" href="../fonts/css.css">
     <link rel="stylesheet" href="../fonts/icon.css">
     <link rel="stylesheet" href="../mdl/material.cyan-light_blue.min.css">
     <link rel="stylesheet" href="../styles/styles.css">
     <style>
+        /* Styling for search-box */
         .search-box {
             padding: 1% 0%;
             max-width: 100%;
             margin: auto;
             text-align: center;
             background-color: white;
-        }
-        
-        .search-box .mdl-textfield {
+        } .search-box .mdl-textfield {
             margin: 0% 9.5%;
-        }
-        
-        .search-box > * {
+        } .search-box > * {
             cursor: pointer;
         }
+
+        /* Styling for mdl-card holding the form */
         .demo-card-wide .form-holder {
             padding: 2.5%;
-        }
-        .demo-card-wide.mdl-card {
+        } .demo-card-wide.mdl-card {
             width: 100%;
-        }
-        .demo-card-wide > .mdl-card__title {
+        } .demo-card-wide > .mdl-card__title {
             color: #000;
-        }
-        .demo-card-wide .form-holder .mdl-card__supporting-text {
+        } .demo-card-wide .form-holder .mdl-card__supporting-text {
             width: 95%;
-        }
-        .demo-card--margin-bottom {
+        } .demo-card--margin-bottom {
             margin-bottom: 2.5%;
-        }
-        .demo-card-wide .mdl-layout__header-row {
+        } .demo-card-wide .mdl-layout__header-row {
             padding: 0% !important;
         }
     </style>
@@ -97,7 +93,7 @@
             </div>
             <!-- Tabs -->
             <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
-                <a href="#firewall-rules" class="mdl-layout__tab is-active">Network Rules</a>
+                <a href="#firewall-rule" class="mdl-layout__tab is-active">Network Rules</a>
                 <a href="#web-filter" class="mdl-layout__tab">Web Filter</a>
             </div>
         </header>
@@ -112,26 +108,26 @@
                         <span class="visuallyhidden">Accounts</span>
                     </button>
                     <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="accbtn">
-                        <li class="mdl-menu__item"><i class="material-icons">account_circle</i>Profile</li>
-                        <li class="mdl-menu__item"><i class="material-icons">exit_to_app</i>Logout</li>
+                        <li id="mdl-menu__item--profile" class="mdl-menu__item mdl-menu__item--profile"><i class="material-icons">account_circle</i>Profile</li>
+                        <li id="mdl-menu__item--signout" class="mdl-menu__item mdl-menu__item--signout"><i class="material-icons">exit_to_app</i>Logout</li>
                     </ul>
                 </div>
             </header>
             <nav class="demo-navigation mdl-navigation mdl-color--blue-grey-800">
-                <a class="mdl-navigation__link btn--home"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dashboard</i>Dashboard</a>
-                <a class="mdl-navigation__link btn--rules"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">flag</i>Rules & Policies</a>
+                <a id="mdl-navigation__link--home" class="mdl-navigation__link mdl-navigation__link--home"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dashboard</i>Dashboard</a>
+                <a id="mdl-navigation__link--rules" class="mdl-navigation__link mdl-navigation__link--rules"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">flag</i>Rules & Policies</a>
                 <div class="mdl-layout-spacer"></div>
-                <a class="mdl-navigation__link"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">help_outline</i><span class="visuallyhidden">Help</span></a>
+                <a id="mdl-navigation__link--help" class="mdl-navigation__link mdl-navigation__link--help"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">help_outline</i><span class="visuallyhidden">Help</span></a>
             </nav>
         </div>
         <main class="mdl-layout__content mdl-color--grey-100">
-            <section class="mdl-layout__tab-panel is-active" id="firewall-rules">
+            <section class="mdl-layout__tab-panel is-active" id="firewall-rule">
                 <div class="search-box">
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                        <input class="mdl-textfield__input" type="text" id="rule_name" onkeyup="search()">
-                        <label class="mdl-textfield__label" for="rule_name">Rule Name...</label>
+                        <input class="mdl-textfield__input firewall-rule__search--input-name" type="text" id="firewall-rule__search--input-name">
+                        <label class="mdl-textfield__label" for="firewall-rule__search--input-name">Rule Name...</label>
                     </div>
-                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" onclick="search()"><!-- onclick="search()" -->
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect firewall-rule__search--input-button" id="firewall-rule__search--input-button">
                         <i class="material-icons">search</i> Search
                     </button>
                 </div>
@@ -148,7 +144,6 @@
                                     <th>Destination Address Range</th>
                                     <th>Destination Port Range</th>
                                     <th>Protocol</th>
-                                    <th>Virus Scanner</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -163,10 +158,7 @@
                                     <td>80</td>
                                     <td>TCP</td>
                                     <td>
-                                        Enforced
-                                    </td>
-                                    <td>
-                                        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">edit</i> Edit</button>
+                                        <button class="firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">edit</i> Edit</button>
                                     </td>
                                 </tr>
                                 <tr>
@@ -179,10 +171,7 @@
                                     <td>3306</td>
                                     <td>TCP</td>
                                     <td>
-                                        Enforced
-                                    </td>
-                                    <td>
-                                        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">edit</i> Edit</button>
+                                        <button class="firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">edit</i> Edit</button>
                                     </td>
                                 </tr>
                                 <tr>
@@ -195,120 +184,39 @@
                                     <td>*</td>
                                     <td>*</td>
                                     <td>
-                                        Not Enforced
-                                    </td>
-                                    <td>
-                                        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">edit</i> Edit</button>
+                                        <button class="firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">edit</i> Edit</button>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                     <div class="action-bar">
-                        <!-- <div class="mdl-layout-spacer"></div> -->
-                        <button class="firewall-button--add mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">add</i> Add</button>
-                        <button class="firewall-button--delete mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" disabled><i class="material-icons">delete</i> Delete</button>
-                        <!-- <button class="firewall-button--publish mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" disabled><i class="material-icons">update</i> Update</button> -->
+                        <button id="firewall-rule__button--add" class="firewall-rule__button--add mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">add</i> Add</button>
+                        <button id="firewall-rule__button--delete" class="firewall-rule__button--delete mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" disabled><i class="material-icons">delete</i> Delete</button>
                     </div>
                 </div>
             </section>
             <section class="mdl-layout__tab-panel" id="web-filter">
                 <div class="page-content mdl-grid">
-                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="filter-mode">
-                        <input type="checkbox" id="filter-mode" class="mdl-switch__input" checked>
-                        <span class="mdl-switch__label">Filter Using Whitelist</span><!--  <i class="material-icons">help</i> -->
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="web-filter__mode">
+                        <input type="checkbox" id="web-filter__mode" class="mdl-switch__input web-filter__mode" checked>
+                        <span class="mdl-switch__label">Filter Using Whitelist</span>
                     </label>
-                    <!-- <i class="material-icons" id="filter-mode-label mdl-cell mdl-cell--4-col">help</i> -->
-                    <!-- <div class="mdl-tooltip mdl-tooltip--bottom" for="filter-mode-label"> -->
-                        <!-- Do you wish to configure a whitelist filter? -->
-                    <!-- </div> -->
-                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="block-ads">
-                        <input type="checkbox" id="block-ads" class="mdl-switch__input" checked>
-                        <span class="mdl-switch__label">Block Ads</span><!--  <i class="material-icons">help</i> -->
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="web-filter__block-ads">
+                        <input type="checkbox" id="web-filter__block-ads" class="mdl-switch__input web-filter__block-ads" checked>
+                        <span class="mdl-switch__label">Block Ads</span>
                     </label>
-                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="block-malicious">
-                        <input type="checkbox" id="block-malicious" class="mdl-switch__input" checked>
-                        <span class="mdl-switch__label">Block Malicious Domains</span><!--  <i class="material-icons">help</i> -->
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="web-filter__block-malicious">
+                        <input type="checkbox" id="web-filter__block-malicious" class="mdl-switch__input web-filter__block-malicious" checked>
+                        <span class="mdl-switch__label">Block Malicious Domains</span>
                     </label>
-                    <!-- <div class="demo-card-wide mdl-card mdl-shadow--2dp demo-card--margin-bottom">
-                        <div class="form-holder">
-                            <div class="mdl-card__title">
-                                <h2 class="mdl-card__title-text">Whitelisted Sites</h2>
-                            </div>
-                            <div class="mdl-card__supporting-text">
-                                <div class="mdl-textfield mdl-js-textfield">
-                                    <input class="mdl-textfield__input" type="text" id="whitelist-url">
-                                    <label class="mdl-textfield__label" for="whitelist-url">Example: google.com</label>
-                                </div>
-                                <a class="mdl-button mdl-button--raised mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-                                    <i class="material-icons">add</i>                                                
-                                </a>
-                                <div class="mdl-layout__header-row">
-                                    <div class="mdl-typography--title">google.com</div>
-                                    <div class="mdl-layout-spacer"></div>
-                                    <button class="mdl-button mdl-js-button mdl-button--icon mdl-js-ripple-effect">
-                                        <i class="material-icons">cancel</i>
-                                    </button>
-                                </div>
-                                <div class="mdl-layout__header-row">
-                                    <div class="mdl-typography--title">nyp.edu.sg</div>
-                                    <div class="mdl-layout-spacer"></div>
-                                    <button class="mdl-button mdl-js-button mdl-button--icon mdl-js-ripple-effect">
-                                        <i class="material-icons">cancel</i>
-                                    </button>
-                                </div>
-                                <div class="mdl-layout__header-row">
-                                    <div class="mdl-typography--title">learn.nyp.edu.sg</div>
-                                    <div class="mdl-layout-spacer"></div>
-                                    <button class="mdl-button mdl-js-button mdl-button--icon mdl-js-ripple-effect">
-                                        <i class="material-icons">cancel</i>
-                                    </button>
-                                </div>
-                                            
-                            </div>
-                        </div>
-                    </div>
-                    <div class="demo-card-wide mdl-card mdl-shadow--2dp">
-                        <div class="form-holder">
-                            <div class="mdl-card__title">
-                                <h2 class="mdl-card__title-text">Blacklisted Sites</h2>
-                            </div>
-                            <div class="mdl-card__supporting-text">
-                                <div class="mdl-textfield mdl-js-textfield">
-                                    <input class="mdl-textfield__input" type="text" id="whitelist-url">
-                                    <label class="mdl-textfield__label" for="whitelist-url">Example: badwebsite.com</label>
-                                </div>
-                                <a class="mdl-button mdl-button--raised mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-                                    <i class="material-icons">add</i>                                                
-                                </a>
-                                <div class="mdl-layout__header-row">
-                                    <div class="mdl-typography--title">bad.com</div>
-                                    <div class="mdl-layout-spacer"></div>
-                                    <button class="mdl-button mdl-js-button mdl-button--icon mdl-js-ripple-effect">
-                                        <i class="material-icons">cancel</i>
-                                    </button>
-                                </div>
-                                <div class="mdl-layout__header-row">
-                                    <div class="mdl-typography--title">terrorism.org</div>
-                                    <div class="mdl-layout-spacer"></div>
-                                    <button class="mdl-button mdl-js-button mdl-button--icon mdl-js-ripple-effect">
-                                        <i class="material-icons">cancel</i>
-                                    </button>
-                                </div>
-                                <div class="mdl-layout__header-row">
-                                    <div class="mdl-typography--title">hacker.net</div>
-                                    <div class="mdl-layout-spacer"></div>
-                                    <button class="mdl-button mdl-js-button mdl-button--icon mdl-js-ripple-effect">
-                                        <i class="material-icons">cancel</i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
                 </div>
             </section>
         </main>
     </div>
+    <!-- TODO: Add library for es6-promise polyfill -->
+    <!-- TODO: Add library for axios js -->
+    <!-- TODO: Use the online version of /mdl/material.min.js -->
     <script src="../mdl/material.min.js"></script>
     <script src="../scripts/app.js"></script>
 </body>

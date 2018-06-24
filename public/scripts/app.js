@@ -1,14 +1,13 @@
-var home_btn = document.querySelector(".btn--home");
-var rule_btn = document.querySelector(".btn--rules");
+var home_btn = document.getElementById("mdl-navigation__link--home");
+var rule_btn = document.getElementById("mdl-navigation__link--rules");
+var profile_btn = document.getElementById("mdl-menu__item--profile");
+var signout_btn = document.getElementById("mdl-menu__item--signout");
 var port_inputs = document.querySelectorAll(".rule__ports");
 // Add rule button is to proceed to the "Add Rule" page to add a rule.
-var add_rule_btn = document.querySelector(".firewall-button--add");
+var add_rule_btn = document.getElementById("firewall-rule__button--add");
 // Delete button is to delete an existing rule.
-var delete_rule_btn = document.querySelector(".firewall-button--delete");
-// Publish button is to publish changes to the firewall.
-var publish_rule_btn = document.querySelector(".firewall-button--publish");
-// Update button is to create/edit a new rule. 
-// Must be explicitly published using the publish button.
+var delete_rule_btn = document.getElementById("firewall-rule__button--delete");
+// Update button is to create/edit a new rule.
 var update_rule_btn = document.querySelector(".firewall-button--update");
 // Cancel button is to cancel the rule creation process.
 var cancel_rule_btn = document.querySelector(".firewall-button--cancel");
@@ -17,8 +16,8 @@ var cancel_rule_btn = document.querySelector(".firewall-button--cancel");
 var path_prefix = "/";
 
 // Set actions for buttons
-if (home_btn !== null) home_btn.href = "/";
-if (rule_btn !== null) rule_btn.href = "/contents/firewall.html";
+if (home_btn) home_btn.href = "/";
+if (rule_btn) rule_btn.href = "/contents/firewall.html";
 
 function showSnackbar(message) {
     var notification = document.querySelector('.mdl-js-snackbar');
@@ -37,22 +36,20 @@ function isAValidPort(el) {
     try {
         parsed_port = parseInt(el.value);
     } catch (error) {
-        el.classList.add("is-invalid");
+        return el.classList.add("is-invalid");
     }
-    if (parsed_port < 0 || parsed_port > 65535) {
-        el.classList.add("is-invalid");
-        return;
-    }
-    if (el.classList.contains("is-invalid")) {
-        el.classList.remove("is-invalid");
-    }
+    if (parsed_port < 0 || parsed_port > 65535) return el.classList.add("is-invalid");
+    if (el.classList.contains("is-invalid")) return el.classList.remove("is-invalid");
 }
 
 function retrieveProfile() {
     return axios.post("/profile-retrieve").then(function(response) {
         return JSON.response(response.data);
     });
-    // return Ajax.post("/profile-retrieve").then(JSON.parse);
+}
+
+function signInWithEmailPass() {
+
 }
 
 function retrieveRules() {
