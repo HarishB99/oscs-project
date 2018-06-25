@@ -34,205 +34,272 @@ const webFilterRef = db.collection('filters').doc('filter');
 
 const app = express();
 
-function generateSalt() {
-    return crypto.pseudoRandomBytes(64).toString('hex');
+class CryptoGrapher {
+    generateSalt() {
+        return crypto.pseudoRandomBytes(64).toString('hex');
+    }
+
+    hash(message, salt) {
+        const digest = crypto.createHash('sha512');
+        const finalMessage = message.concat(salt);
+        digest.update(finalMessage);
+        return digest.digest('hex');
+    }
+
+    encrypt(plainText, password) {
+        const cipher = crypto.createCipher('aes256', password);
+        let cipherText = cipher.update(plainText, 'utf8', 'hex');
+        cipherText += cipher.final('hex');
+        return cipherText;
+    }
+
+    decrypt(cipherText, password) {
+        const decipher = crypto.createDecipher('aes256', password);
+        let plainText = decipher.update(cipherText, 'hex', 'utf8');
+        plainText += decipher.final('utf8');
+        return plainText;
+    }
 }
 
-function hash(message, salt) {
-    const digest = crypto.createHash('sha512');
-    const finalMessage = message.concat(salt);
-    digest.update(finalMessage);
-    return digest.digest('hex');
+class InputValidator {
+    isEmpty(input) {
+        return (input === "" || input === null || input === undefined) ? true : false;
+    }
+
+    isOfValidLength(input, min, max, inclusive) {
+        return this.isInValidRange(input.length, min, max, inclusive);
+    }
+
+    isValidOrgName(input) {
+        return /^[A-Za-z0-9 ,()]{3,30}$/.test(input);
+    }
+
+    isValidEmail(input) {
+        const regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return regex.test(input);
+    }
+
+    isValidPhoneNum(input) {
+        const regex = /^[89]+\d{7}$/;
+        return regex.test(input);
+    }
+
+    isInValidRange(input, min, max, inclusive) {
+        return inclusive ? (input >= min && input <= max) : (input > min && input < max);
+    }
 }
 
-function encrypt(plainText, password) {
-    const cipher = crypto.createCipher('aes256', password);
-    let cipherText = cipher.update(plainText, 'utf8', 'hex');
-    cipherText += cipher.final('hex');
-    return cipherText;
+class Input {
+    /**
+     * To construct an Input object to process user input
+     * @param {*} email email of user
+     * @param {*} password password of user
+     * @param {*} phoneNumber phoneNumber of user
+     * @param {*} organisation organisation of user
+     * @param {*} photoURL url of the display picture of the user
+     */
+    constructor(email, password, phoneNumber, organisation, photoURL) {
+        this.email = email;
+        this.password = password;
+        this.phoneNumber = '+65'.concat(phoneNumber);
+        this.organisation = organisation;
+        this.photoURL = photoURL || 'https://material.io/tools/icons/static/icons/baseline-perm_identity-24px.svg';
+        this.displayName = input.email.substr(0, input.email.lastIndexOf('@'));
+    }
+
+    toString() {
+        return JSON.stringify({
+            email: this.email,
+            password: this.password,
+            phoneNumber: this.phoneNumber,
+            organisation: this.organisation,
+            photoURL: this.photoURL,
+            displayName: this.displayName
+        });
+    }
 }
 
-function decrypt(cipherText, password) {
-    const decipher = crypto.createDecipher('aes256', password);
-    let plainText = decipher.update(cipherText, 'hex', 'utf8');
-    plainText += decipher.final('utf8');
-    return plainText;
-}
+app.get('/create-test-user', async (request, response) => {
+    // TODO: Generate password and send to users
+    // I believe this can be achieved using 
+    // Firebase sing-in with link.
+    // So I need to determine whether it is 
+    // the first time that a user is signing up and 
+    // if yes, send them an email containing their 
+    // password, whick will be used by client to sign in 
+    // and then update the new password that the 
+    // user will create via admin.auth().updateUser();
+    // Hopefully this works without any errors. 
 
-// app.get('/create-test-user', (request, response) => {
-//     // TODO: Generate password and send to users
-//     // I believe this can be achieved using 
-//     // Firebase sing-in with link.
-//     // So I need to determine whether it is 
-//     // the first time that a user is signing up and 
-//     // if yes, send them an email containing their 
-//     // password, whick will be used by client to sign in 
-//     // and then update the new password that the 
-//     // user will create via admin.auth().updateUser();
-//     // Hopefully this works without any errors. 
+    // TODO: Get the input from user 
+    // Validate the inputDO 
+    const input = new Input('test@example.com', 'secretTestPassword', '87127475', 'example.org', null);
 
-//     // TODO: Get the input from user 
-//     // Validate the inputDO 
-//     const input = {
-//         email: "test@example.com",
-//         phoneNumber: "87127475",
-//         password: "secretTestPassword",
-//         organisation: 'example.org'
-//     };
+    try {
+        const userRecord = await admin.auth().createUser({
+            email: input.email,
+            emailVerified: false,
+            phoneNumber: input.phoneNumber,
+            password: input.password,
+            displayName: input.displayName,
+            photoURL: input.photoURL,
+            disabled: false
+        });
+
+        await admin.auth().setCustomUserClaims(userRecord.uid, {
+            organisation: input.organisation
+        });
+
+        response.send('User Creation Successful');
+    } catch (error) {
+        console.log('Error while creating test user: ', error);
+        response.send('User Creation Unsuccessful');
+    }
+});
+
+app.get('/create-test-user2', async (request, response) => {
+    // TODO: Generate password and send to users
+    // I believe this can be achieved using 
+    // Firebase sing-in with link.
+    // So I need to determine whether it is 
+    // the first time that a user is signing up and 
+    // if yes, send them an email containing their 
+    // password, whick will be used by client to sign in 
+    // and then update the new password that the 
+    // user will create via admin.auth().updateUser();
+    // Hopefully this works without any errors. 
+
+    // TODO: Get the input from user 
+    // Validate the inputDO 
+    const input = new Input('test2@example.com', '87127479', 'toBeUnlocked@nypsit2018', 'example.org', null);
+
+    const cryptographer = new CryptoGrapher();
+    const encryptedPassword = cryptographer.encrypt(input.password, 'secretWhispered1519');
+    const salt = generateSalt();
     
-//     admin.auth().createUser({
-//         email: "test@example.com",
-//         emailVerified: false,
-//         phoneNumber: "+65".concat(input.phoneNumber),
-//         password: input.password,
-//         displayName: input.email.substr(0, input.email.lastIndexOf('@')),
-//         photoURL: input.photoURL || "https://material.io/tools/icons/static/icons/baseline-perm_identity-24px.svg",
-//         disabled: false
-//     }).then(userRecord => {
-//         return admin.auth().setCustomUserClaims(userRecord.uid, {
-//             organisation: input.organisation
-//         });
-//         // return db.doc(`/users/${userRecord.uid}`).set({
-//         //     organisation: 'example.org'
-//         // });
-//     }).then(() => {
-//         response.send('User Creation Successful');
-//     }).catch(error => {
-//         console.log("Error while creating test user: ", error);
-//         response.send('User Creation Unsuccessful');
-//     });
-// });
+    try {
+        const userRecord = await admin.auth().createUser({
+            email: input.email,
+            emailVerified: false,
+            phoneNumber: input.phoneNumber,
+            displayName: input.displayName,
+            photoURL: input.photoURL,
+            disabled: false
+        });
+        // Await setting of user claim and db record
+        await Promise.all(
+            admin.auth().setCustomUserClaims(userRecord.uid, {
+                organisation: input.organisation
+            }),
+            db.doc(`/users/${userRecord.uid}`).set({
+                secret: cryptographer.hash(encryptedPassword, salt),
+                salt: cryptographer.encrypt(salt, 'thisIs@V3ryImportantSt3p')
+            })
+        );
+        response.send('User Creation Successful');
+    } catch (error) {
+        console.log("Error while creating test user: ", error);
+        response.send('User Creation Unsuccessful');
+    }
+});
 
-// app.get('/create-test-user2', (request, response) => {
-//     // TODO: Generate password and send to users
-//     // I believe this can be achieved using 
-//     // Firebase sing-in with link.
-//     // So I need to determine whether it is 
-//     // the first time that a user is signing up and 
-//     // if yes, send them an email containing their 
-//     // password, whick will be used by client to sign in 
-//     // and then update the new password that the 
-//     // user will create via admin.auth().updateUser();
-//     // Hopefully this works without any errors. 
+app.post('/account-create-request', async (request, response) => {
+    try {
+        const req_params = JSON.parse(request.body);
 
-//     // TODO: Get the input from user 
-//     // Validate the inputDO 
-//     const input = {
-//         email: "test2@example.com",
-//         phoneNumber: "87127479",
-//         password: "toBeUnlocked@nypsit2018",
-//         organisation: 'example.org'
-//     };
-//     const encryptedPassword = encrypt(input.password, 'secretWhispered1519');
-//     const salt = generateSalt();
+        const email = req_params.email;
+        const organisation = req_params.org;
+        const phoneNumber = req_params.contact;
     
-    
-//     admin.auth().createUser({
-//         email: input.email,
-//         emailVerified: false,
-//         phoneNumber: "+65".concat(input.phoneNumber),
-//         displayName: input.email.substr(0, input.email.lastIndexOf('@')),
-//         photoURL: input.photoURL || "https://material.io/tools/icons/static/icons/baseline-perm_identity-24px.svg",
-//         disabled: false
-//     }).then(userRecord => {
-//         let promises = [];
-//         promises.push(admin.auth().setCustomUserClaims(userRecord.uid, {
-//             organisation: input.organisation
-//         }));
-//         promises.push(db.doc(`/users/${userRecord.uid}`).set({
-//             secret: hash(encryptedPassword, salt),
-//             salt: encrypt(salt, 'thisIs@V3ryImportantSt3p')
-//         }));
-//         // return db.doc(`/users/${userRecord.uid}`).set({
-//         //     organisation: 'example.org'
-//         // });
-//         return Promise.all(promises);
-//     }).then(() => {
-//         response.send('User Creation Successful');
-//     }).catch(error => {
-//         console.log("Error while creating test user: ", error);
-//         response.send('User Creation Unsuccessful');
-//     });
-// });
+        let input = null;
+        const iv = new InputValidator();
+        if (iv.isValidEmail(email) && iv.isValidPhoneNum(phoneNumber) && iv.isValidOrgName(organisation)) {
+            input = new Input(email, null, phoneNumber, organisation, null);
+        }
 
-app.get('/profile-retrieve', (request, response) => {
+        if (!input) {
+            response.send('Bad Request');
+        } else {
+            const requestRef = db.collection('requests').doc();
+            await requestRef.set({
+                email: input.email,
+                organisation: input.organisation,
+                phoneNumber: input.phoneNumber
+            });
+            response.send('Account Request: Created');
+        }
+    } catch (error) {
+        console.error('Error while creating account request: ', error);
+        response.send('Access denied');
+    }
+});
+
+app.get('/profile-retrieve', async (request, response) => {
     // TODO: authenticate user before 
     // retrieving profile
     const email = request.query.email;
     let responseJson = {};
-    admin.auth().getUserByEmail(email)
-    .then(userRecord => {
-        responseJson.displayName = userRecord.displayName;
-        responseJson.email = userRecord.email;
-        responseJson.phoneNumber = userRecord.phoneNumber;
-        responseJson.organisation = userRecord.customClaims.organisation;
-        responseJson.status = 'ok';
+    try {
+        const userRecord = await admin.auth().getUserByEmail(email);
+        responseJson = {
+            displayName: userRecord.displayName,
+            email: userRecord.email,
+            phoneNumber: userRecord.phoneNumber,
+            organisation: userRecord.customClaims.organisation,
+            status: 'ok'
+        };
         response.send(JSON.stringify(responseJson));
-        // return db.doc(`/users/${userRecord.uid}`).get();
-    })
-    // .then(dbUserRecord => {
-    //     responseJson.organisation = dbUserRecord.get('organisation');
-    //     responseJson.status = 'ok';
-    //     response.send(JSON.stringify(responseJson));
-    // })
-    .catch(error => {
+    } catch (error) {
         responseJson.status = 'access denied';
         console.error('', error);
         response.send(JSON.stringify(responseJson));
-    });
+    }
 });
 
-app.get('/login', (request, response) => {
+app.get('/login', async (request, response) => {
     // response.set('Access-Control-Allow-Origin', '*');
     // response.set('Access-Control-Allow-Methods', 'POST');
     const email = request.query.username;
     const pass = request.query.pass;
 
-    firebaseApp.auth().signInWithEmailAndPassword(
-        email, pass
-    ).then(() => {
-        return admin.auth().getUserByEmail(email);
-    }).then(userRecord => {
-        return db.doc(`/users/${userRecord.uid}`).set({
+    try {
+        await firebaseApp.auth().signInWithEmailAndPassword(email, password);
+        const userRecord = await admin.auth().getUserByEmail(email);
+        await db.doc(`/users/${userRecord.uid}`).set({
             state: 'loggedin'
         }, { merge: true });
-    }).then(() => {
         response.send('Sign in successful');
-    }).catch(error => {
-        console.log("Error while signing in user: ", error);
-        response.send("Access denied");
-    });
+    } catch (error) {
+        console.error('Error while signing in user: ', error);
+        response.send('Access denied');
+    }
 });
 
-app.get('/login2', (request, response) => {
+app.get('/login2', async (request, response) => {
     // response.set('Access-Control-Allow-Origin', '*');
     // response.set('Access-Control-Allow-Methods', 'POST');
     const email = request.query.username;
     const pass = request.query.pass;
 
-    admin.auth().getUserByEmail(email).then(userRecord => {
-        const uid = userRecord.uid;
-        return db.doc(`/users/${uid}`).get();
-    }).then(userSecret => {
-        const secret = userSecret.data();
-        const encryptedSalt = secret.salt;
-        const hashedPass = secret.secret;
-        const salt = decrypt(encryptedSalt, 'thisIs@V3ryImportantSt3p');
-        const hashedReceivedPass = hash(encrypt(pass, 'secretWhispered1519'), salt);
-        console.log("Hashed Pass: ", hashedPass);
-        console.log("Hashed received pass: ", hashedReceivedPass);
+    try {
+        const userRecord = await admin.auth().getUserByEmail(email);
+        const keysDoc = await db.doc(`/users/${userRecord.uid}`).get();
+        const keys = keysDoc.data();
+        const salt = cryptographer.decrypt(keys.salt, 'thisIs@V3eryImportantSt3p');
+        const hashedPass = keys.secret;
+        const hashedReceivedPass = cryptographer.hash(cryptographer.encrypt(pass, 'secretWhispered1519'), salt);
         if (hashedReceivedPass === hashedPass) {
-            response.send('You are authorised');
+            response.send('ok');
         } else {
             response.send('Access Denied');
         }
-    }).catch(error => {
+    } catch (error) {
         console.error('Error while signing in user: ', error);
         response.send('Access Denied');
-    });
+    }
 });
 
-app.get('/rules.json', (request, response) => {
+app.get('/rules.json', async (request, response) => {
     // The following line sets the Cache Control such that 
     // the firewall rules can be cached to a CDN server (hence 
     // the option "public")
@@ -255,7 +322,8 @@ app.get('/rules.json', (request, response) => {
         virusScan: true
     };
 
-    rulesRef.get().then(rules => {
+    try {
+        const rules = await rulesRef.get();
         rules.forEach(rule => {
             const params = rule.data();
             const responseRule = {
@@ -269,29 +337,29 @@ app.get('/rules.json', (request, response) => {
                 protocol: params.protocol,
                 state: params.state
             };
-
+    
             if (params.direction === "in") {
-                responseJson.firewallRules.incoming.push(responseRule);
+                responseJson.firewallRules
+                    .incoming.push(responseRule);
             } else if (params.direction === "out") {
-                responseJson.firewallRules.outgoing.push(responseRule);
+                responseJson.firewallRules
+                    .outgoing.push(responseRule);
             }
         });
-        return webFilterRef.get();
-    }).then(filterDoc => {
+        const filterDoc = await webFilterRef.get();
         const filter = filterDoc.data();
-        const modes = ["blacklist", "whitelist"];
         responseJson.webfilter = {
-            mode: modes[filter.mode],
+            mode: (filter.mode === 1 ? 'whitelist' : 'blacklist'),
             blockAds: filter.blockAds,
             blockMalicious: filter.blockMalicious,
             domainGroups: filter.domainGroups,
             domains: filter.domains
         };
         response.json(responseJson);
-    }).catch(error => {
+    } catch (error) {
         console.error('Error while retrieving rules from database', error);
         response.status(500).send('Internal Error');
-    });
+    }
 });
 
 exports.web_app = functions.https.onRequest(app);

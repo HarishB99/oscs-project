@@ -11,6 +11,11 @@ var delete_rule_btn = document.getElementById("firewall-rule__button--delete");
 var update_rule_btn = document.querySelector(".firewall-button--update");
 // Cancel button is to cancel the rule creation process.
 var cancel_rule_btn = document.querySelector(".firewall-button--cancel");
+// Account Request button
+var acc_req_btn = document.getElementById("account-create--button-submit");
+var acc_req_email = document.getElementById("account-create--input-email");
+var acc_req_org = document.getElementById("account-create--input-org");
+var acc_req_phone = document.getElementById("account-create--input-phone");
 
 // Set up path prefix i.e. '../' (for urls links in button actions)
 var path_prefix = "/";
@@ -27,7 +32,8 @@ function showSnackbar(message) {
         // actionText: 'Undo',
         timeout: 10000
     };
-    notification.MaterialSnackbar.showSnackbar(data);
+    if (notification.getAttribute('aria-hidden') !== "false")
+        notification.MaterialSnackbar.showSnackbar(data);
 }
 
 function isAValidPort(el) {
@@ -68,20 +74,45 @@ function deleteRule() {
     
 }
 
-if (add_rule_btn !== null) {
+if (add_rule_btn) {
     add_rule_btn.onclick = function(e) {
         location.href = "/contents/rules/rule.html";
     };
 }
 
-if (update_rule_btn !== null) {
+if (update_rule_btn) {
     update_rule_btn.onclick = function(el) {
         location.href = "/contents/rules/rule.html";
     };
 }
 
-if (cancel_rule_btn !== null) {
+if (cancel_rule_btn) {
     cancel_rule_btn.onclick = function(e) {
         location.href = "/contents/firewall.html";
     };
+}
+
+if (acc_req_btn) {
+    acc_req_btn.addEventListener("click", function(e) {
+        axios.post("/account-create-request", {
+            email: acc_req_email.value,
+            org: acc_req_org.value,
+            contact: acc_req_phone.value
+        }).then(response => {
+            if (response.toLowerCase() === "account request: created") {
+                // TODO: On Success
+            } else {
+                showSnackbar("Please check your input and try again. If the problem persist, please close the browser and try again.");
+            }
+        }).catch(error => {
+            console.error("Error while performing account creation request: ", error);
+            if (error.message === "Network Error") {
+                showSnackbar("Please check your network connection and try again.");
+            } else if (error.message.search('404') >= 0) {
+                showSnackbar("Sorry. The functionality has not been enabled yet.");
+            } else {
+                showSnackbar("An unexpected error occurred. Please try again later.");
+            }
+        })
+    });
 }
