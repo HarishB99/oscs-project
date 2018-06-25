@@ -51,18 +51,8 @@
     <link rel="stylesheet" href="/fonts/css.css">
     <link rel="stylesheet" href="/fonts/icon.css">
     <link rel="stylesheet" href="/mdl/material.cyan-light_blue.min.css">
-    <link rel="stylesheet" href="/getmdl-select/getmdl-select.min.css">
     <link rel="stylesheet" href="/styles/styles.css">
     <style>
-        #view-source {
-            position: fixed;
-            display: block;
-            right: 0;
-            bottom: 0;
-            margin-right: 40px;
-            margin-bottom: 40px;
-            z-index: 900;
-        }
         .demo-card-wide.mdl-card {
             /* width: 60%; */
             margin: auto;
@@ -86,27 +76,17 @@
         <header class="mdl-layout__header">
             <div class="mdl-layout__header-row">
                 <!-- Title -->
-                <span class="mdl-layout-title">Login - Username</span>
-                <!-- Add spacer, to align navigation to the right -->
-                <div class="mdl-layout-spacer"></div>
-                <!-- Navigation. We hide it in small screens. -->
-                <!-- <nav class="mdl-navigation mdl-layout--large-screen-only">
-                    <a class="mdl-navigation__link" href="">Link</a>
-                    <a class="mdl-navigation__link" href="">Link</a>
-                    <a class="mdl-navigation__link" href="">Link</a>
-                    <a class="mdl-navigation__link" href="">Link</a>
-                </nav> -->
+                <span class="mdl-layout-title">Firegate Login</span>
             </div>
         </header>
-        <!-- <div class="mdl-layout__drawer">
-            <span class="mdl-layout-title">Title</span>
+        <div class="mdl-layout__drawer">
+            <span class="mdl-layout-title">Firegate</span>
             <nav class="mdl-navigation">
-                <a class="mdl-navigation__link" href="">Link</a>
-                <a class="mdl-navigation__link" href="">Link</a>
-                <a class="mdl-navigation__link" href="">Link</a>
-                <a class="mdl-navigation__link" href="">Link</a>
+                <a class="mdl-navigation__link" href="">About</a>
+                <a class="mdl-navigation__link" href="">Terms &amp; conditions</a>
+                <a class="mdl-navigation__link" href="">Help</a>
             </nav>
-        </div> -->
+        </div>
         <main class="mdl-layout__content">
             <div class="page-content">
                 <!-- Wide card with share menu button -->
@@ -116,10 +96,13 @@
                             <h2 class="mdl-card__title-text">Login</h2>
                         </div>
                         <div class="mdl-card__supporting-text">
-                            <!-- Textfield with Floating Label -->
                             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                <input class="mdl-textfield__input" type="text" id="username">
+                                <input class="mdl-textfield__input" type="text" id="username" autofocus autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
                                 <label class="mdl-textfield__label" for="username">Username...</label>
+                            </div>
+                            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" autocomplete="off">
+                                <input class="mdl-textfield__input" type="password" id="pass">
+                                <label class="mdl-textfield__label" for="pass">Password...</label>
                             </div>
                             <p>
                                 Forgot password? <a href="">Click here</a>
@@ -137,7 +120,6 @@
         </main>
     </div>
     <script src="/mdl/material.min.js"></script>
-    <script src="/getmdl-select/getmdl-select.min.js"></script>
     <script src="/scripts/app.js"></script>
 </body>
 </html>
