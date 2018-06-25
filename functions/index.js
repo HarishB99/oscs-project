@@ -60,7 +60,7 @@ function decrypt(cipherText, password) {
 }
 
 // app.get('/create-test-user', (request, response) => {
-//     // TODO Generate password and send to users
+//     // TODO: Generate password and send to users
 //     // I believe this can be achieved using 
 //     // Firebase sing-in with link.
 //     // So I need to determine whether it is 
@@ -71,7 +71,7 @@ function decrypt(cipherText, password) {
 //     // user will create via admin.auth().updateUser();
 //     // Hopefully this works without any errors. 
 
-//     // TODO Get the input from user 
+//     // TODO: Get the input from user 
 //     // Validate the inputDO 
 //     const input = {
 //         email: "test@example.com",
@@ -104,7 +104,7 @@ function decrypt(cipherText, password) {
 // });
 
 // app.get('/create-test-user2', (request, response) => {
-//     // TODO Generate password and send to users
+//     // TODO: Generate password and send to users
 //     // I believe this can be achieved using 
 //     // Firebase sing-in with link.
 //     // So I need to determine whether it is 
@@ -115,7 +115,7 @@ function decrypt(cipherText, password) {
 //     // user will create via admin.auth().updateUser();
 //     // Hopefully this works without any errors. 
 
-//     // TODO Get the input from user 
+//     // TODO: Get the input from user 
 //     // Validate the inputDO 
 //     const input = {
 //         email: "test2@example.com",
@@ -156,7 +156,7 @@ function decrypt(cipherText, password) {
 // });
 
 app.get('/profile-retrieve', (request, response) => {
-    // TODO authenticate user before 
+    // TODO: authenticate user before 
     // retrieving profile
     const email = request.query.email;
     let responseJson = {};
