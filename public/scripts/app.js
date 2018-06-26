@@ -94,12 +94,17 @@ if (cancel_rule_btn) {
 
 if (acc_req_btn) {
     acc_req_btn.addEventListener("click", function(e) {
+        console.log({
+            email: acc_req_email.value,
+            org: acc_req_org.value,
+            contact: acc_req_phone.value
+        });
         axios.post("/account-create-request", {
             email: acc_req_email.value,
             org: acc_req_org.value,
             contact: acc_req_phone.value
         }).then(response => {
-            if (response.toLowerCase() === "account request: created") {
+            if (response.data.toLowerCase() === "account request: created") {
                 // TODO: On Success
             } else {
                 showSnackbar("Please check your input and try again. If the problem persist, please close the browser and try again.");

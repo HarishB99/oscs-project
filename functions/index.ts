@@ -7,11 +7,11 @@
 //  response.send("Hello from Firebase!");
 // });
 
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
-const firebase = require('firebase');
-const express = require('express');
-const crypto = require('crypto');
+import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
+import * as firebase from 'firebase';
+import * as express from 'express';
+import * as crypto from 'crypto';
 
 const config = {
     apiKey: "AIzaSyCUJp0rD0b9nNgA5pn4WOXtZr6mM4PxQp8",
@@ -33,25 +33,25 @@ const webFilterRef = db.collection('filters').doc('filter');
 const app = express();
 
 class CryptoGrapher {
-    generateSalt() {
+    public static generateSalt(): string {
         return crypto.pseudoRandomBytes(64).toString('hex');
     }
 
-    hash(message, salt) {
+    public static hash(message: string, salt: string): string {
         const digest = crypto.createHash('sha512');
         const finalMessage = message.concat(salt);
         digest.update(finalMessage);
         return digest.digest('hex');
     }
 
-    encrypt(plainText, password) {
+    public static encrypt(plainText: string, password: string): string {
         const cipher = crypto.createCipher('aes256', password);
         let cipherText = cipher.update(plainText, 'utf8', 'hex');
         cipherText += cipher.final('hex');
         return cipherText;
     }
 
-    decrypt(cipherText, password) {
+    public static decrypt(cipherText: string, password: string): string {
         const decipher = crypto.createDecipher('aes256', password);
         let plainText = decipher.update(cipherText, 'hex', 'utf8');
         plainText += decipher.final('utf8');
@@ -60,35 +60,42 @@ class CryptoGrapher {
 }
 
 class InputValidator {
-    isEmpty(input) {
+    public static isEmpty(input: string): boolean {
         return (input === "" || input === null || input === undefined) ? true : false;
     }
 
-    isOfValidLength(input, min, max, inclusive) {
-        return this.isInValidRange(input.length, min, max, inclusive);
+    public static isOfValidLength(input: string, min: number, max: number, inclusive: boolean): boolean {
+        return InputValidator.isInValidRange(input.length, min, max, inclusive);
     }
 
-    isValidOrgName(input) {
-        return /^[A-Za-z0-9 .,()]{3,30}$/.test(input);
+    public static isValidOrgName(input: string): boolean {
+        return /^[A-Za-z0-9 ,()]{3,30}$/.test(input);
     }
 
     // TODO: Rectify regex to check email
-    isValidEmail(input) {
+    public static isValidEmail(input: string): boolean {
         const regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return regex.test(input);
     }
 
-    isValidPhoneNum(input) {
+    public static isValidPhoneNum(input: string): boolean {
         const regex = /^[89]+\d{7}$/;
         return regex.test(input);
     }
 
-    isInValidRange(input, min, max, inclusive) {
+    public static isInValidRange(input: number, min: number, max: number, inclusive: boolean): boolean {
         return inclusive ? (input >= min && input <= max) : (input > min && input < max);
     }
 }
 
 class Input {
+    private _email;
+    private _password;
+    private _organisation;
+    private _phoneNumber;
+    private _photoURL;
+    private _displayName;
+
     /**
      * To construct an Input object to process user input
      * @param {*} email email of user
@@ -98,128 +105,148 @@ class Input {
      * @param {*} photoURL url of the display picture of the user
      * @author Harish S/O Balamurugan
      */
-    constructor(email, password, phoneNumber, organisation, photoURL) {
-        this.email = email;
-        this.password = password;
-        this.phoneNumber = '+65'.concat(phoneNumber);
-        this.organisation = organisation;
-        this.photoURL = photoURL || 'https://material.io/tools/icons/static/icons/baseline-perm_identity-24px.svg';
-        this.displayName = this.email.substr(0, this.email.lastIndexOf('@'));
+    constructor(email: string, password: string, phoneNumber: string, organisation: string, photoURL: string) {
+        this._email = email;
+        this._password = password;
+        this._phoneNumber = '+65'.concat(phoneNumber);
+        this._organisation = organisation;
+        this._photoURL = photoURL || 'https://material.io/tools/icons/static/icons/baseline-perm_identity-24px.svg';
+        this._displayName = this._email.substr(0, this._email.lastIndexOf('@'));
+    }
+
+    get email(): string {
+        return this._email;
+    }
+
+    get password(): string {
+        return this._password;
+    }
+
+    get phoneNumber(): string {
+        return this._phoneNumber;
+    }
+
+    get organisation(): string {
+        return this._organisation;
+    }
+
+    get photoURL(): string {
+        return this._photoURL;
+    }
+
+    get displayName(): string {
+        return this._displayName;
     }
 
     toString() {
         return JSON.stringify({
-            email: this.email,
-            password: this.password,
-            phoneNumber: this.phoneNumber,
-            organisation: this.organisation,
-            photoURL: this.photoURL,
-            displayName: this.displayName
+            email: this._email,
+            password: this._password,
+            phoneNumber: this._phoneNumber,
+            organisation: this._organisation,
+            photoURL: this._photoURL,
+            displayName: this._displayName
         });
     }
 }
 
-// app.get('/create-test-user', async (request, response) => {
-//     // TODO: Generate password and send to users
-//     // I believe this can be achieved using 
-//     // Firebase sing-in with link.
-//     // So I need to determine whether it is 
-//     // the first time that a user is signing up and 
-//     // if yes, send them an email containing their 
-//     // password, whick will be used by client to sign in 
-//     // and then update the new password that the 
-//     // user will create via admin.auth().updateUser();
-//     // Hopefully this works without any errors. 
+interface UserClaim {
+    organisation: string
+}
 
-//     // TODO: Get the input from user 
-//     // Validate the inputDO 
-//     const input = new Input('test@example.com', 'secretTestPassword', '87127475', 'example.org', null);
+app.get('/create-test-user', async (request, response) => {
+    // TODO: Generate password and send to users
+    // I believe this can be achieved using 
+    // Firebase sing-in with link.
+    // So I need to determine whether it is 
+    // the first time that a user is signing up and 
+    // if yes, send them an email containing their 
+    // password, whick will be used by client to sign in 
+    // and then update the new password that the 
+    // user will create via admin.auth().updateUser();
+    // Hopefully this works without any errors. 
 
-//     try {
-//         const userRecord = await admin.auth().createUser({
-//             email: input.email,
-//             emailVerified: false,
-//             phoneNumber: input.phoneNumber,
-//             password: input.password,
-//             displayName: input.displayName,
-//             photoURL: input.photoURL,
-//             disabled: false
-//         });
+    // TODO: Get the input from user 
+    // Validate the inputDO 
+    const input = new Input('test@example.com', 'secretTestPassword', '87127475', 'example.org', null);
 
-//         await admin.auth().setCustomUserClaims(userRecord.uid, {
-//             organisation: input.organisation
-//         });
+    try {
+        const userRecord = await admin.auth().createUser({
+            email: input.email,
+            emailVerified: false,
+            phoneNumber: input.phoneNumber,
+            password: input.password,
+            displayName: input.displayName,
+            photoURL: input.photoURL,
+            disabled: false
+        });
 
-//         response.send('User Creation Successful');
-//     } catch (error) {
-//         console.log('Error while creating test user: ', error);
-//         response.send('User Creation Unsuccessful');
-//     }
-// });
+        await admin.auth().setCustomUserClaims(userRecord.uid, {
+            organisation: input.organisation
+        });
 
-// app.get('/create-test-user2', async (request, response) => {
-//     // TODO: Generate password and send to users
-//     // I believe this can be achieved using 
-//     // Firebase sing-in with link.
-//     // So I need to determine whether it is 
-//     // the first time that a user is signing up and 
-//     // if yes, send them an email containing their 
-//     // password, whick will be used by client to sign in 
-//     // and then update the new password that the 
-//     // user will create via admin.auth().updateUser();
-//     // Hopefully this works without any errors. 
+        response.send('User Creation Successful');
+    } catch (error) {
+        console.log('Error while creating test user: ', error);
+        response.send('User Creation Unsuccessful');
+    }
+});
 
-//     // TODO: Get the input from user 
-//     // Validate the inputDO 
-//     const input = new Input('test2@example.com', '87127479', 'toBeUnlocked@nypsit2018', 'example.org', null);
+app.get('/create-test-user2', async (request, response) => {
+    // TODO: Generate password and send to users
+    // I believe this can be achieved using 
+    // Firebase sing-in with link.
+    // So I need to determine whether it is 
+    // the first time that a user is signing up and 
+    // if yes, send them an email containing their 
+    // password, whick will be used by client to sign in 
+    // and then update the new password that the 
+    // user will create via admin.auth().updateUser();
+    // Hopefully this works without any errors. 
 
-//     const cryptographer = new CryptoGrapher();
-//     const encryptedPassword = cryptographer.encrypt(input.password, 'secretWhispered1519');
-//     const salt = cryptographer.generateSalt();
+    // TODO: Get the input from user 
+    // Validate the inputDO 
+    const input = new Input('test2@example.com', '87127479', 'toBeUnlocked@nypsit2018', 'example.org', null);
+
+    const encryptedPassword = CryptoGrapher.encrypt(input.password, 'secretWhispered1519');
+    const salt = CryptoGrapher.generateSalt();
     
-//     try {
-//         const userRecord = await admin.auth().createUser({
-//             email: input.email,
-//             emailVerified: false,
-//             phoneNumber: input.phoneNumber,
-//             displayName: input.displayName,
-//             photoURL: input.photoURL,
-//             disabled: false
-//         });
-//         // Await setting of user claim and db record
-//         await Promise.all([
-//             admin.auth().setCustomUserClaims(userRecord.uid, {
-//                 organisation: input.organisation
-//             }),
-//             db.doc(`/users/${userRecord.uid}`).set({
-//                 secret: cryptographer.hash(encryptedPassword, salt),
-//                 salt: cryptographer.encrypt(salt, 'thisIs@V3ryImportantSt3p')
-//             })
-//         ]);
-//         response.send('User Creation Successful');
-//     } catch (error) {
-//         console.log("Error while creating test user: ", error);
-//         response.send('User Creation Unsuccessful');
-//     }
-// });
+    try {
+        const userRecord = await admin.auth().createUser({
+            email: input.email,
+            emailVerified: false,
+            phoneNumber: input.phoneNumber,
+            displayName: input.displayName,
+            photoURL: input.photoURL,
+            disabled: false
+        });
+        // Await setting of user claim and db record
+        await Promise.all([
+            admin.auth().setCustomUserClaims(userRecord.uid, {
+                organisation: input.organisation
+            }),
+            db.doc(`/users/${userRecord.uid}`).set({
+                secret: CryptoGrapher.hash(encryptedPassword, salt),
+                salt: CryptoGrapher.encrypt(salt, 'thisIs@V3ryImportantSt3p')
+            })
+        ]);
+        response.send('User Creation Successful');
+    } catch (error) {
+        console.log("Error while creating test user: ", error);
+        response.send('User Creation Unsuccessful');
+    }
+});
 
 app.post('/account-create-request', async (request, response) => {
     try {
-        const body = request.body;
-        // console.log("Body: ", body);
-        // console.log(`email: ${body.email}`);
-        // console.log(`organisation: ${body.org}`);
-        // console.log(`phoneNumber: ${body.contact}`);
-        // console.log('Typeof body: ', (typeof body));
-        // const req_params = JSON.parse(body);
+        const req_params = JSON.parse(request.body);
 
-        const email = body.email;
-        const organisation = body.org;
-        const phoneNumber = body.contact;
+        const email = req_params.email;
+        const organisation = req_params.org;
+        const phoneNumber = req_params.contact;
     
         let input = null;
-        const iv = new InputValidator();
-        if (iv.isValidEmail(email) && iv.isValidPhoneNum(phoneNumber) && iv.isValidOrgName(organisation)) {
+        if (InputValidator.isValidEmail(email) && InputValidator.isValidPhoneNum(phoneNumber) && InputValidator.isValidOrgName(organisation)) {
             input = new Input(email, null, phoneNumber, organisation, null);
         }
 
@@ -244,20 +271,24 @@ app.get('/profile-retrieve', async (request, response) => {
     // TODO: authenticate user before 
     // retrieving profile
     const email = request.query.email;
+    let responseJson = {};
     try {
         const userRecord = await admin.auth().getUserByEmail(email);
-        response.send(JSON.stringify({
+        const claims: UserClaim = userRecord.customClaims as UserClaim;
+        responseJson = {
             displayName: userRecord.displayName,
             email: userRecord.email,
             phoneNumber: userRecord.phoneNumber,
-            organisation: userRecord.customClaims.organisation,
+            organisation: claims.organisation,
             status: 'ok'
-        }));
+        };
+        response.send(JSON.stringify(responseJson));
     } catch (error) {
-        console.error('Error while retrieving profile: ', error);
-        response.send(JSON.stringify({
+        responseJson = {
             status: 'access denied'
-        }));
+        };
+        console.error('', error);
+        response.send(JSON.stringify(responseJson));
     }
 });
 
@@ -290,9 +321,9 @@ app.get('/login2', async (request, response) => {
         const userRecord = await admin.auth().getUserByEmail(email);
         const keysDoc = await db.doc(`/users/${userRecord.uid}`).get();
         const keys = keysDoc.data();
-        const salt = cryptographer.decrypt(keys.salt, 'thisIs@V3eryImportantSt3p');
+        const salt = CryptoGrapher.decrypt(keys.salt, 'thisIs@V3eryImportantSt3p');
         const hashedPass = keys.secret;
-        const hashedReceivedPass = cryptographer.hash(cryptographer.encrypt(pass, 'secretWhispered1519'), salt);
+        const hashedReceivedPass = CryptoGrapher.hash(CryptoGrapher.encrypt(pass, 'secretWhispered1519'), salt);
         if (hashedReceivedPass === hashedPass) {
             response.send('ok');
         } else {
@@ -363,7 +394,7 @@ app.get('/rules.json', async (request, response) => {
         response.json(responseJson);
     } catch (error) {
         console.error('Error while retrieving rules from database', error);
-        response.send('Internal Error');
+        response.status(500).send('Internal Error');
     }
 });
 
