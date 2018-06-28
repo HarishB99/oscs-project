@@ -12,6 +12,7 @@ const admin = require('firebase-admin');
 const firebase = require('firebase');
 const express = require('express');
 const crypto = require('crypto');
+const cors = require('cors')({ origin: true });
 
 const config = {
     apiKey: "AIzaSyCUJp0rD0b9nNgA5pn4WOXtZr6mM4PxQp8",
@@ -119,6 +120,18 @@ class Input {
     }
 }
 
+/**
+ * The following is a test app to test CORS
+ */
+// app.post('/cors-allowed', cors, (request, response, next) => {
+//     const body = request.body;
+//     console.log(body);
+//     const email = body.username;
+//     const password = body.password;
+
+//     response.status(200).send(`Received Post Data: Your email is ${email}. Your password is ${password}. This was possible via Cross Origin Resource Sharing, also known as CORS for short.`);
+// });
+
 // app.get('/create-test-user', async (request, response) => {
 //     // TODO: Generate password and send to users
 //     // I believe this can be achieved using 
@@ -205,14 +218,16 @@ class Input {
 
 app.post('/account-create-request', async (request, response) => {
     try {
+        // The following is possible because 
+        // Content-Type on request header was 
+        // set to application/json. This was 
+        // done by axios itself.
+        //
+        // If the Content-Type flag was not 
+        // sent, JSON.parse will have to be 
+        // used on the body to extract the 
+        // JSON.data
         const body = request.body;
-        // console.log("Body: ", body);
-        // console.log(`email: ${body.email}`);
-        // console.log(`organisation: ${body.org}`);
-        // console.log(`phoneNumber: ${body.contact}`);
-        // console.log('Typeof body: ', (typeof body));
-        // const req_params = JSON.parse(body);
-
         const email = body.email;
         const organisation = body.org;
         const phoneNumber = body.contact;
@@ -226,6 +241,10 @@ app.post('/account-create-request', async (request, response) => {
         if (!input) {
             response.send('Bad Request');
         } else {
+            // TODO: Create user without password and send OTP 
+            // (After successfully signing up using OTP, user 
+            // will have to create password)
+            // An account verified claim should be used
             const requestRef = db.collection('requests').doc();
             await requestRef.set({
                 email: input.email,
@@ -243,6 +262,8 @@ app.post('/account-create-request', async (request, response) => {
 app.get('/profile-retrieve', async (request, response) => {
     // TODO: authenticate user before 
     // retrieving profile
+    // I might want to port over this implementation to 
+    // the client side, unless python sdk also needs this.
     const email = request.query.email;
     try {
         const userRecord = await admin.auth().getUserByEmail(email);
@@ -261,9 +282,7 @@ app.get('/profile-retrieve', async (request, response) => {
     }
 });
 
-app.get('/login', async (request, response) => {
-    // response.set('Access-Control-Allow-Origin', '*');
-    // response.set('Access-Control-Allow-Methods', 'POST');
+app.post('/login', cors, async (request, response, next) => {
     const email = request.query.username;
     const pass = request.query.pass;
 
@@ -280,9 +299,7 @@ app.get('/login', async (request, response) => {
     }
 });
 
-app.get('/login2', async (request, response) => {
-    // response.set('Access-Control-Allow-Origin', '*');
-    // response.set('Access-Control-Allow-Methods', 'POST');
+app.post('/login2', cors, async (request, response, next) => {
     const email = request.query.username;
     const pass = request.query.pass;
 

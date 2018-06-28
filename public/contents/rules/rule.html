@@ -50,8 +50,7 @@
     -->
 
     <!-- TODO: Use the online versions of the following assets -->
-    <link rel="stylesheet" href="/fonts/css.css">
-    <link rel="stylesheet" href="/fonts/icon.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="/mdl/material.cyan-light_blue.min.css">
     <link rel="stylesheet" href="/getmdl-select/getmdl-select.min.css">
     <link rel="stylesheet" href="/styles/styles.css">
@@ -70,25 +69,6 @@
             overflow-y: auto;
         }
     </style>
-    <script>
-        function isAValidPort(el) {
-            console.log(el);
-    var port_enterd = el.value;
-    var parsed_port = 0;
-    try {
-        parsed_port = parseInt(el.value);
-    } catch (error) {
-        el.classList.add("is-invalid");
-    }
-    if (parsed_port < 0 || parsed_port > 65535) {
-        el.classList.add("is-invalid");
-        return;
-    }
-    if (el.classList.contains("is-invalid")) {
-        el.classList.remove("is-invalid");
-    }
-}
-    </script>
 </head>
 <body>
     <div class="demo-layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
@@ -135,7 +115,7 @@
                                     <span class="mdl-textfield__error">Only alphanumeric characters are allowed.</span>
                                 </div>
                                 <div class="mdl-textfield mdl-js-textfield">
-                                    <input class="mdl-textfield__input" type="text" pattern="^[0-9]{1,5}$" maxlength="5" onkeyup="isAValidPriorityNum(this)" id="rule_priority"> <!-- -?[0-9]*(\.[0-9]+)? -->
+                                    <input class="mdl-textfield__input" type="text" pattern="^[0-9]{1,5}$" maxlength="5" id="rule_priority"> <!-- -?[0-9]*(\.[0-9]+)? -->
                                     <label class="mdl-textfield__label" for="rule_priority">Priority...</label>
                                     <span class="mdl-textfield__error">Digits only</span>
                                 </div>
@@ -156,7 +136,7 @@
                                     <span class="mdl-textfield__error">Please enter a valid IP address</span>
                                 </div>
                                 <div class="mdl-textfield mdl-js-textfield">
-                                    <input class="mdl-textfield__input" maxlength="5" type="text" id="rule_sport">
+                                    <input class="rule__ports mdl-textfield__input" maxlength="5" type="text" id="rule_sport">
                                     <label class="mdl-textfield__label" for="rule_sport">Source Port Range...</label>
                                     <span class="mdl-textfield__error">Please enter a port number between 0 and 65,535</span>
                                 </div>
@@ -167,7 +147,7 @@
                                     <span class="mdl-textfield__error">Please enter a valid IP address</span>
                                 </div>
                                 <div class="mdl-textfield mdl-js-textfield">
-                                    <input class="mdl-textfield__input" maxlength="5" type="text" id="rule_dport">
+                                    <input class="rule__ports mdl-textfield__input" maxlength="5" type="text" id="rule_dport">
                                     <label class="mdl-textfield__label" for="rule_dport">Destination Port Range...</label>
                                     <span class="mdl-textfield__error">Please enter a port number between 0 and 65,535</span>
                                 </div>
@@ -207,5 +187,13 @@
     <script src="/mdl/material.min.js"></script>
     <script src="/getmdl-select/getmdl-select.min.js"></script>
     <script src="/scripts/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var els = document.querySelectorAll('.rule__ports');
+            for (var i = 0; i < els.length; i++) {
+                els[i].addEventListener('keyup', isAValidPort);
+            }
+        });
+    </script>
 </body>
 </html>

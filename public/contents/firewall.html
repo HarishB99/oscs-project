@@ -82,7 +82,70 @@
         } .demo-card-wide .mdl-layout__header-row {
             padding: 0% !important;
         }
+
+
+
+        /* Table Sorting */
+table {
+  margin-top: 1em;
+}
+  
+th.sort {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  min-width: 75px;
+}
+th.sort:hover {
+  cursor: pointer;
+  text-decoration: none;
+}
+th.sort:focus {
+  outline: none;
+}
+th.sort:after {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  content: "";
+  position: relative;
+  top: -10px;
+  right: -5px;
+}
+th.sort.asc:after {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #000;
+  content: "";
+  position: relative;
+  top: 4px;
+  right: -5px;
+}
+th.sort.desc:after {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #000;
+  content: "";
+  position: relative;
+  top: -4px;
+  right: -5px;
+}
     </style>
+    <!-- TODO: Add library for es6-promise polyfill -->
+    <!-- TODO: Add library for axios js -->
+    <!-- TODO: Use the online version of /mdl/material.min.js -->
+    <script src="../mdl/material.min.js"></script>
+    <script src="../scripts/app.js"></script>
+    <script src="../scripts/jquery-3.3.1.min.js"></script>
+    <script src="../scripts/list.min.js"></script>
 </head>
 <body>
     <div class="demo-layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
@@ -121,10 +184,10 @@
             </nav>
         </div>
         <main class="mdl-layout__content mdl-color--grey-100">
-            <section class="mdl-layout__tab-panel is-active" id="firewall-rule">
+            <section id="firewall-rule__table" class="mdl-layout__tab-panel is-active" id="firewall-rule">
                 <div class="search-box">
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                        <input class="mdl-textfield__input firewall-rule__search--input-name" type="text" id="firewall-rule__search--input-name">
+                        <input class="search mdl-textfield__input firewall-rule__search--input-name" type="text" id="firewall-rule__search--input-name">
                         <label class="mdl-textfield__label" for="firewall-rule__search--input-name">Rule Name...</label>
                     </div>
                     <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect firewall-rule__search--input-button" id="firewall-rule__search--input-button">
@@ -133,56 +196,56 @@
                 </div>
                 <div class="page-content">
                     <div class="mdl-data-table__holder">
-                        <table class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp">
+                        <table id="firewall-rule__table" class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp">
                             <thead>
                                 <tr>
-                                    <th class="mdl-data-table__cell--non-numeric">Rule</th>
-                                    <th>Access</th>
-                                    <th>Priority</th>
-                                    <th>Source Address Range</th>
-                                    <th>Source Port Range</th>
-                                    <th>Destination Address Range</th>
-                                    <th>Destination Port Range</th>
-                                    <th>Protocol</th>
+                                    <th class="mdl-data-table__cell--non-numeric sort" data-sort="rule">Rule</th>
+                                    <th class="sort" data-sort="access">Access</th>
+                                    <th class="sort" data-sort="priority">Priority</th>
+                                    <th class="sort" data-sort="saddr">Source Address Range</th>
+                                    <th class="sort" data-sort="sport">Source Port Range</th>
+                                    <th class="sort" data-sort="daddr">Destination Address Range</th>
+                                    <th class="sort" data-sort="dport">Destination Port Range</th>
+                                    <th class="sort" data-sort="protocol">Protocol</th>
                                     <th></th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="list">
                                 <tr>
-                                    <td class="mdl-data-table__cell--non-numeric">HTTP</td>
-                                    <td>Allow</td>
-                                    <td>100</td>
-                                    <td>*</td>
-                                    <td>*</td>
-                                    <td>*</td>
-                                    <td>80</td>
-                                    <td>TCP</td>
+                                    <td class="mdl-data-table__cell--non-numeric rule">HTTP</td>
+                                    <td class="access">Allow</td>
+                                    <td class="priority">100</td>
+                                    <td class="saddr">*</td>
+                                    <td class="sport">*</td>
+                                    <td class="daddr">*</td>
+                                    <td class="dport">80</td>
+                                    <td class="protocol">TCP</td>
                                     <td>
                                         <button class="firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">edit</i> Edit</button>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="mdl-data-table__cell--non-numeric">SQL</td>
-                                    <td>Allow</td>
-                                    <td>101</td>
-                                    <td>*</td>
-                                    <td>*</td>
-                                    <td>*</td>
-                                    <td>3306</td>
-                                    <td>TCP</td>
+                                    <td class="mdl-data-table__cell--non-numeric rule">SQL</td>
+                                    <td class="access">Allow</td>
+                                    <td class="priority">101</td>
+                                    <td class="saddr">*</td>
+                                    <td class="sport">*</td>
+                                    <td class="daddr">*</td>
+                                    <td class="dport">3306</td>
+                                    <td class="protocol">TCP</td>
                                     <td>
                                         <button class="firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">edit</i> Edit</button>
                                     </td>
                                 </tr>
                                 <tr>
-                                <td class="mdl-data-table__cell--non-numeric">Deny All</td>
-                                    <td>Deny</td>
-                                    <td>200</td>
-                                    <td>*</td>
-                                    <td>*</td>
-                                    <td>*</td>
-                                    <td>*</td>
-                                    <td>*</td>
+                                <td class="mdl-data-table__cell--non-numeric rule">Deny All</td>
+                                    <td class="access">Deny</td>
+                                    <td class="priority">200</td>
+                                    <td class="saddr">*</td>
+                                    <td class="sport">*</td>
+                                    <td class="daddr">*</td>
+                                    <td class="dport">*</td>
+                                    <td class="protocol">*</td>
                                     <td>
                                         <button class="firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">edit</i> Edit</button>
                                     </td>
@@ -214,10 +277,25 @@
             </section>
         </main>
     </div>
-    <!-- TODO: Add library for es6-promise polyfill -->
-    <!-- TODO: Add library for axios js -->
-    <!-- TODO: Use the online version of /mdl/material.min.js -->
-    <script src="../mdl/material.min.js"></script>
-    <script src="../scripts/app.js"></script>
+    <script>
+        var options = {
+            valueNames: ['rule', 'access', 'priority', 'saddr',
+                        'sport', 'daddr', 'dport', 
+                        'protocol']
+        };
+
+        var ruleList = new List('firewall-rule__table', options);
+
+        $($('th.sort')[0]).trigger('click', function() {
+            console.log('clicked');
+        });
+
+        $('input.search').on('keyup', function(e) {
+            if (e.keyCode === 27) {
+                $(e.currentTarget).val('');
+                ruleList.search('');
+            }
+        });
+    </script>
 </body>
 </html>

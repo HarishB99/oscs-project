@@ -12,6 +12,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "consolidate": "^0.15.1",
+    "cors": "^2.8.4",
     "express": "^4.16.3",
     "firebase": "^5.1.0",
     "firebase-admin": "^5.12.1",

@@ -36,11 +36,16 @@ function showSnackbar(message) {
         notification.MaterialSnackbar.showSnackbar(data);
 }
 
-function isAValidPort(el) {
+function isAValidPort(e) {
+    var childEl = e.target;
+    var el = childEl.parentElement;
     // var port_enterd = el.value;
     var parsed_port = 0;
     try {
-        parsed_port = parseInt(el.value);
+        parsed_port = parseInt(childEl.value);
+        if (isNaN(childEl.value)) {
+            throw 'still not a number';
+        }
     } catch (error) {
         return el.classList.add("is-invalid");
     }
