@@ -21,6 +21,12 @@ var acc_req_pass2 = document.getElementById("account-create--input-password2");
 // Account Login button
 var acc_login_btn = document.getElementById("account-login--button");
 
+// Profile Display
+var acc_prof_name = document.getElementById("account-profile--display-name");
+var acc_prof_org = document.getElementById("account-profile--display-org");
+var acc_prof_email = document.getElementById("account-profile--input-email");
+var acc_prof_phone = document.getElementById("account-profile--input-phone");
+
 // Set up path prefix i.e. '../' (for urls links in button actions)
 var path_prefix = "/";
 
@@ -59,9 +65,13 @@ function isAValidPort(e) {
     if (el.classList.contains("is-invalid")) return el.classList.remove("is-invalid");
 }
 
-function retrieveProfile() {
-    return axios.post("/account-retrieve").then(function(response) {
-        return JSON.response(response.data);
+function retrieveProfile(uid) {
+    return axios({
+        url: '/account-retrieve-basic',
+        method: 'POST',
+        headers: {
+            'Authorisation': 'Bearer ' + uid
+        }
     });
 }
 
@@ -106,7 +116,7 @@ if (cancel_rule_btn) {
 if (acc_req_btn) {
     acc_req_btn.addEventListener("click", function(e) {
         // TODO: Make sure input passes validation
-        axios.post("/account-create-request", {
+        axios.post("/account-create", {
             email: acc_req_email.value,
             org: acc_req_org.value,
             contact: acc_req_phone.value,
@@ -114,6 +124,7 @@ if (acc_req_btn) {
         }).then(function(response) {
             if (response.data.toLowerCase() === "account request: created") {
                 // TODO: On Success
+                location.replace('/contents/accounts/login.html');
             } else {
                 showSnackbar("Please check your input and try again. If the problem persist, please close the browser and try again.");
             }
@@ -126,7 +137,7 @@ if (acc_req_btn) {
             } else {
                 showSnackbar("An unexpected error occurred. Please try again later.");
             }
-        })
+        });
     });
 }
 
@@ -167,6 +178,21 @@ if (acc_req_pass) {
     });
 }
 
+if (acc_req_pass2) {
+    acc_req_pass2.addEventListener('keyup', function(e) {
+        if (acc_req_pass2.value === acc_req_pass.value) {
+            if (acc_req_pass2.parentElement.className.search("is-invalid") >= 0) {
+                var acc_req_pass2_parent = acc_req_pass2.parentElement;
+                acc_req_pass2_parent.className = acc_req_pass2_parent.className.replace(" is-invalid", "");
+            }
+        } else {
+            if (acc_req_pass2.parentElement.className.search("is-invalid") < 0) {
+                acc_req_pass2.parentElement.className += " is-invalid";
+            }
+        }
+    });
+}
+
 if (acc_login_btn) {
     acc_login_btn.addEventListener('click', function(e) {
         var email = document.getElementById('username').value;
@@ -184,7 +210,7 @@ if (acc_login_btn) {
                     location.href = '/contents/accounts/account.html';
                 });
             } else if (error.code === "auth/user-disabled") {
-                showSnackbar("Your account has been disabled. Please try again later.")
+                showSnackbar("Your account has been disabled. Please try again later.");
             } else if (error.code === "auth/wrong-password" || error.code === "auth/invalid-email") {
                 showSnackbar("Invalid Credentials. Please try again.");
             }

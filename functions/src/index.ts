@@ -4,6 +4,9 @@ import * as express from 'express';
 import { InputValidator } from './InputValidator';
 import { Input } from './Input';
 import { UserClaim } from './UserClaim';
+import { SuccessCode } from './SuccessCode';
+import { ErrorCode } from './ErrorCode';
+import * as path from 'path';
 // import * as cors from 'cors';
 
 admin.initializeApp();
@@ -22,6 +25,17 @@ const db = admin.firestore();
 
 //     response.status(200).send(`Received Post Data: Your email is ${email}. Your password is ${password}. This was possible via Cross Origin Resource Sharing, also known as CORS for short.`);
 // });
+
+
+function getToken(header: string): string {
+    if (header) {
+        const match = header.match(/^Bearer\s+([^\s]+)$/)
+        if (match) {
+            return match[1]
+        }
+    }
+    return null
+}
 
 // Accounts
 app.post('/account-create', async (request, response) => {
@@ -49,7 +63,7 @@ app.post('/account-create', async (request, response) => {
         }
 
         if (!input) {
-            response.send('Bad Request');
+            response.send(JSON.stringify(ErrorCode.ACCOUNT.BAD_DATA));
         } else {
             // TODO: Create user with password
             // Send verification email and verification SMS
@@ -70,30 +84,71 @@ app.post('/account-create', async (request, response) => {
                 organisation: input.organisation
             });
 
-            response.send('Account Request: Created');
+            response.send(JSON.stringify(SuccessCode.ACCOUNT.CREATE));
         }
     } catch (error) {
-        console.error('Error while creating account request', error);
-        response.send('Access denied');
+        console.error('Error while creating account request: ', error);
+        response.send(JSON.stringify(ErrorCode.ACCOUNT.CREATE));
     }
 });
 
-app.get('/account-retrieve', async (request, response) => {
+app.post('/account-retrieve-name', async (request, response) => {
     // TODO: authenticate user before 
     // retrieving profile
     // I might want to port over this implementation to 
     // the client side, unless python sdk also needs this.
     try {
-        const uid = request.query.uid;
+        const uid = getToken(request.get('Authorisation'));
+        
 
         const userRecord = await admin.auth().getUser(uid);
-        const userClaims: UserClaim = userRecord.customClaims as UserClaim;
+        response.send(JSON.stringify({
+            displayName: userRecord.displayName,
+            status: 'ok'
+        }));
+    } catch (error) {
+        console.error('Error while retrieving profile: ', error);
+        response.send(JSON.stringify({
+            status: 'access denied'
+        }));
+    }
+});
+
+app.post('/account-retrieve-picture', async (request, response) => {
+    // TODO: authenticate user before 
+    // retrieving profile
+    // I might want to port over this implementation to 
+    // the client side, unless python sdk also needs this.
+    try {
+        const uid = getToken(request.get('Authorisation'));
+
+        const userRecord = await admin.auth().getUser(uid);
+        response.send(JSON.stringify({
+            photoURL: userRecord.photoURL,
+            status: 'ok'
+        }));
+    } catch (error) {
+        console.error('Error while retrieving profile: ', error);
+        response.send(JSON.stringify({
+            status: 'access denied'
+        }));
+    }
+});
+
+app.post('/account-retrieve-basic', async (request, response) => {
+    // TODO: authenticate user before 
+    // retrieving profile
+    // I might want to port over this implementation to 
+    // the client side, unless python sdk also needs this.
+    try {
+        const uid = getToken(request.get('Authorisation'));
+        const userRecord = await admin.auth().getUser(uid);
+        const { organisation } = userRecord.customClaims as UserClaim;
         response.send(JSON.stringify({
             displayName: userRecord.displayName,
             email: userRecord.email,
-            phoneNumber: userRecord.phoneNumber,
-            organisation: userClaims.organisation,
-            photoURL: userRecord.photoURL,
+            phoneNumber: userRecord.phoneNumber.split("+65")[1],
+            organisation: organisation,
             status: 'ok'
         }));
     } catch (error) {
@@ -140,7 +195,7 @@ app.post('/account-update', async (request, response) => {
             response.send('Account Update: Success');
         }
     } catch (error) {
-        console.error('Error while updating account details', error);
+        console.error('Error while updating account details: ', error);
         response.send('Access denied');
     }
 });
@@ -171,6 +226,10 @@ app.post('/filter-update', (request, response) => {
 
 app.post('/filter-delete', (request, response) => {
     response.status(503).send('Functionality not available yet.');
+});
+
+app.all('*', (request, response) => {
+    response.status(404).send('Sorry, we can\'t find that ');
 });
 
 export const web_app = functions.https.onRequest(app);

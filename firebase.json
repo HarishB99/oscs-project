@@ -3,6 +3,55 @@
     "public": "public",
     "rewrites": [
       {
+        "source": "/",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/index",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/home",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/error",
+        "destination": "/404.html"
+      },
+      {
+        "source": "/firewall",
+        "destination": "/contents/firewall.html"
+        // "destination": "/index.html"
+      },
+      {
+        "source": "/edit_rule",
+        "destination": "/contents/rules/edit_rule.html"
+      },
+      {
+        "source": "/create_rule",
+        "destination": "/contents/rules/rule.html"
+      },
+      {
+        "source": "/create_account",
+        "destination": "/contents/accounts/account.html"
+      },
+      {
+        "source": "/login",
+        "destination": "/contents/accounts/login.html"
+      },
+      {
+        "source": "/otp",
+        "destination": "/contents/accounts/otp.html"
+      },
+      {
+        "source": "/reset_password",
+        "destination": "/contents/accounts/pass_rst.html"
+      },
+      {
+        "source": "/profile",
+        "destination": "/contents/accounts/profile.html"
+      },
+      {
         "source": "**",
         "function": "web_app"
       }

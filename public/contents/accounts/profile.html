@@ -57,6 +57,21 @@
     <link rel="stylesheet" href="/fonts/icon.css">
     <link rel="stylesheet" href="/mdl/material.cyan-light_blue.min.css">
     <link rel="stylesheet" href="/styles/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase-auth.js"></script>
+    <script>
+        // Initialize Firebase
+        // TODO: Replace with your project's customized code snippet
+        var config = {
+            apiKey: "AIzaSyCUJp0rD0b9nNgA5pn4WOXtZr6mM4PxQp8",
+            authDomain: "firegate-101.firebaseapp.com",
+            databaseURL: "https://firegate-101.firebaseio.com",
+            projectId: "firegate-101",
+            storageBucket: "firegate-101.appspot.com",
+            messagingSenderId: "700794827690"
+        };
+        firebase.initializeApp(config);
+    </script>
     <style>
         .demo-card-wide .form-holder {
             padding: 2.5%;
@@ -108,21 +123,21 @@
                 <div class="demo-card-wide mdl-card mdl-shadow--2dp">
                     <div class="form-holder">
                         <div class="mdl-card__title">
-                            <h2 class="mdl-card__title-text" id="username">${user.name}</h2>
+                            <h2 class="mdl-card__title-text" >Welcome, <span id="account-profile--display-name"></span></h2>
                         </div>
                         <div class="mdl-card__supporting-text">
-                            <div class="mdl-typography--title-color-contrast" id="organisation">
-                                ${user.organisation}
+                            <div class="mdl-typography--title-color-contrast" id="account-profile--display-org">
+                                
                             </div>
                             <!-- <br/> -->
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input class="mdl-textfield__input" type="email" id="email" value="test@example.com"> <!-- pattern="^[A-Za-z0-9 ]{1,30}$" -->
+                                <input class="mdl-textfield__input" type="email" id="account-profile--input-email"> <!-- pattern="^[A-Za-z0-9 ]{1,30}$" -->
                                 <label class="mdl-textfield__label" for="email">Email Address...</label>
                                 <span class="mdl-textfield__error">Please enter a valid email address.</span>
                             </div>
                             <!-- <br/> -->
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input class="mdl-textfield__input" type="text" pattern="^[89]+[0-9]{7}$" value="98765432" id="num" maxlength="8" >
+                                <input class="mdl-textfield__input" type="text" pattern="^[89]+[0-9]{7}$" id="account-profile--input-phone" maxlength="8" >
                                 <label class="mdl-textfield__label" for="num">Contact number...</label>
                                 <span class="mdl-textfield__error">Please enter a valid contact number.</span>
                             </div>
@@ -159,23 +174,25 @@
     <script src="/scripts/ajax.js"></script>
     <script src="/scripts/app.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function(e) {
-            retrieveProfile()
-            .then(function(userRecord) {
-                document.getElementById('username').innerHTML = userRecord.displayName;
-                document.getElementById('organisation').innerHTML = userRecord.organisation;
-                document.getElementById('email').value = userRecord.email;
-                document.getElementById('num').value = userRecord.phoneNumber;
-                console.log('User profile retrieved successfully');
-            })
-            .catch(function(error) {
-                console.error('Error while retrieving user profile: ', error);
-                if (error.message === Ajax.NETWORK_ERROR) {
-                    showSnackbar('Please check your network connection.');
-                } else {
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                user.getIdToken(true).then(function(token) {
+                    return retrieveProfile(token);
+                }).then(function(response) {
+                    var profile = response.data;
+                    acc_prof_name.innerHTML = profile.displayName;
+                    acc_prof_org.innerHTML = profile.organisation;
+                    acc_prof_email.value = profile.email;
+                    acc_prof_phone.value = profile.phoneNumber;
+                })['catch'](function(error) {
+                    console.error('Error while retrieving profile data: ', error);
                     showSnackbar('An unexpected error occurred. Please try again later.');
-                }
-            });
+                });
+            } else {
+                console.log('You are not logged in.');
+                window.alert('You are not logged in.');
+                location.replace('/contents/accounts/login.html');
+            }
         });
     </script>
 </body>
