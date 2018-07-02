@@ -69,7 +69,6 @@ firebase.auth().onAuthStateChanged(user => {
 });
 
 app.get('/rules.json', (request, response) => {
-    // TODO: Change format of responseJson to combine all incoming and outgoing into rules.
     const responseJson = {
         rules: [],
         webfilter: {},
