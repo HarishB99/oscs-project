@@ -1,6 +1,6 @@
 const express = require('express');
 const firebase = require('firebase');
-const bodyParser = require('body-parser');
+// const bodyParser = require('body-parser');
 const config = {
     apiKey: "AIzaSyCUJp0rD0b9nNgA5pn4WOXtZr6mM4PxQp8",
     authDomain: "firegate-101.firebaseapp.com",
@@ -19,7 +19,7 @@ db.settings(settings);
 let rules_final = null;
 let filter_final = null;
 
-app.use(bodyParser.json());
+app.use(express.json());
 
 app.post('/login', (request, response) => {
     // TODO: Authentication flow
