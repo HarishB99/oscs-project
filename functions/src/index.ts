@@ -26,7 +26,11 @@ const db = admin.firestore();
 //     response.status(200).send(`Received Post Data: Your email is ${email}. Your password is ${password}. This was possible via Cross Origin Resource Sharing, also known as CORS for short.`);
 // });
 
-
+/**
+ * Function to retrieve the id token sent by client 
+ * in the custom request header 'Authorisation'.
+ * The value of the header is formatted as 'Bearer <token>'
+ */
 function getToken(header: string): string {
     if (header) {
         const match = header.match(/^Bearer\s+([^\s]+)$/)
@@ -93,15 +97,12 @@ app.post('/account-create', async (request, response) => {
 });
 
 app.post('/account-retrieve-name', async (request, response) => {
-    // TODO: authenticate user before 
-    // retrieving profile
-    // I might want to port over this implementation to 
+    // TODO: I might want to port over this implementation to 
     // the client side, unless python sdk also needs this.
     try {
-        const uid = getToken(request.get('Authorisation'));
-        
-
-        const userRecord = await admin.auth().getUser(uid);
+        const idToken = getToken(request.get('Authorisation'));
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const userRecord = await admin.auth().getUser(decodedToken.uid);
         response.send(JSON.stringify({
             displayName: userRecord.displayName,
             status: 'ok'
@@ -115,14 +116,12 @@ app.post('/account-retrieve-name', async (request, response) => {
 });
 
 app.post('/account-retrieve-picture', async (request, response) => {
-    // TODO: authenticate user before 
-    // retrieving profile
-    // I might want to port over this implementation to 
+    // TODO: I might want to port over this implementation to 
     // the client side, unless python sdk also needs this.
     try {
-        const uid = getToken(request.get('Authorisation'));
-
-        const userRecord = await admin.auth().getUser(uid);
+        const idToken = getToken(request.get('Authorisation'));
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const userRecord = await admin.auth().getUser(decodedToken.uid);
         response.send(JSON.stringify({
             photoURL: userRecord.photoURL,
             status: 'ok'
@@ -136,13 +135,12 @@ app.post('/account-retrieve-picture', async (request, response) => {
 });
 
 app.post('/account-retrieve-basic', async (request, response) => {
-    // TODO: authenticate user before 
-    // retrieving profile
-    // I might want to port over this implementation to 
+    // TODO: I might want to port over this implementation to 
     // the client side, unless python sdk also needs this.
     try {
-        const uid = getToken(request.get('Authorisation'));
-        const userRecord = await admin.auth().getUser(uid);
+        const idToken = getToken(request.get('Authorisation'));
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const userRecord = await admin.auth().getUser(decodedToken.uid);
         const { organisation } = userRecord.customClaims as UserClaim;
         response.send(JSON.stringify({
             displayName: userRecord.displayName,
@@ -161,8 +159,9 @@ app.post('/account-retrieve-basic', async (request, response) => {
 
 app.post('/account-update', async (request, response) => {
     try {
-        // TODO: authenticate user before 
-        // updating profile
+        const idToken = getToken(request.get('Authorisation'));
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+
         const body = request.body;
         const email = body.email;
         const organisation = body.org;
@@ -178,11 +177,10 @@ app.post('/account-update', async (request, response) => {
         if (!input) {
             response.send('Bad Request');
         } else {
-            // TODO: Create user with password
-            // Send verification email and verification SMS
+            // TODO: Send verification email and verification SMS
             // if email or phone number has been changed.
 
-            const userRecord = await admin.auth().getUserByEmail(input.email);
+            const userRecord = await admin.auth().getUser(decodedToken.uid);
             await admin.auth().updateUser(userRecord.uid, {
                 email: input.email,
                 phoneNumber: input.phoneNumber
@@ -201,6 +199,10 @@ app.post('/account-update', async (request, response) => {
 });
 
 app.post('/account-delete', (request, response) => {
+    response.status(503).send('Functionality not available yet.');
+});
+
+app.post('/account-pass-update', (request, response) => {
     response.status(503).send('Functionality not available yet.');
 });
 
