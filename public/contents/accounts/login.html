@@ -54,6 +54,20 @@
     <link rel="stylesheet" href="/fonts/icon.css">
     <link rel="stylesheet" href="/mdl/material.cyan-light_blue.min.css">
     <link rel="stylesheet" href="/styles/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.1.0/firebase-auth.js"></script>
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyCUJp0rD0b9nNgA5pn4WOXtZr6mM4PxQp8",
+            authDomain: "firegate-101.firebaseapp.com",
+            databaseURL: "https://firegate-101.firebaseio.com",
+            projectId: "firegate-101",
+            storageBucket: "firegate-101.appspot.com",
+            messagingSenderId: "700794827690"
+        };
+        firebase.initializeApp(config);
+    </script>
     <style>
         .demo-card-wide.mdl-card {
             /* width: 60%; */
@@ -113,7 +127,7 @@
                     </div>
                     <div class="mdl-layout__header-row mdl-card__actions mdl-card--border">
                         <div class="mdl-layout-spacer"></div>
-                        <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="login">
+                        <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect account-login--button" id="account-login--button">
                             Next
                         </button>
                     </div>
@@ -121,10 +135,10 @@
             </div>
         </main>
     </div>
-    <!-- TODO: Add library for es6-promise polyfill -->
-    <!-- TODO: Add library for axios js -->
-    <!-- TODO: Use the online version of /mdl/material.min.js -->
+    <!-- TODO: Use the online version of the following assets -->
     <script src="/mdl/material.min.js"></script>
+    <script src="/scripts/es6-promise.auto.min.js"></script>
+    <script src="/scripts/axios.min.js"></script>
     <script src="/scripts/app.js"></script>
 </body>
 </html>

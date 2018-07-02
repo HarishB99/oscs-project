@@ -104,21 +104,36 @@
                         </div>
                         <div class="mdl-card__supporting-text">
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input id="account-create--input-org" class="account-create--input-org mdl-textfield__input" type="text" pattern="^[A-Za-z0-9 ,\.\(\)]{3,30}$" maxlength="30" autofocus id="org">
-                                <label class="mdl-textfield__label" for="org">Organisation...</label>
+                                <input id="account-create--input-org" class="account-create--input-org mdl-textfield__input" type="text" pattern="^[A-Za-z0-9 ,\.\(\)]{3,30}$" maxlength="30" autofocus>
+                                <label class="mdl-textfield__label" for="account-create--input-org">Organisation...</label>
                                 <span class="mdl-textfield__error">Please enter a valid organisation name.</span>
                             </div>
                             <br/>
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input id="account-create--input-email" class="account-create--input-email mdl-textfield__input" type="email" id="email"> <!-- pattern="^[A-Za-z0-9 ]{1,30}$" -->
-                                <label class="mdl-textfield__label" for="email">Email Address...</label>
+                                <input id="account-create--input-email" class="account-create--input-email mdl-textfield__input" type="email"> <!-- pattern="^[A-Za-z0-9 ]{1,30}$" -->
+                                <label class="mdl-textfield__label" for="account-create--input-email">Email Address...</label>
                                 <span class="mdl-textfield__error">Please enter a valid email address.</span>
                             </div>
                             <br/>
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input id="account-create--input-phone" class="account-create--input-phone mdl-textfield__input" type="text" pattern="^[89]+[0-9]{7}$" id="num" maxlength="8" >
-                                <label class="mdl-textfield__label" for="num">Contact number...</label>
+                                <input id="account-create--input-phone" class="account-create--input-phone mdl-textfield__input" type="text" pattern="^[89]+[0-9]{7}$" maxlength="8">
+                                <label class="mdl-textfield__label" for="account-create--input-phone">Contact number...</label>
                                 <span class="mdl-textfield__error">Please enter a valid contact number.</span>
+                            </div>
+                            <br/>
+                            <div class="mdl-textfield mdl-js-textfield">
+                                <input id="account-create--input-password" class="account-create--input-password mdl-textfield__input" type="password" maxlength="30" ><!--  pattern="^(?=.{2,}[a-z])(?=.{2,}[A-Z])(?=.{2,}[0-9])(?=.+[!@#\$%\^&\*])(?=.{8,})" -->
+                                <label class="mdl-textfield__label" for="account-create--input-password">Password...</label>
+                                <span class="mdl-textfield__error">Please enter a valid strong password (Hover over input field to learn about password strength)</span>
+                                <div class="mdl-tooltip mdl-tooltip--large" for="account-create--input-password">
+                                    Minimum be at least 8 characters long, must have at least 2 capital letter, 2 small letter, 2 number and 1 special character
+                                </div>
+                            </div>
+                            <br/>
+                            <div class="mdl-textfield mdl-js-textfield">
+                                <input id="account-create--input-password2" class="account-create--input-password2 mdl-textfield__input" type="password" pattern="^(?=.{2,}[a-z])(?=.{2,}[A-Z])(?=.{2,}[0-9])(?=.+[!@#\$%\^&\*])(?=.{8,})" maxlength="30" >
+                                <label class="mdl-textfield__label" for="account-create--input-password2">Confirm Password...</label>
+                                <span class="mdl-textfield__error">Please enter the password you entered above.</span>
                             </div>
                         </div>
                     </div>

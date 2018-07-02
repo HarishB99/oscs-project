@@ -50,6 +50,7 @@
     -->
 
     <!-- TODO: Use the online versions of the following assets -->
+    <!-- <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=es6|always,Element.prototype.classList|always,default|always"></script> -->
     <link rel="stylesheet" href="../fonts/css.css">
     <link rel="stylesheet" href="../fonts/icon.css">
     <link rel="stylesheet" href="../mdl/material.cyan-light_blue.min.css">
@@ -83,69 +84,84 @@
             padding: 0% !important;
         }
 
-
-
         /* Table Sorting */
-table {
-  margin-top: 1em;
-}
-  
-th.sort {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  min-width: 75px;
-}
-th.sort:hover {
-  cursor: pointer;
-  text-decoration: none;
-}
-th.sort:focus {
-  outline: none;
-}
-th.sort:after {
-  display: inline-block;
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  content: "";
-  position: relative;
-  top: -10px;
-  right: -5px;
-}
-th.sort.asc:after {
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 5px solid #000;
-  content: "";
-  position: relative;
-  top: 4px;
-  right: -5px;
-}
-th.sort.desc:after {
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-bottom: 5px solid #000;
-  content: "";
-  position: relative;
-  top: -4px;
-  right: -5px;
-}
+        table {
+            margin-top: 1em;
+        }
+        
+        th.sort {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            min-width: 75px;
+        }
+        th.sort:hover {
+            cursor: pointer;
+            text-decoration: none;
+        }
+        th.sort:focus {
+            outline: none;
+        }
+        th.sort:after {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            content: "";
+            position: relative;
+            top: -10px;
+            right: -5px;
+        }
+        th.sort.asc:after {
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 5px solid #000;
+            content: "";
+            position: relative;
+            top: -4px;
+            right: -5px;
+        }
+        th.sort.desc:after {
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #000;
+            content: "";
+            position: relative;
+            top: 4px;
+            right: -5px;
+        }
+        th.sort {
+            cursor: pointer;
+        }
     </style>
-    <!-- TODO: Add library for es6-promise polyfill -->
-    <!-- TODO: Add library for axios js -->
-    <!-- TODO: Use the online version of /mdl/material.min.js -->
+    <!-- TODO: Use the online version of the following assets -->
     <script src="../mdl/material.min.js"></script>
-    <script src="../scripts/app.js"></script>
     <script src="../scripts/jquery-3.3.1.min.js"></script>
     <script src="../scripts/list.min.js"></script>
+    <script src="../scripts/es6-promise.auto.min.js"></script>
+    <script src="../scripts/axios.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase-firestore.js"></script>
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyCUJp0rD0b9nNgA5pn4WOXtZr6mM4PxQp8",
+            authDomain: "firegate-101.firebaseapp.com",
+            databaseURL: "https://firegate-101.firebaseio.com",
+            projectId: "firegate-101",
+            storageBucket: "firegate-101.appspot.com",
+            messagingSenderId: "700794827690"
+        };
+        firebase.initializeApp(config);
+    </script>
 </head>
 <body>
     <div class="demo-layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
@@ -186,13 +202,22 @@ th.sort.desc:after {
         <main class="mdl-layout__content mdl-color--grey-100">
             <section id="firewall-rule__table" class="mdl-layout__tab-panel is-active" id="firewall-rule">
                 <div class="search-box">
+                    <!-- <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable">
+                        <label class="mdl-button mdl-js-button mdl-button--icon" for="firewall-rule__search--input-name">
+                            <i class="material-icons">search</i>
+                        </label>
+                        <div class="mdl-textfield__expandable-holder">
+                            <input class="search mdl-textfield__input" type="text" id="firewall-rule__search--input-name">
+                            <label class="mdl-textfield__label" for="firewall-rule__search--input-name">Expandable Input</label>
+                        </div>
+                    </div> -->
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                         <input class="search mdl-textfield__input firewall-rule__search--input-name" type="text" id="firewall-rule__search--input-name">
-                        <label class="mdl-textfield__label" for="firewall-rule__search--input-name">Rule Name...</label>
+                        <label class="mdl-textfield__label" for="firewall-rule__search--input-name">Rule name, Port Number, IP Address, etc...</label>
                     </div>
-                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect firewall-rule__search--input-button" id="firewall-rule__search--input-button">
+                    <!-- <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect firewall-rule__search--input-button" id="firewall-rule__search--input-button">
                         <i class="material-icons">search</i> Search
-                    </button>
+                    </button> -->
                 </div>
                 <div class="page-content">
                     <div class="mdl-data-table__holder">
@@ -210,46 +235,8 @@ th.sort.desc:after {
                                     <th></th>
                                 </tr>
                             </thead>
-                            <tbody class="list">
-                                <tr>
-                                    <td class="mdl-data-table__cell--non-numeric rule">HTTP</td>
-                                    <td class="access">Allow</td>
-                                    <td class="priority">100</td>
-                                    <td class="saddr">*</td>
-                                    <td class="sport">*</td>
-                                    <td class="daddr">*</td>
-                                    <td class="dport">80</td>
-                                    <td class="protocol">TCP</td>
-                                    <td>
-                                        <button class="firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">edit</i> Edit</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="mdl-data-table__cell--non-numeric rule">SQL</td>
-                                    <td class="access">Allow</td>
-                                    <td class="priority">101</td>
-                                    <td class="saddr">*</td>
-                                    <td class="sport">*</td>
-                                    <td class="daddr">*</td>
-                                    <td class="dport">3306</td>
-                                    <td class="protocol">TCP</td>
-                                    <td>
-                                        <button class="firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">edit</i> Edit</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                <td class="mdl-data-table__cell--non-numeric rule">Deny All</td>
-                                    <td class="access">Deny</td>
-                                    <td class="priority">200</td>
-                                    <td class="saddr">*</td>
-                                    <td class="sport">*</td>
-                                    <td class="daddr">*</td>
-                                    <td class="dport">*</td>
-                                    <td class="protocol">*</td>
-                                    <td>
-                                        <button class="firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">edit</i> Edit</button>
-                                    </td>
-                                </tr>
+                            <tbody id="firewall-rule__table--list" class="list firewall-rule__table--list">
+                                
                             </tbody>
                         </table>
                     </div>
@@ -286,14 +273,104 @@ th.sort.desc:after {
 
         var ruleList = new List('firewall-rule__table', options);
 
-        $($('th.sort')[0]).trigger('click', function() {
-            console.log('clicked');
-        });
+        $(function() {
+            $($('th.sort')[0]).trigger('click', function() {
+                console.log('clicked');
+            });
 
-        $('input.search').on('keyup', function(e) {
-            if (e.keyCode === 27) {
-                $(e.currentTarget).val('');
-                ruleList.search('');
+            $('input.search').on('keyup', function(e) {
+                if (e.keyCode === 27) {
+                    $(e.currentTarget).val('');
+                    ruleList.search('');
+                }
+            });
+        });
+    </script>
+    <script src="../scripts/app.js"></script>
+    <script>
+        var db = firebase.firestore();
+        var settings = {/* your settings... */ timestampsInSnapshots: true};
+        db.settings(settings);
+        var auth = firebase.auth();
+
+        auth.onAuthStateChanged(function(user) {
+            console.log(user);
+            if (user) {
+                db.collection("users").doc(user.uid).collection("rules")
+                .onSnapshot(function(rules) {
+                    if (rules.docs.length <= 0) {
+                        var table = document.getElementById("firewall-rule__table--list");
+                            var tableRow = document.createElement("tr");
+                                var noRules = document.createElement("td");
+                                    noRules.className = "mdl-data-table__cell--non-numeric rule";
+                                    noRules.colSpan = 10;
+                                    // TODO: Add button/link to add rule
+                                    noRules.innerHTML = "You have not configured any rules.";
+                                tableRow.appendChild(noRules);
+                        table.appendChild(tableRow);
+                    } else {
+                        rules.forEach(function(rule) {
+                            var params = rule.data();
+                            console.log(params);
+                            var name = params.name;
+                            var allow = params.allow ? "Allow" : "Deny";
+                            var priority = params.priority;
+                            var sourceip = params.sourceip;
+                            var sourceport = params.sourceport;
+                            var destip = params.destip;
+                            var destport = params.destport;
+                            var protocol = params.protocol;
+
+                            var table = document.getElementById("firewall-rule__table--list");
+                                var tableRow = document.createElement("tr");
+                                    var ruleName = document.createElement("td");
+                                        ruleName.className = "mdl-data-table__cell--non-numeric rule";
+                                        ruleName.innerHTML = name;
+                                    var access = document.createElement("td");
+                                        access.className = "access";
+                                        access.innerHTML = allow;
+                                    var prior = document.createElement("td");
+                                        prior.className = "priority";
+                                        prior.innerHTML = priority;
+                                    var sip = document.createElement("td");
+                                        sip.className = "saddr";
+                                        sip.innerHTML = sourceip;
+                                    var sport = document.createElement("td");
+                                        sport.className = "sport";
+                                        sport.innerHTML = sourceport;
+                                    var dip = document.createElement("td");
+                                        dip.className = "daddr";
+                                        dip.innerHTML = destip;
+                                    var dport = document.createElement("td");
+                                        dport.className = "dport";
+                                        dport.innerHTML = destport;
+                                    var proto = document.createElement("td");
+                                        proto.className = "protocol";
+                                        proto.innerHTML = protocol;
+                                    var toEdit = document.createElement("td");
+                                        var toEditButton = document.createElement("button");
+                                        toEditButton.className = "firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect";
+                                        toEditButton.innerHTML = "<i class=\"material-icons\">edit</i> Edit";
+                                        toEdit.appendChild(toEditButton);
+                                tableRow.appendChild(ruleName);
+                                tableRow.appendChild(access);
+                                tableRow.appendChild(prior);
+                                tableRow.appendChild(sip);
+                                tableRow.appendChild(sport);
+                                tableRow.appendChild(dip);
+                                tableRow.appendChild(dport);
+                                tableRow.appendChild(proto);
+                                tableRow.appendChild(toEdit);
+                            table.innerHTML = "";
+                            table.appendChild(tableRow);
+                        });
+                    }
+                }, function(error) {
+                    console.log(error);
+                    showSnackbar("An unexpected error occurred. Please try again later.");
+                });
+            } else {
+                showSnackbar("You are not logged in.");
             }
         });
     </script>
