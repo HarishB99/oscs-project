@@ -8,7 +8,7 @@ export class InputValidator {
      * @param input the string input to be validated
      */
     public isEmpty(input: string): boolean {
-        return input === '' || input === null || input === undefined;
+        return input === '' || input === null || typeof input === 'undefined';
     }
 
     /**
@@ -60,7 +60,6 @@ export class InputValidator {
         return re.test(input);
     }
 
-    
     /**
      * Checks whether the password has 
      * at least 2 uppercase letters, 
