@@ -5,7 +5,7 @@ import subprocess, json, requests
 text_clf = None
 options = {
     "block-ads" : True,
-    "block-malicious" : True
+    "block-malicious" : True,
     "isBlacklist" : True
 }
 
@@ -14,6 +14,34 @@ blockedDomains = {
     "malicious" : {},
     "user" : {}
 }
+
+categories = {
+    '101': 'Negative: Malware or viruses',
+    '102': 'Negative: Poor customer experience',
+    '103': 'Negative: Phishing',
+    '104': 'Negative: Scam',
+    '105': 'Negative: Potentially illegal',
+    '201': 'Questionable: Misleading claims or unethical',
+    '202': 'Questionable: Privacy risks',
+    '203': 'Questionable: Suspicious',
+    '204': 'Questionable: Hate, discrimination',
+    '205': 'Questionable: Spam',
+    '206': 'Questionable: Potentially unwanted programs',
+    '207': 'Questionable: Ads / pop-ups',
+    '301': 'Neutral: Online tracking',
+    '302': 'Neutral: Alternative or controversial medicine',
+    '303': 'Neutral: Opinions, religion, politics ',
+    '304': 'Neutral: Other ',
+    '401': 'Child safety: Adult content',
+    '402': 'Child safety: Incindental nudity',
+    '403': 'Child safety: Gruesome or shocking',
+    '404': 'Child safety: Site for kids',
+    '501': 'Positive: Good site'
+}
+
+apiKeys = None
+with open("../data/apiKeys.json", "r") as f:
+    apiKeys = json.loads(f.read())
 
 def addDomainsF(fileName, category):
     with open(fileName, "r") as f:
@@ -34,7 +62,7 @@ def load(l):
     addDomainsF("../data/ad-domains-list.txt", "ad")
     addDomainsF("../data/malicious-domains-list.txt", "malicious")
     #load user defined domains
-    with open('../data/temprules.json', 'r') as rules:
+    with open('../data/testrules.json', 'r') as rules:
         rules = json.loads(rules.read())
         r = rules["webfilter"]
         #set options
@@ -52,11 +80,20 @@ def load(l):
         #add user-defined domains
         for domain in r["domains"]:
             blockedDomains["user"][domain] = True
-
-    #load text classifier
-    twenty_train = fetch_20newsgroups(subset='twenty_train')
+    print(apiKeys["webOfTrust"])
+    print(apiKeys["googleSafeBrowsing"])
 
 def request(flow):
+    if (flow.request.pretty_host == 'api.mywot.com' or
+     flow.request.pretty_host == 'safebrowsing.googleapis.com'):
+        return
+    print("LOGGING")
+    with open("../logs/urls.log", "a+") as u:
+        u.write(flow.request.method + " " + flow.request.path + " " + flow.request.http_version)
+    with open("../logs/pretty_hosts.log", "a+") as l:
+        l.write(flow.request.pretty_host + '\n')
+
+    print("FILTERING")
     #ignore ads
     if options["block-ads"]:
         if flow.request.pretty_host in blockedDomains["ad"]:
@@ -81,15 +118,18 @@ def request(flow):
             418, "Blocked by policy (whitelist)"
             )
 
-def response(flow):
-    #ignore ads
-    if blockedDomain["ad"][flow.response.pretty_host]:
-        flow.kill()
-    if blockedDomains["malicious"][flow.response.pretty_host]:
-        flow.response = http.HTTPResponse.make(418, "Malicious site blocked")
+    #lookup stuff in the apis
+    print("API LOOKUPS")
+    #wotResults = webOfTrustLookup(flow.request.host)
+    gResults = googleSafeBrowsingLookup(flow.request.host)
+    #check results
+    print("CHECK RESULT")
 
+
+def response(flow):
     #check images using header
     if flow.response.headers.get("content-type", "").startswith("image"):
+        () #TODO:: check images (may abondon)
         #check image
         #encoded_image = base64.b64encode(flow.response.content)
         #subprocess.run(["python3", "classify_nsfw.py", "-m", "data/open_nsfw-weights.py", "-t", "base64_"])
@@ -100,8 +140,8 @@ def response(flow):
         #flow.response.headers["content-type"] = "image/png"
 
     #check downloading files
-    if(flow.response.headers.get("content-disposition", "").startswith("attachment"):
-        #scan the file for viruses
+    if flow.response.headers.get("content-disposition", "").startswith("attachment"):
+        () #TODO::scan file for viruses
 
     #classify text with ML
     html = BeautifulSoup(flow.response.content)
@@ -118,56 +158,33 @@ def webOfTrustLookup(domain):
     }
     try:
         target = 'http://' + domain + '/'
-        parameters = {'hosts': domain + "/", 'key': '390f9bd0aad758a356a40ba7858ca67b2089885f'}
+        parameters = {'hosts': domain + "/", 'key': apiKeys["webOfTrust"]}
+        print("WEB OF TRUST")
         reply = requests.get(
             "http://api.mywot.com/0.4/public_link_json2",
             params=parameters,
             headers={'user-agent': 'Mozilla/5.0'})
+        print("REQUEST SENT")
         reply_dict = json.loads(reply.text)
-        categories = {
-            '101': 'Negative: Malware or viruses',
-            '102': 'Negative: Poor customer experience',
-            '103': 'Negative: Phishing',
-            '104': 'Negative: Scam',
-            '105': 'Negative: Potentially illegal',
-            '201': 'Questionable: Misleading claims or unethical',
-            '202': 'Questionable: Privacy risks',
-            '203': 'Questionable: Suspicious',
-            '204': 'Questionable: Hate, discrimination',
-            '205': 'Questionable: Spam',
-            '206': 'Questionable: Potentially unwanted programs',
-            '207': 'Questionable: Ads / pop-ups',
-            '301': 'Neutral: Online tracking',
-            '302': 'Neutral: Alternative or controversial medicine',
-            '303': 'Neutral: Opinions, religion, politics ',
-            '304': 'Neutral: Other ',
-            '401': 'Child safety: Adult content',
-            '402': 'Child safety: Incindental nudity',
-            '403': 'Child safety: Gruesome or shocking',
-            '404': 'Child safety: Site for kids',
-            '501': 'Positive: Good site'
-        }
+        print(json.dumps(reply_dict))
         if reply.status_code == 200:
-            for key, value in reply_dict[Domain].items():
+            for key, value in reply_dict[domain].items():
                 if key == "1":
                     ()  # Deprecated
                 elif key == "2":
                     ()  # Deprecated
                 elif key == "0":
-                    results.reputation.trustworthiness = value
+                    results["reputation"]["trustworthiness"] = value
                 elif key == "4":
-                    results.reputation.childSafety = value
+                    results["reputation"]["childSafety"] = value
                 elif key == "categories":
                     for categoryId, confidence in value.items():
-                        results.categories.append((categoryId, confidence))
+                        results["categories"].append((categoryId, confidence))
                 elif key == "blacklists":
                     continue #lazy to handle this
                 else:
                     return 4 #unknown response
             return results
-        if hasKeys == False:
-            return 1 #Web of Trust has no records for that particular domain
-
         if reply.status_code != 200:
             return 2 #Server return unusual status code
     except KeyError:
@@ -176,22 +193,25 @@ def webOfTrustLookup(domain):
 def googleSafeBrowsingLookup(domain):
     result = []
     try:
-        reply = requests.post('https://safebrowsing.googleapis.com/v4/threatMatches:find?key=AIzaSyANNSsma-RHsoH7X05wEUOGbPsl-G9vdU8',
-            data = {
-                'client' : {
-                    'clientId' : 'OCCS Project',
-                    'clientVersion': '1.5.2'
-                },
-                'threatInfo' : {
-                    'threatTypes' : ["MALWARE", "SOCIAL_ENGINEERING"],
-                    'platformTypes' : ["ANY_PLATFORM"],
-                    'threatEntryTypes' ["URL"],
-                    'threatEntries' : [{"url":domain}]
-                }
-            })
+        headers = {'content-type': 'application/json'}
+        payload = {
+            'client' : {
+                'clientId' : 'OCCS_Project',
+                'clientVersion': '1.0'
+            },
+            'threatInfo' : {
+                'threatTypes' : ["MALWARE", "SOCIAL_ENGINEERING"],
+                'platformTypes' : ["ANY_PLATFORM"],
+                'threatEntryTypes' : ["URL"],
+                'threatEntries' : [{"url": domain}]
+            }
+        }
+        reply = requests.post('https://safebrowsing.googleapis.com/v4/threatMatches:find?key=' + apiKeys['googleSafeBrowsing'],
+            headers=headers, json=payload)
+
         if reply.status_code == 200:
             for match in reply.json()["matches"]:
-                result.append(match.['threatType'])
+                result.append(match['threatType'])
             return result
         else:
             return 1 #bad request

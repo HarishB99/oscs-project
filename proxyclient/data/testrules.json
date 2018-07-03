@@ -1,6 +1,6 @@
 {
   "firewallRules": {
-    "incoming": [
+    "rules":[
       {
         "priority": 100,
         "name": "http",
@@ -10,7 +10,8 @@
         "destip": "0.0.0.0",
         "destport": "*",
         "protocol" : "tcp",
-        "state" : "NEW,ESTABLISHED,RELATED"
+        "state" : "NEW,ESTABLISHED,RELATED",
+        "direction" : "incoming"
       },
       {
         "priority": 200,
@@ -21,7 +22,8 @@
         "destip": "0.0.0.0",
         "destport": "*",
         "protocol" : "tcp",
-        "state" : "NEW,ESTABLISHED,RELATED"
+        "state" : "NEW,ESTABLISHED,RELATED",
+        "direction": "incoming"
       },
       {
         "priority": 300,
@@ -32,7 +34,8 @@
         "destip": "0.0.0.0",
         "destport": "8080",
         "protocol": "tcp",
-        "state" : "NEW,ESTABLISHED,RELATED"
+        "state" : "NEW,ESTABLISHED,RELATED",
+        "direction" : "incoming"
       },
       {
         "priority": 1000,
@@ -43,10 +46,9 @@
         "destip": "0.0.0.0",
         "destport": "*",
         "protocol" : "*",
-        "state" : "NEW,ESTABLISHED,RELATED"
-      }
-    ],
-    "outgoing": [
+        "state" : "NEW,ESTABLISHED,RELATED",
+        "direction" : "incoming"
+      },
       {
         "priority": 1000,
         "name": "allowAll",
@@ -56,7 +58,8 @@
         "destip": "0.0.0.0",
         "destport": "*",
         "protocol" : "*",
-        "state" : "NEW,ESTABLISHED,RELATED"
+        "state" : "NEW,ESTABLISHED,RELATED",
+        "direction" : "outgoing"
       }
     ]
   },
@@ -66,7 +69,7 @@
     "blockMalicious": true,
     "domainGroups" : ["socialMedia"],
     "domains": [
-      "www.kongregate.com"
+      "kongregate.com"
     ]
   },
   "dpi" : true,
