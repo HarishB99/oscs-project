@@ -1,5 +1,7 @@
+// Side panel buttons
 var home_btn = document.getElementById("mdl-navigation__link--home");
 var rule_btn = document.getElementById("mdl-navigation__link--rules");
+// Side panel menu button
 var profile_btn = document.getElementById("mdl-menu__item--profile");
 var signout_btn = document.getElementById("mdl-menu__item--signout");
 var port_inputs = document.querySelectorAll(".rule__ports");
@@ -30,9 +32,29 @@ var acc_prof_phone = document.getElementById("account-profile--input-phone");
 // Set up path prefix i.e. '../' (for urls links in button actions)
 var path_prefix = "/";
 
-// Set actions for buttons
-if (home_btn) home_btn.href = "/";
-if (rule_btn) rule_btn.href = "/contents/firewall.html";
+/**
+ * Generic functions
+ */
+var InputValidator = function() {};
+InputValidator.isEmpty = function(input) {
+    return input === "" || typeof input === "undefined" || input === null;
+};
+InputValidator.isAReasonablyStrongPassword = function(input) {
+    const re = new RegExp('^(?=.{2,}[a-z])(?=.{2,}[A-Z])(?=.{2,}[0-9])(?=.+[!@#$%^&*])(?=.{8,})', 'u');
+    return re.test(input);
+};
+InputValidator.isValidOrgName = function(input) {
+    const re = /^[A-Za-z0-9 .,()]{3,30}$/;
+    return re.test(input);
+};
+InputValidator.isValidEmail = function(input) {
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(input);
+};
+InputValidator.isValidPhoneNum = function(input) {
+    const re = /^[89]+\d{7}$/;
+    return re.test(input);
+};
 
 function showSnackbar(message, actionText, actionHandler) {
     var notification = document.querySelector('.mdl-js-snackbar');
@@ -40,13 +62,29 @@ function showSnackbar(message, actionText, actionHandler) {
         message: message,
         timeout: 10000
     };
-    if (!isEmpty(actionText)) {
+    if (!InputValidator.isEmpty(actionText)) {
         data.actionText = actionText;
         data.actionHandler = actionHandler;
     }
     if (notification.getAttribute('aria-hidden') !== "false")
         notification.MaterialSnackbar.showSnackbar(data);
 }
+
+/**
+ * Account creation functions
+ */
+
+// Set actions for buttons
+if (home_btn) home_btn.href = "/";
+if (rule_btn) rule_btn.href = "/firewall";
+
+if (profile_btn) {
+    profile_btn.addEventListener('click', function() {
+        location.href = "/profile";
+    });
+}
+
+
 
 function isAValidPort(e) {
     var childEl = e.target;
@@ -77,10 +115,6 @@ function retrieveProfile(uid) {
 
 function signInWithEmailPass() {
 
-}
-
-function retrieveRules() {
-    return Ajax.post("/rules.json");
 }
 
 function updateRule() {
@@ -141,18 +175,44 @@ if (acc_req_btn) {
     });
 }
 
-function isEmpty(input) {
-    return input === "" || input === undefined || input === null;
+
+
+
+
+if (acc_login_btn) {
+    acc_login_btn.addEventListener('click', function(e) {
+        var email = document.getElementById('username').value;
+        var password = document.getElementById('pass').value;
+        // TODO: If possible, validate the input
+        firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(function() {
+            console.log('User logged in');
+            // TODO: What happens next after user logs in
+            location.replace('/');
+        })['catch'](function(error) {
+            console.error(error);
+            if (error.code === "auth/user-not-found") {
+                showSnackbar("Your email does not match our records.", "Create Account", function(e) {
+                    location.href = '/contents/accounts/account.html';
+                });
+            } else if (error.code === "auth/user-disabled") {
+                showSnackbar("Your account has been disabled. Please try again later.");
+            } else if (error.code === "auth/wrong-password" || error.code === "auth/invalid-email") {
+                showSnackbar("Invalid Credentials. Please try again.");
+            }
+        });
+    });
 }
 
-function isAReasonablyStrongPassword(password) {
-    const re = new RegExp('^(?=.{2,}[a-z])(?=.{2,}[A-Z])(?=.{2,}[0-9])(?=.+[!@#$%^&*])(?=.{8,})', 'u');
-    return re.test(password);
-}
 
+
+
+/**
+ * Account Creation
+ */
 if (acc_req_pass) {
     // acc_req_pass.addEventListener('focus', function(e) {
-    //     if (isAReasonablyStrongPassword(acc_req_pass.value)) {
+    //     if (InputValidator.isAReasonablyStrongPassword(acc_req_pass.value)) {
     //         if (acc_req_pass.parentElement.className.search("is-invalid") >= 0) {
     //             var acc_req_pass_parent = acc_req_pass.parentElement;
     //             acc_req_pass_parent.className = acc_req_pass_parent.className.replace(" is-invalid", "");
@@ -165,7 +225,7 @@ if (acc_req_pass) {
     // });
 
     acc_req_pass.addEventListener('keyup', function(e) {
-        if (isAReasonablyStrongPassword(acc_req_pass.value)) {
+        if ( InputValidator.isAReasonablyStrongPassword(acc_req_pass.value)) {
             if (acc_req_pass.parentElement.className.search("is-invalid") >= 0) {
                 var acc_req_pass_parent = acc_req_pass.parentElement;
                 acc_req_pass_parent.className = acc_req_pass_parent.className.replace(" is-invalid", "");
@@ -190,30 +250,5 @@ if (acc_req_pass2) {
                 acc_req_pass2.parentElement.className += " is-invalid";
             }
         }
-    });
-}
-
-if (acc_login_btn) {
-    acc_login_btn.addEventListener('click', function(e) {
-        var email = document.getElementById('username').value;
-        var password = document.getElementById('pass').value;
-        // TODO: If possible, validate the input
-        firebase.auth().signInWithEmailAndPassword(email, password)
-        .then(function() {
-            console.log('User logged in');
-            // TODO: What happens next after user logs in
-            location.replace('/');
-        })['catch'](function(error) {
-            console.error(error);
-            if (error.code === "auth/user-not-found") {
-                showSnackbar("Your email does not match our records.", "Create Account", function(e) {
-                    location.href = '/contents/accounts/account.html';
-                });
-            } else if (error.code === "auth/user-disabled") {
-                showSnackbar("Your account has been disabled. Please try again later.");
-            } else if (error.code === "auth/wrong-password" || error.code === "auth/invalid-email") {
-                showSnackbar("Invalid Credentials. Please try again.");
-            }
-        });
     });
 }
