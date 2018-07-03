@@ -23,6 +23,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Profile</title>
 
+    <!-- TODO: Set up PWA/AMP when possible -->
     <!-- Add to homescreen for Chrome on Android -->
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="icon" sizes="192x192" href="/images/android-desktop.png">
@@ -44,8 +45,11 @@
         add a canonical link to the desktop page 
         https://developers.google.com/webmasters/smartphone-sites/feature-phones 
     -->
-    <link rel="canonical" href="profile.html">
+    <!--
+    <link rel="canonical" href="http://www.example.com/">
+    -->
 
+    <!-- TODO: Use the online versions of the following assets -->
     <!-- For Online Use -->
     <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"> -->
     <!-- For Offline Use -->
@@ -87,16 +91,16 @@
                         <span class="visuallyhidden">Accounts</span>
                     </button>
                     <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="accbtn">
-                        <li class="mdl-menu__item"><i class="material-icons">account_circle</i>Profile</li>
-                        <li class="mdl-menu__item"><i class="material-icons">exit_to_app</i>Logout</li>
+                        <li id="mdl-menu__item--profile" class="mdl-menu__item mdl-menu__item--profile"><i class="material-icons">account_circle</i>Profile</li>
+                        <li id="mdl-menu__item--signout" class="mdl-menu__item mdl-menu__item--signout"><i class="material-icons">exit_to_app</i>Logout</li>
                     </ul>
                 </div>
             </header>
             <nav class="demo-navigation mdl-navigation mdl-color--blue-grey-800">
-                <a class="mdl-navigation__link btn--home"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dashboard</i>Dashboard</a>
-                <a class="mdl-navigation__link btn--rules"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">flag</i>Rules & Policies</a>
+                <a id="mdl-navigation__link--home" class="mdl-navigation__link mdl-navigation__link--home"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dashboard</i>Dashboard</a>
+                <a id="mdl-navigation__link--rules" class="mdl-navigation__link mdl-navigation__link--rules"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">flag</i>Rules & Policies</a>
                 <div class="mdl-layout-spacer"></div>
-                <a class="mdl-navigation__link"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">help_outline</i><span class="visuallyhidden">Help</span></a>
+                <a id="mdl-navigation__link--help" class="mdl-navigation__link mdl-navigation__link--help"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">help_outline</i><span class="visuallyhidden">Help</span></a>
             </nav>
         </div>
         <main class="mdl-layout__content mdl-color--grey-100">
@@ -146,7 +150,8 @@
         </main>
     </div>
     <script src="/mdl/material.min.js"></script>
-    <!-- TODO Add library for es6-promise polyfill -->
+    <!-- TODO: Add library for es6-promise polyfill -->
+    <!-- TODO: Use the online versions of the following assets -->
     <!-- Online use -->
     <!-- <script src="https://unpkg.com/axios/dist/axios.min.js"></script> -->
     <!-- Offline use -->

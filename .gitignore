@@ -1,2 +1,2 @@
-functions/node_modules/
-functions/lib/
+**/node_modules/
+**/lib/

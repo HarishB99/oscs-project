@@ -1,0 +1,22 @@
+{
+  "name": "firegate101-client",
+  "version": "1.0.0",
+  "description": "Node.js Client to access Firebase services",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js",
+    "start": "node index.js"
+  },
+  "author": "Harish S/O Balamurugan",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "firebase": "^5.2.0",
+    "lodash": "^4.17.10"
+  },
+  "devDependencies": {
+    "jshint": "^2.9.5"
+  }
+}

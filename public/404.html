@@ -23,6 +23,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Resource not found</title>
 
+    <!--
+        TODO: Set up PWA/AMP when possible
+    -->
     <!-- Add to homescreen for Chrome on Android -->
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="icon" sizes="192x192" href="/images/android-desktop.png">
@@ -48,32 +51,19 @@
         <link rel="canonical" href="http://www.example.com/">
     -->
 
+    <!--
+        TODO: Use the online versions of 
+        the following assets
+    -->
     <link rel="stylesheet" href="/fonts/css.css">
     <link rel="stylesheet" href="/fonts/icon.css">
     <link rel="stylesheet" href="/mdl/material.cyan-light_blue.min.css">
     <link rel="stylesheet" href="/styles/styles.css">
     <style>
-        #view-source {
-            position: fixed;
-            display: block;
-            right: 0;
-            bottom: 0;
-            margin-right: 40px;
-            margin-bottom: 40px;
-            z-index: 900;
-        }
-        /* .demo-card-square.mdl-card {
-            width: 320px;
-            height: 320px;
-        }
-        .demo-card-square > .mdl-card__title {
-            color: #fff;
-            background:
-                url('/images/404.png') bottom right 15% no-repeat #46B6AC;
-        } */
         .page-content {
             padding: 2.5%;
         }
+
         .invert {
             -moz-transform: scale(-1, 1);
             -webkit-transform: scale(-1, 1);
@@ -81,11 +71,11 @@
             -ms-transform: scale(-1, 1);
             transform: scale(-1, 1);
         }
+        
         .demo-card-wide.mdl-card {
             width: 60%;
             margin: auto;
-        }
-        .demo-card-wide > .mdl-card__title {
+        } .demo-card-wide > .mdl-card__title {
             color: #000;
             height: 176px;
             margin: auto;
@@ -97,7 +87,6 @@
                 width: 70%;
             }
         }
-
         @media only screen and (max-width: 800px) {
             .demo-card-wide.mdl-card {
                 width: 100%;
@@ -124,25 +113,35 @@
                         <span class="visuallyhidden">Accounts</span>
                     </button>
                     <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="accbtn">
+                        <li id="mdl-menu__item--profile" class="mdl-menu__item mdl-menu__item--profile"><i class="material-icons">account_circle</i>Profile</li>
+                        <li id="mdl-menu__item--signout" class="mdl-menu__item mdl-menu__item--signout"><i class="material-icons">exit_to_app</i>Logout</li>
+                    </ul>
+                    <!-- <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="accbtn">
                         <li class="mdl-menu__item"><i class="material-icons">account_circle</i>Profile</li>
                         <li class="mdl-menu__item"><i class="material-icons">exit_to_app</i>Logout</li>
-                        <!-- <li class="mdl-menu__item"><i class="material-icons">add</i>Add another account...</li> -->
-                    </ul>
+                        <li class="mdl-menu__item"><i class="material-icons">add</i>Add another account...</li>
+                    </ul> -->
                 </div>
             </header>
             <nav class="demo-navigation mdl-navigation mdl-color--blue-grey-800">
+                <a id="mdl-navigation__link--home" class="mdl-navigation__link mdl-navigation__link--home"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dashboard</i>Dashboard</a>
+                <a id="mdl-navigation__link--rules" class="mdl-navigation__link mdl-navigation__link--rules"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">flag</i>Rules & Policies</a>
+                <div class="mdl-layout-spacer"></div>
+                <a id="mdl-navigation__link--help" class="mdl-navigation__link mdl-navigation__link--help"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">help_outline</i><span class="visuallyhidden">Help</span></a>
+            </nav>
+            <!-- <nav class="demo-navigation mdl-navigation mdl-color--blue-grey-800">
                 <a class="mdl-navigation__link btn--home"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">home</i>Home</a>
                 <a class="mdl-navigation__link btn--rules"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">flag</i>Rules & Policies</a>
-                <!-- <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">delete</i>Trash</a>
+                <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">delete</i>Trash</a>
                 <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">report</i>Spam</a>
                 <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">forum</i>Forums</a>
                 <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">flag</i>Updates</a>
                 <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">local_offer</i>Promos</a>
                 <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">shopping_cart</i>Purchases</a>
-                <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">people</i>Social</a> -->
+                <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">people</i>Social</a>
                 <div class="mdl-layout-spacer"></div>
                 <a class="mdl-navigation__link"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">help_outline</i><span class="visuallyhidden">Help</span></a>
-            </nav>
+            </nav> -->
         </div>
         <main class="mdl-layout__content mdl-color--grey-100">
             <div class="page-content">
@@ -163,6 +162,10 @@
             </div>
         </main>
     </div>
+    <!--
+        TODO: Use the online version of 
+        /mdl/material.min.js
+    -->
     <script src="/mdl/material.min.js"></script>
     <script src="/scripts/app.js"></script>
 </body>
