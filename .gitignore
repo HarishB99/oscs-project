@@ -1,2 +1,6 @@
 **/node_modules/
 **/lib/
+/proxyclient/data/apiKeys.json
+/proxyclient/logs
+/proxyclient/scripts/googleTest.py
+/proxyclient/scripts/WOTtest.py
