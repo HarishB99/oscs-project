@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<!--
+    Material Design Lite
+    Copyright 2015 Google Inc. All right reserved.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        https://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Network Rules</title>
+
+    <!-- TODO: Set up PWA/AMP when possible -->
+    <!-- Add to homescreen for Chrome on Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="icon" sizes="192x192" href="/images/android-desktop.png">
+
+    <!-- Add to homescreen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Material Design Lite">
+    <link rel="apple-touch-icon-precomposed" href="/images/ios-desktop.png">
+
+    <!-- Tile icon for Win8 (144x144 + tile color) -->
+    <meta name="msapplication-TileImage" content="/images/touch/ms-touch-icon-144x144-precomposed.png">
+    <meta name="msapplication-TileColor" content="#3372DF">
+
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <!-- 
+        SEO: If your mobile URL is different from the desktop URL, 
+        add a canonical link to the desktop page 
+        https://developers.google.com/webmasters/smartphone-sites/feature-phones 
+    -->
+    <!--
+        <link rel="canonical" href="http://www.example.com/">
+    -->
+
+    <!-- TODO: Use the online versions of the following assets -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="/mdl/material.cyan-light_blue.min.css">
+    <link rel="stylesheet" href="/getmdl-select/getmdl-select.min.css">
+    <link rel="stylesheet" href="/styles/styles.css">
+    <style>
+        .demo-card-wide .form-holder {
+            padding: 2.5%;
+        }
+        .demo-card-wide.mdl-card {
+            width: 100%;
+        }
+        .demo-card-wide > .mdl-card__title {
+            color: #000;
+        }
+        .demo-card-wide .form-holder .mdl-card__supporting-text {
+            width: 95%;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
+        <header class="demo-header mdl-layout__header mdl-color--grey-100 mdl-color-text--grey-600">
+            <div class="mdl-layout__header-row">
+                <span class="mdl-layout-title">Rules & Policies</span>
+                <div class="mdl-layout-spacer"></div>
+            </div>
+        </header>
+        <div class="demo-drawer mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50">
+            <header class="demo-drawer-header">
+                <img src="/images/user.jpg" class="demo-avatar">
+                <div class="demo-avatar-dropdown">
+                    <span>hello@example.com</span>
+                    <div class="mdl-layout-spacer"></div>
+                    <button id="accbtn" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+                        <i class="material-icons" role="presentation">arrow_drop_down</i>
+                        <span class="visuallyhidden">Accounts</span>
+                    </button>
+                    <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="accbtn">
+                        <li id="mdl-menu__item--profile" class="mdl-menu__item mdl-menu__item--profile"><i class="material-icons">account_circle</i>Profile</li>
+                        <li id="mdl-menu__item--signout" class="mdl-menu__item mdl-menu__item--signout"><i class="material-icons">exit_to_app</i>Logout</li>
+                    </ul>
+                </div>
+            </header>
+            <nav class="demo-navigation mdl-navigation mdl-color--blue-grey-800">
+                <a id="mdl-navigation__link--home" class="mdl-navigation__link mdl-navigation__link--home"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dashboard</i>Dashboard</a>
+                <a id="mdl-navigation__link--rules" class="mdl-navigation__link mdl-navigation__link--rules"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">flag</i>Rules & Policies</a>
+                <div class="mdl-layout-spacer"></div>
+                <a id="mdl-navigation__link--help" class="mdl-navigation__link mdl-navigation__link--help"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">help_outline</i><span class="visuallyhidden">Help</span></a>
+            </nav>
+        </div>
+        <main class="mdl-layout__content mdl-color--grey-100">
+            <div class="page-content">
+                <div class="demo-card-wide mdl-card mdl-shadow--2dp">
+                    <div class="form-holder">
+                        <div class="mdl-card__title">
+                            <h2 class="mdl-card__title-text">New Rule</h2>
+                        </div>
+                        <div class="mdl-card__supporting-text">
+                                <div class="mdl-textfield mdl-js-textfield">
+                                    <input class="mdl-textfield__input" pattern="^[A-Za-z0-9]{1,30}$" type="text" maxlength="30" autofocus id="rule_name">
+                                    <label class="mdl-textfield__label" for="rule_name">Name...</label>
+                                    <span class="mdl-textfield__error">Only alphanumeric characters are allowed.</span>
+                                </div>
+                                <div class="mdl-textfield mdl-js-textfield">
+                                    <input class="mdl-textfield__input" type="text" pattern="^[0-9]{1,5}$" maxlength="5" id="rule_priority"> <!-- -?[0-9]*(\.[0-9]+)? -->
+                                    <label class="mdl-textfield__label" for="rule_priority">Priority...</label>
+                                    <span class="mdl-textfield__error">Digits only</span>
+                                </div>
+                                <div class="mdl-textfield mdl-js-textfield getmdl-select">
+                                    <input type="text" value="" class="mdl-textfield__input" id="rule_protocol" readonly>
+                                    <input type="hidden" value="" name="rule_protocol">
+                                    <i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>
+                                    <label for="rule_protocol" class="mdl-textfield__label">Protocol</label>
+                                    <ul for="rule_protocol" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
+                                        <li class="mdl-menu__item" data-val="TCP">TCP</li>
+                                        <li class="mdl-menu__item" data-val="UDP">UDP</li>
+                                    </ul>
+                                </div>
+                                <br/>
+                                <div class="mdl-textfield mdl-js-textfield">
+                                    <input class="mdl-textfield__input" type="text" pattern="^(?=[\d\*]+\.[\d\*]\.[\d\*]\.[\d\*]$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9]|\*)\.?){4}$" id="rule_saddr">
+                                    <label class="mdl-textfield__label" for="rule_saddr">Source Address Range...</label>
+                                    <span class="mdl-textfield__error">Please enter a valid IP address</span>
+                                </div>
+                                <div class="mdl-textfield mdl-js-textfield">
+                                    <input class="rule__ports mdl-textfield__input" maxlength="5" type="text" id="rule_sport">
+                                    <label class="mdl-textfield__label" for="rule_sport">Source Port Range...</label>
+                                    <span class="mdl-textfield__error">Please enter a port number between 0 and 65,535</span>
+                                </div>
+                                <br/>
+                                <div class="mdl-textfield mdl-js-textfield">
+                                    <input class="mdl-textfield__input" type="text" pattern="^(?=[\d\*]+\.[\d\*]\.[\d\*]\.[\d\*]$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9]|\*)\.?){4}$" id="rule_daddr">
+                                    <label class="mdl-textfield__label" for="rule_daddr">Destination Address Range...</label>
+                                    <span class="mdl-textfield__error">Please enter a valid IP address</span>
+                                </div>
+                                <div class="mdl-textfield mdl-js-textfield">
+                                    <input class="rule__ports mdl-textfield__input" maxlength="5" type="text" id="rule_dport">
+                                    <label class="mdl-textfield__label" for="rule_dport">Destination Port Range...</label>
+                                    <span class="mdl-textfield__error">Please enter a port number between 0 and 65,535</span>
+                                </div>
+                                <div class="mdl-grid">
+                                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule_access">
+                                        <input type="checkbox" id="rule_access" class="mdl-switch__input" checked>
+                                        <span class="mdl-switch__label">Allowed</span>
+                                    </label>
+                                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule_virus_scanner">
+                                        <input type="checkbox" id="rule_virus_scanner" class="mdl-switch__input" checked>
+                                        <span class="mdl-switch__label">Virus Scanner</span>
+                                    </label>
+                                </div>
+                                
+                                <!-- <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="rule_virus_scanner">
+                                    <input type="checkbox" id="rule_virus_scanner" class="mdl-switch__input" checked>
+                                    <span class="mdl-switch__label">Enable Virus Scanner</span>
+                                </label> -->
+                        </div>
+                    </div>
+                    <div class="mdl-card__actions mdl-card--border">
+                        <!-- <div class="mdl-layout-spacer"></div> -->
+                        <button class="firewall-button--update mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                            <i class="material-icons">edit</i> Add/Update
+                        </button>
+                        <button class="firewall-button--cancel mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                            <i class="material-icons">cancel</i> Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- TODO: Add library for es6-promise polyfill -->
+    <!-- TODO: Add library for axios js -->
+    <!-- TODO: Use the online version of /mdl/material.min.js -->
+    <script src="/mdl/material.min.js"></script>
+    <script src="/scripts/es6-promise.auto.min.js"></script>
+    <script src="/scripts/axios.min.js"></script>
+    <script src="/getmdl-select/getmdl-select.min.js"></script>
+    <script src="/scripts/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var els = document.querySelectorAll('.rule__ports');
+            for (var i = 0; i < els.length; i++) {
+                els[i].addEventListener('keyup', isAValidPort);
+            }
+        });
+    </script>
+</body>
+</html>

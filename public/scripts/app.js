@@ -84,8 +84,6 @@ if (profile_btn) {
     });
 }
 
-
-
 function isAValidPort(e) {
     var childEl = e.target;
     var el = childEl.parentElement;
@@ -129,21 +127,27 @@ function deleteRule() {
     
 }
 
+if (port_inputs) {
+    for (var i = 0; i < port_inputs; i++) {
+        port_inputs[i].addEventListener('keyup', isAValidPort);
+    }
+}
+
 if (add_rule_btn) {
     add_rule_btn.onclick = function(e) {
-        location.href = "/contents/rules/rule.html";
+        location.href = "/create_rule";
     };
 }
 
 if (update_rule_btn) {
     update_rule_btn.onclick = function(el) {
-        location.href = "/contents/rules/rule.html";
+        location.href = "/edit_rule";
     };
 }
 
 if (cancel_rule_btn) {
     cancel_rule_btn.onclick = function(e) {
-        location.href = "/contents/firewall.html";
+        location.href = "/firewall";
     };
 }
 
@@ -193,7 +197,7 @@ if (acc_login_btn) {
             console.error(error);
             if (error.code === "auth/user-not-found") {
                 showSnackbar("Your email does not match our records.", "Create Account", function(e) {
-                    location.href = '/contents/accounts/account.html';
+                    location.href = '/create_account';
                 });
             } else if (error.code === "auth/user-disabled") {
                 showSnackbar("Your account has been disabled. Please try again later.");

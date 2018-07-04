@@ -6,8 +6,7 @@ import { Input } from './Input';
 import { UserClaim } from './UserClaim';
 import { SuccessCode } from './SuccessCode';
 import { ErrorCode } from './ErrorCode';
-import * as path from 'path';
-// import * as cors from 'cors';
+import * as cors from 'cors';
 
 admin.initializeApp();
 
@@ -17,14 +16,14 @@ const db = admin.firestore();
 /**
  * The following is a test app to test CORS
  */
-// const corsHandler = cors({ origin: true });
-// app.post('/cors-allowed', corsHandler, (request, response, next) => {
-//     const body = request.body;
-//     const email = body.email;
-//     const password = body.password;
+const corsHandler = cors({ origin: true });
+app.post('/cors-allowed', corsHandler, (request, response, next) => {
+    const body = request.body;
+    const email = body.email;
+    const password = body.password;
 
-//     response.status(200).send(`Received Post Data: Your email is ${email}. Your password is ${password}. This was possible via Cross Origin Resource Sharing, also known as CORS for short.`);
-// });
+    response.status(200).send(`Received Post Data: Your email is ${email}. Your password is ${password}. This was possible via Cross Origin Resource Sharing, also known as CORS for short.`);
+});
 
 /**
  * Function to retrieve the id token sent by client 
@@ -42,6 +41,31 @@ function getToken(header: string): string {
 }
 
 // Accounts
+app.post('/account', async (request, response) => {
+    try {
+        const { access, email } = request.body;
+        if (access === 'login') {
+            const { uid, emailVerified } = await admin.auth().getUserByEmail(email);
+            const userDoc = await db.doc(`/users/${uid}`).get();
+            if (emailVerified 
+                && userDoc.data().phoneVerified) {
+                response.send(JSON.stringify({
+                    access: true
+                }));
+            } else {
+                response.send(JSON.stringify({
+                    access: false
+                }));
+            }
+        } else {
+            response.status(400).send('Bad request');
+        }
+    } catch (error) {
+        console.error('Error while serving /account: ', error);
+        response.send('Access denied');
+    }
+});
+
 app.post('/account-create', async (request, response) => {
     try {
         // The following is possible because 
@@ -53,11 +77,7 @@ app.post('/account-create', async (request, response) => {
         // sent, JSON.parse will have to be 
         // used on the body to extract the 
         // JSON.data
-        const body = request.body;
-        const email = body.email;
-        const organisation = body.org;
-        const phoneNumber = body.contact;
-        const password = body.pass;
+        const { email, organisation, phoneNumber, password } = request.body;
 
         let input: Input = null;
         const iv = new InputValidator();
@@ -76,7 +96,7 @@ app.post('/account-create', async (request, response) => {
             // system. Manage permissions with claims 
             // and uid from firebase client on client-side.
 
-            const userRecord = await admin.auth().createUser({
+            const { uid } = await admin.auth().createUser({
                 email: input.email,
                 password: input.password,
                 photoURL: input.photoURL,
@@ -84,7 +104,7 @@ app.post('/account-create', async (request, response) => {
                 displayName: input.displayName
             });
 
-            await admin.auth().setCustomUserClaims(userRecord.uid, {
+            await admin.auth().setCustomUserClaims(uid, {
                 organisation: input.organisation
             });
 
@@ -101,10 +121,10 @@ app.post('/account-retrieve-name', async (request, response) => {
     // the client side, unless python sdk also needs this.
     try {
         const idToken = getToken(request.get('Authorisation'));
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const userRecord = await admin.auth().getUser(decodedToken.uid);
+        const { uid } = await admin.auth().verifyIdToken(idToken);
+        const { displayName } = await admin.auth().getUser(uid);
         response.send(JSON.stringify({
-            displayName: userRecord.displayName,
+            displayName: displayName,
             status: 'ok'
         }));
     } catch (error) {
@@ -120,10 +140,10 @@ app.post('/account-retrieve-picture', async (request, response) => {
     // the client side, unless python sdk also needs this.
     try {
         const idToken = getToken(request.get('Authorisation'));
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const userRecord = await admin.auth().getUser(decodedToken.uid);
+        const { uid } = await admin.auth().verifyIdToken(idToken);
+        const { photoURL } = await admin.auth().getUser(uid);
         response.send(JSON.stringify({
-            photoURL: userRecord.photoURL,
+            photoURL: photoURL,
             status: 'ok'
         }));
     } catch (error) {
@@ -139,13 +159,13 @@ app.post('/account-retrieve-basic', async (request, response) => {
     // the client side, unless python sdk also needs this.
     try {
         const idToken = getToken(request.get('Authorisation'));
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const userRecord = await admin.auth().getUser(decodedToken.uid);
-        const { organisation } = userRecord.customClaims as UserClaim;
+        const { uid } = await admin.auth().verifyIdToken(idToken);
+        const { displayName, email, phoneNumber, customClaims } = await admin.auth().getUser(uid);
+        const { organisation } = customClaims as UserClaim;
         response.send(JSON.stringify({
-            displayName: userRecord.displayName,
-            email: userRecord.email,
-            phoneNumber: userRecord.phoneNumber.split("+65")[1],
+            displayName: displayName,
+            email: email,
+            phoneNumber: phoneNumber.split("+65")[1],
             organisation: organisation,
             status: 'ok'
         }));
@@ -160,7 +180,7 @@ app.post('/account-retrieve-basic', async (request, response) => {
 app.post('/account-update', async (request, response) => {
     try {
         const idToken = getToken(request.get('Authorisation'));
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const { uid } = await admin.auth().verifyIdToken(idToken);
 
         const body = request.body;
         const email = body.email;
@@ -180,13 +200,12 @@ app.post('/account-update', async (request, response) => {
             // TODO: Send verification email and verification SMS
             // if email or phone number has been changed.
 
-            const userRecord = await admin.auth().getUser(decodedToken.uid);
-            await admin.auth().updateUser(userRecord.uid, {
+            await admin.auth().updateUser(uid, {
                 email: input.email,
                 phoneNumber: input.phoneNumber
             });
 
-            await admin.auth().setCustomUserClaims(userRecord.uid, {
+            await admin.auth().setCustomUserClaims(uid, {
                 organisation: input.organisation
             });
 
@@ -230,9 +249,9 @@ app.post('/filter-delete', (request, response) => {
     response.status(503).send('Functionality not available yet.');
 });
 
-app.all('*', (request, response) => {
-    response.status(404).send('Sorry, we can\'t find that ');
-});
+// app.all('*', (request, response) => {
+//     response.status(404).send('Sorry, we can\'t find that ');
+// });
 
 export const web_app = functions.https.onRequest(app);
 
@@ -255,7 +274,7 @@ export const createNewUser = functions.auth.user().onCreate(user => {
     //     accountVerified: false
     // });
 
-    return db.doc(`/user/${uid}`).set({
-        state: 'loggedout'
+    return db.doc(`/users/${uid}`).set({
+        phoneVerified: false
     }, { merge: true });
 });

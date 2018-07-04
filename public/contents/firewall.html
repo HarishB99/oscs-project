@@ -221,7 +221,7 @@
                 </div>
                 <div class="page-content">
                     <div class="mdl-data-table__holder">
-                        <table id="firewall-rule__table" class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp">
+                        <table id="firewall-rule__table" class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
                             <thead>
                                 <tr>
                                     <th class="mdl-data-table__cell--non-numeric sort" data-sort="rule">Rule</th>
@@ -308,7 +308,7 @@
                             var tableRow = document.createElement("tr");
                                 var noRules = document.createElement("td");
                                     noRules.className = "mdl-data-table__cell--non-numeric rule";
-                                    noRules.colSpan = 10;
+                                    noRules.colSpan = 9;
                                     // TODO: Add button/link to add rule
                                     noRules.innerHTML = "You have not configured any rules.";
                                 tableRow.appendChild(noRules);
@@ -375,7 +375,9 @@
                     showSnackbar("An unexpected error occurred. Please try again later.");
                 });
             } else {
-                showSnackbar("You are not logged in.");
+                // showSnackbar("You are not logged in.");
+                window.alert('You are not logged in.');
+                location.replace('/contents/accounts/login.html');
             }
         });
     </script>

@@ -1,5 +1,6 @@
 const express = require('express');
 const firebase = require('firebase');
+const axios = require('axios');
 // const bodyParser = require('body-parser');
 const config = {
     apiKey: "AIzaSyCUJp0rD0b9nNgA5pn4WOXtZr6mM4PxQp8",
@@ -22,7 +23,9 @@ let filter_final = null;
 app.use(express.json());
 
 app.post('/login', (request, response) => {
-    // TODO: Authentication flow
+    // TODO: Check if user has verified phone number 
+    // and email. If no, can do nothing. Else, can 
+    // do something.
     response.set('Accept', 'application/json');
 
     // For POST
@@ -33,10 +36,18 @@ app.post('/login', (request, response) => {
     // For GET
     // const email = request.query.email;
     // const password = request.query.password;
-    
-    firebase.auth().signInWithEmailAndPassword(email, password)
-    .then(() => {
-        response.send("Login successful");
+    axios.default.post('https://firegate-101.firebaseapp.com/account', {
+        access: 'login',
+        email: email
+    }).then(response => {
+        const { access } = response.data;
+        if (access) {
+            return firebase.auth().signInWithEmailAndPassword(email, password);
+        } else {
+            response.send('Account info has not been verified. Login is not allowed');
+        }
+    }).then(() => {
+        response.send('Login successful');
     })
     .catch(error => {
         console.error("Error while loging in: ", error);
