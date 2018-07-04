@@ -1,4 +1,4 @@
-import subprocess, json, sys, argparse, requests
+import subprocess, json, sys, argparse, requests, platform, socket
 import FirewallRule
 from iptableSetup import IptablesHandler
 
@@ -35,13 +35,17 @@ else:
         'username': args.username,
         'password': args.password
     });
-    if(r.status_code == 200):
+    if r.status_code == 200:
         #parse the json containing data
         rules = json.loads(r.text)
 for r in rules["firewallRules"]["incoming"]:
-    IptablesHandler.createRule(r, True)
-for r2 in rules["firewallRules"]["outgoing"]:
-    IptablesHandler.createRule(r2, False)
+    if r["direction"] == "incoming":
+        IptablesHandler.createRule(r, True)
+    elif r["direction"] == "outgoing":
+        IptablesHandler.createRule(r, False)
+    else:
+        print("Error: Unrecognized firewall rule direction")
+        
 #write test rules to file for proxy script
 with open('../data/temprules.json', 'rw+') as rulefile:
     rulefile.write(json.dumps(rules))
@@ -50,5 +54,5 @@ with open('../data/temprules.json', 'rw+') as rulefile:
 
 #start mitmdump for web filter
 print("Proxy Server IP:")
-subprocess.run(["hostname", "-I"])
-subprocess.run(["mitmdump", "-p", str(port), "-s", "proxyscript.py", "--insecure"])
+print(socket.gethostbyname(socket.gethostname()))
+subprocess.run(["mitmdump", "-p", str(port), "-s", "proxyscript.py"])
