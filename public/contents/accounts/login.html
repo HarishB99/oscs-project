@@ -113,15 +113,17 @@
                         </div>
                         <div class="mdl-card__supporting-text">
                             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                <input class="mdl-textfield__input" type="text" id="username" autofocus autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
-                                <label class="mdl-textfield__label" for="username">Username...</label>
+                                <input class="mdl-textfield__input" type="email" id="account-login--email" autofocus autocomplete="off">
+                                <label class="mdl-textfield__label" for="account-login--email">Email Address...</label>
+                                <span class="mdl-textfield__error">Please enter a valid email.</span>
                             </div>
                             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" autocomplete="off">
-                                <input class="mdl-textfield__input" type="password" id="pass">
-                                <label class="mdl-textfield__label" for="pass">Password...</label>
+                                <input class="mdl-textfield__input" type="password" id="account-login--pass">
+                                <label class="mdl-textfield__label" for="account-login--pass">Password...</label>
+                                <span class="mdl-textfield__error">Please enter a valid password</span>
                             </div>
                             <p>
-                                Forgot password? <a href="">Click here</a>
+                                Forgot password? <a href="/reset_password">Click here</a>
                             </p>
                         </div>
                     </div>
@@ -140,5 +142,63 @@
     <script src="/scripts/es6-promise.auto.min.js"></script>
     <script src="/scripts/axios.min.js"></script>
     <script src="/scripts/app.js"></script>
+    <script>
+        // Account Login button
+        var acc_login_btn = document.getElementById("account-login--button");
+        var acc_login_email = document.getElementById("account-login--email");
+        var acc_login_pass = document.getElementById("account-login--pass");
+
+        function checkAllInputs() {
+            update_text_field_ui(acc_login_email, 
+                InputValidator.isValidEmail(acc_login_email.value));
+            update_text_field_ui(acc_login_pass, 
+                InputValidator.isAReasonablyStrongPassword(acc_login_pass.value));
+        }
+
+        checkAllInputs();
+
+        /* ::Add keyboard event listeners to validate text fields:: */
+        acc_login_email.addEventListener('focus', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidEmail(e.target.value));
+        }); acc_login_email.addEventListener('keyup', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidEmail(e.target.value));
+        });
+
+        acc_login_pass.addEventListener('focus', function(e) {
+            update_text_field_ui(acc_login_pass, 
+                InputValidator.isAReasonablyStrongPassword(acc_login_pass.value));
+        }); acc_login_pass.addEventListener('keyup', function(e) {
+            update_text_field_ui(acc_login_pass, 
+                InputValidator.isAReasonablyStrongPassword(acc_login_pass.value));
+        });
+        /* ::Add keyboard event listeners to validate text fields:: */
+
+        acc_login_btn.addEventListener('click', function(e) {
+            checkAllInputs();
+            
+            if (stillAnyInvalid()) return;
+
+            firebase.auth().signInWithEmailAndPassword(
+                acc_login_email.value, acc_login_pass.value)
+            .then(function() {
+                location.replace('/otp');
+            })['catch'](function(error) {
+                console.error(error);
+                if (error.code === "auth/user-not-found") {
+                    showSnackbar("Your email does not match our records.", "Create Account", function(e) {
+                        location.href = '/create_account';
+                    });
+                } else if (error.code === "auth/user-disabled") {
+                    showSnackbar("Your account has been disabled. Please try again later.");
+                } else if (error.code === "auth/wrong-password" || error.code === "auth/invalid-email") {
+                    showSnackbar("Invalid Credentials. Please try again.");
+                } else {
+                    showSnackbar("An unexpected error occurred. Please try again later.");
+                }
+            });
+        });
+    </script>
 </body>
 </html>

@@ -267,15 +267,8 @@
         document.getElementById('rule-button--update')
         .addEventListener('click', function(e) {
             checkAllInputs();
-            var anyFieldIsInvalid = false;
-            document.querySelectorAll('.mdl-textfield')
-                .forEach(function(input) {
-                    if (input.classList.contains('is-invalid')) {
-                        showSnackbar("Please check your input and try again.");
-                        anyFieldIsInvalid = true;
-                    }
-                });
-            if (anyFieldIsInvalid) return;
+            
+            if (stillAnyInvalid()) return;
 
             axios.post('/rule-create', {
                 name: rule_create_name.value,

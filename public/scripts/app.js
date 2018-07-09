@@ -13,8 +13,6 @@ var delete_rule_btn = document.getElementById("firewall-rule__button--delete");
 var update_rule_btn = document.querySelector(".firewall-button--update");
 // Cancel button is to cancel the rule creation process.
 var cancel_rule_btn = document.querySelector(".firewall-button--cancel");
-// Account Login button
-var acc_login_btn = document.getElementById("account-login--button");
 
 // Profile Display
 var acc_prof_name = document.getElementById("account-profile--display-name");
@@ -99,10 +97,6 @@ function update_text_field_ui(el, valid) {
     }
 }
 
-/**
- * Account creation functions
- */
-
 // Set actions for buttons
 if (home_btn) home_btn.href = "/";
 if (rule_btn) rule_btn.href = "/firewall";
@@ -123,27 +117,14 @@ function retrieveProfile(uid) {
     });
 }
 
-if (acc_login_btn) {
-    acc_login_btn.addEventListener('click', function(e) {
-        var email = document.getElementById('username').value;
-        var password = document.getElementById('pass').value;
-        // TODO: If possible, validate the input
-        firebase.auth().signInWithEmailAndPassword(email, password)
-        .then(function() {
-            console.log('User logged in');
-            // TODO: What happens next after user logs in
-            location.replace('/');
-        })['catch'](function(error) {
-            console.error(error);
-            if (error.code === "auth/user-not-found") {
-                showSnackbar("Your email does not match our records.", "Create Account", function(e) {
-                    location.href = '/create_account';
-                });
-            } else if (error.code === "auth/user-disabled") {
-                showSnackbar("Your account has been disabled. Please try again later.");
-            } else if (error.code === "auth/wrong-password" || error.code === "auth/invalid-email") {
-                showSnackbar("Invalid Credentials. Please try again.");
-            }
-        });
+function stillAnyInvalid() {
+    var anyFieldIsInvalid = false;
+    document.querySelectorAll('.mdl-textfield')
+    .forEach(function(input) {
+        if (input.classList.contains('is-invalid')) {
+            showSnackbar("Please check your input and try again.");
+            anyFieldIsInvalid = true;
+        }
     });
+    return anyFieldIsInvalid;
 }
