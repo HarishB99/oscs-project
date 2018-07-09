@@ -4,7 +4,6 @@ var rule_btn = document.getElementById("mdl-navigation__link--rules");
 // Side panel menu button
 var profile_btn = document.getElementById("mdl-menu__item--profile");
 var signout_btn = document.getElementById("mdl-menu__item--signout");
-var port_inputs = document.querySelectorAll(".rule__ports");
 // Add rule button is to proceed to the "Add Rule" page to add a rule.
 var add_rule_btn = document.getElementById("firewall-rule__button--add");
 // Delete button is to delete an existing rule.
