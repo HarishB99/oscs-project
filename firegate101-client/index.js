@@ -1,6 +1,7 @@
 const express = require('express');
 const firebase = require('firebase');
 const axios = require('axios');
+const cors = require('cors')({ origin: true });
 // const bodyParser = require('body-parser');
 const config = {
     apiKey: "AIzaSyCUJp0rD0b9nNgA5pn4WOXtZr6mM4PxQp8",
@@ -21,6 +22,13 @@ let rules_final = null;
 let filter_final = null;
 
 app.use(express.json());
+app.use(cors);
+
+function datestring() {
+    return new Date().toString().split(" GMT")[0];
+}
+const dateString = new Date().toString();
+console.log(`Timezone: ${dateString.substring(dateString.indexOf("GMT"))}`);
 
 app.post('/login', (request, response) => {
     // TODO: Check if user has verified phone number 
@@ -29,63 +37,55 @@ app.post('/login', (request, response) => {
     response.set('Accept', 'application/json');
 
     // For POST
-    const body = request.body;
-    const email = body.email;
-    const password = body.password;
+    const { email, password } = request.body;
 
     // For GET
     // const email = request.query.email;
     // const password = request.query.password;
-    axios.default.post('https://firegate-101.firebaseapp.com/account', {
-        access: 'login',
-        email: email
-    }).then(response => {
-        const { access } = response.data;
-        if (access) {
-            return firebase.auth().signInWithEmailAndPassword(email, password);
-        } else {
-            response.send('Account info has not been verified. Login is not allowed');
-        }
-    }).then(() => {
+    console.log(`${datestring()} [+] Logging in email: ${email}`);
+    firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(() => {
         response.send('Login successful');
-    })
-    .catch(error => {
-        console.error("Error while loging in: ", error);
-        response.send("Login failure");
+    }).catch(error => {
+        console.error(`${datestring()} [-] Error while logging in: ${error}`);
+        response.send('Login failure');
     });
 });
 
 firebase.auth().onAuthStateChanged(user => {
-    console.log('Status: Retrieving rules...');
+    console.log(`${datestring()} [+] Detected authentication state change`);
     if (user) {
+        console.log(`${datestring()} [+] User logged in: ${user.displayName}`);
         const uid = user.uid;
         db.collection('users').doc(uid).collection('rules')
         .onSnapshot(rules => {
+            console.log(`${datestring()} [+] Retrieving rules...`);
             const ruleJsons = [];
             rules.forEach(rule => {
                 ruleJsons.push(rule.data());
             });
             rules_final = ruleJsons;
+            console.log(`${datestring()} [+] Retrieved rules successfully`);
         });
 
         db.doc(`/users/${uid}/filters/filter`)
         .onSnapshot(filterDoc => {
+            console.log(`${datestring()} [+] Retrieving filters...`);
             filter_final = filterDoc.data();
+            console.log(`${datestring()} [+] Retrieved filters sucessfully`);
         });
-        console.log('Retrieved rules successfully.');
     } else {
-        console.log('No user logged in.');
+        console.log(`${datestring()} [-] No user logged in.`);
     }
-    console.log('Status: Finished retrieving rules.');
 });
 
-app.get('/rules.json', (request, response) => {
+app.post('/rules.json', (request, response) => {
     const responseJson = {
         rules: [],
         webfilter: {},
         dpi: true,
         virusScan: true,
-        message: 'If the properties of this object are empty, you probably forgot to login first before performing the query.'
+        message: 'If the properties of this object are empty, you probably forgot to login first before performing this query.'
     };
 
     if (rules_final) {
