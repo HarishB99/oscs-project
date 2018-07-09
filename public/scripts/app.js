@@ -1,5 +1,4 @@
 // Side panel buttons
-var home_btn = document.getElementById("mdl-navigation__link--home");
 var rule_btn = document.getElementById("mdl-navigation__link--rules");
 // Side panel menu button
 var profile_btn = document.getElementById("mdl-menu__item--profile");
@@ -12,7 +11,6 @@ var delete_rule_btn = document.getElementById("firewall-rule__button--delete");
 var update_rule_btn = document.querySelector(".firewall-button--update");
 // Cancel button is to cancel the rule creation process.
 var cancel_rule_btn = document.querySelector(".firewall-button--cancel");
-
 // Profile Display
 var acc_prof_name = document.getElementById("account-profile--display-name");
 var acc_prof_org = document.getElementById("account-profile--display-org");
@@ -97,10 +95,9 @@ function update_text_field_ui(el, valid) {
 }
 
 // Set actions for buttons
-if (home_btn) home_btn.href = "/";
-if (rule_btn) rule_btn.href = "/firewall";
+if (!InputValidator.isEmpty(rule_btn)) rule_btn.href = "/";
 
-if (profile_btn) {
+if (!InputValidator.isEmpty(profile_btn)) {
     profile_btn.addEventListener('click', function() {
         location.href = "/profile";
     });
