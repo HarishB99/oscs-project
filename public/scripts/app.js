@@ -13,13 +13,6 @@ var delete_rule_btn = document.getElementById("firewall-rule__button--delete");
 var update_rule_btn = document.querySelector(".firewall-button--update");
 // Cancel button is to cancel the rule creation process.
 var cancel_rule_btn = document.querySelector(".firewall-button--cancel");
-// Account Request button
-var acc_req_btn = document.getElementById("account-create--button-submit");
-var acc_req_email = document.getElementById("account-create--input-email");
-var acc_req_org = document.getElementById("account-create--input-org");
-var acc_req_phone = document.getElementById("account-create--input-phone");
-var acc_req_pass = document.getElementById("account-create--input-password");
-var acc_req_pass2 = document.getElementById("account-create--input-password2");
 // Account Login button
 var acc_login_btn = document.getElementById("account-login--button");
 
@@ -55,6 +48,29 @@ InputValidator.isValidPhoneNum = function(input) {
     const re = /^[89]+\d{7}$/;
     return re.test(input);
 };
+InputValidator.isValidPortNum = function(input) {
+    if (InputValidator.isNum(input)) {
+        var port = parseInt(input, 10);
+        return (port >= 0 && port <= 65535) ? true : false;
+    }
+    return input === "*";
+};
+InputValidator.isValidRuleName = function(input) {
+    const re = /^[A-Za-z0-9]{3,10}$/;
+    return re.test(input);
+};
+InputValidator.isNum = function(input) {
+    try {
+        const int = parseInt(input);
+        return !isNaN(int);
+    } catch (error) {
+        return false;
+    }
+};
+InputValidator.isValidIp = function(input) {
+    const re = /^(?=[\d\*]+\.[\d\*]\.[\d\*]\.[\d\*]$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9]|\*)\.?){4}$/;
+    return re.test(input);
+};
 
 function showSnackbar(message, actionText, actionHandler) {
     var notification = document.querySelector('.mdl-js-snackbar');
@@ -68,6 +84,19 @@ function showSnackbar(message, actionText, actionHandler) {
     }
     if (notification.getAttribute('aria-hidden') !== "false")
         notification.MaterialSnackbar.showSnackbar(data);
+}
+
+function update_text_field_ui(el, valid) {
+    if (valid) {
+        if (el.parentElement.classList.contains('is-invalid')) {
+            const elParent = el.parentElement;
+            elParent.className = elParent.classList.remove('is-invalid');
+        }
+    } else {
+        if (!el.parentElement.classList.contains('is-invalid')) {
+            el.parentElement.classList.add('is-invalid');
+        }
+    }
 }
 
 /**
@@ -84,23 +113,6 @@ if (profile_btn) {
     });
 }
 
-function isAValidPort(e) {
-    var childEl = e.target;
-    var el = childEl.parentElement;
-    // var port_enterd = el.value;
-    var parsed_port = 0;
-    try {
-        parsed_port = parseInt(childEl.value);
-        if (isNaN(childEl.value)) {
-            throw 'still not a number';
-        }
-    } catch (error) {
-        return el.classList.add("is-invalid");
-    }
-    if (parsed_port < 0 || parsed_port > 65535) return el.classList.add("is-invalid");
-    if (el.classList.contains("is-invalid")) return el.classList.remove("is-invalid");
-}
-
 function retrieveProfile(uid) {
     return axios({
         url: '/account-retrieve-basic',
@@ -110,78 +122,6 @@ function retrieveProfile(uid) {
         }
     });
 }
-
-function signInWithEmailPass() {
-
-}
-
-function updateRule() {
-
-}
-
-function addRule() {
-
-}
-
-function deleteRule() {
-    
-}
-
-if (port_inputs) {
-    for (var i = 0; i < port_inputs; i++) {
-        port_inputs[i].addEventListener('keyup', isAValidPort);
-    }
-}
-
-if (add_rule_btn) {
-    add_rule_btn.onclick = function(e) {
-        location.href = "/create_rule";
-    };
-}
-
-if (update_rule_btn) {
-    update_rule_btn.onclick = function(el) {
-        location.href = "/edit_rule";
-    };
-}
-
-if (cancel_rule_btn) {
-    cancel_rule_btn.onclick = function(e) {
-        location.href = "/firewall";
-    };
-}
-
-if (acc_req_btn) {
-    acc_req_btn.addEventListener("click", function(e) {
-        // TODO: Make sure input passes validation
-        axios.post("/account-create", {
-            email: acc_req_email.value,
-            org: acc_req_org.value,
-            contact: acc_req_phone.value,
-            pass: acc_req_pass.value
-        }).then(function(response) {
-            if (response.data.toLowerCase() === "account request: created") {
-                // TODO: On Success
-                location.replace('/contents/accounts/login.html');
-            } else {
-                showSnackbar("Please check your input and try again. If the problem persist, please close the browser and try again.");
-            }
-        })['catch'](function(error) {
-            console.error("Error while performing account creation request: ", error);
-            if (error.message === "Network Error") {
-                showSnackbar("Please check your network connection and try again.");
-            } else if (error.message.search('404') >= 0) {
-                showSnackbar("Sorry. The functionality has not been enabled yet.");
-            } else {
-                showSnackbar("An unexpected error occurred. Please try again later.");
-            }
-        });
-    });
-}
-
-
-
-
 
 if (acc_login_btn) {
     acc_login_btn.addEventListener('click', function(e) {
@@ -205,54 +145,5 @@ if (acc_login_btn) {
                 showSnackbar("Invalid Credentials. Please try again.");
             }
         });
-    });
-}
-
-
-
-
-/**
- * Account Creation
- */
-if (acc_req_pass) {
-    // acc_req_pass.addEventListener('focus', function(e) {
-    //     if (InputValidator.isAReasonablyStrongPassword(acc_req_pass.value)) {
-    //         if (acc_req_pass.parentElement.className.search("is-invalid") >= 0) {
-    //             var acc_req_pass_parent = acc_req_pass.parentElement;
-    //             acc_req_pass_parent.className = acc_req_pass_parent.className.replace(" is-invalid", "");
-    //         }
-    //     } else {
-    //         if (acc_req_pass.parentElement.className.search("is-invalid") < 0) {
-    //             acc_req_pass.parentElement.className += " is-invalid";
-    //         }
-    //     }
-    // });
-
-    acc_req_pass.addEventListener('keyup', function(e) {
-        if ( InputValidator.isAReasonablyStrongPassword(acc_req_pass.value)) {
-            if (acc_req_pass.parentElement.className.search("is-invalid") >= 0) {
-                var acc_req_pass_parent = acc_req_pass.parentElement;
-                acc_req_pass_parent.className = acc_req_pass_parent.className.replace(" is-invalid", "");
-            }
-        } else {
-            if (acc_req_pass.parentElement.className.search("is-invalid") < 0) {
-                acc_req_pass.parentElement.className += " is-invalid";
-            }
-        }
-    });
-}
-
-if (acc_req_pass2) {
-    acc_req_pass2.addEventListener('keyup', function(e) {
-        if (acc_req_pass2.value === acc_req_pass.value) {
-            if (acc_req_pass2.parentElement.className.search("is-invalid") >= 0) {
-                var acc_req_pass2_parent = acc_req_pass2.parentElement;
-                acc_req_pass2_parent.className = acc_req_pass2_parent.className.replace(" is-invalid", "");
-            }
-        } else {
-            if (acc_req_pass2.parentElement.className.search("is-invalid") < 0) {
-                acc_req_pass2.parentElement.className += " is-invalid";
-            }
-        }
     });
 }

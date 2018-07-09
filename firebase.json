@@ -20,7 +20,7 @@
       },
       {
         "source": "/firewall",
-        "destination": "/contents/firewall.html"
+        "destination": "/index.html"
       },
       {
         "source": "/edit_rule",

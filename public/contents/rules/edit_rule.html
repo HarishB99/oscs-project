@@ -50,10 +50,13 @@
     -->
 
     <!-- TODO: Use the online versions of the following assets -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"> -->
+    <link rel="stylesheet" href="/fonts/icon.css">
+    <link rel="stylesheet" href="/fonts/css.css">
     <link rel="stylesheet" href="/mdl/material.cyan-light_blue.min.css">
     <link rel="stylesheet" href="/getmdl-select/getmdl-select.min.css">
     <link rel="stylesheet" href="/styles/styles.css">
+    <script src="/mdl/material.min.js"></script>
     <style>
         .demo-card-wide .form-holder {
             padding: 2.5%;
@@ -95,7 +98,7 @@
                 </div>
             </header>
             <nav class="demo-navigation mdl-navigation mdl-color--blue-grey-800">
-                <a id="mdl-navigation__link--home" class="mdl-navigation__link mdl-navigation__link--home"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dashboard</i>Dashboard</a>
+                <!-- <a id="mdl-navigation__link--home" class="mdl-navigation__link mdl-navigation__link--home"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dashboard</i>Dashboard</a> -->
                 <a id="mdl-navigation__link--rules" class="mdl-navigation__link mdl-navigation__link--rules"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">flag</i>Rules & Policies</a>
                 <div class="mdl-layout-spacer"></div>
                 <a id="mdl-navigation__link--help" class="mdl-navigation__link mdl-navigation__link--help"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">help_outline</i><span class="visuallyhidden">Help</span></a>
@@ -110,57 +113,65 @@
                         </div>
                         <div class="mdl-card__supporting-text">
                                 <div class="mdl-textfield mdl-js-textfield">
-                                    <input class="mdl-textfield__input" pattern="^[A-Za-z0-9]{1,30}$" type="text" maxlength="30" autofocus id="rule_name">
-                                    <label class="mdl-textfield__label" for="rule_name">Name...</label>
+                                    <input class="mdl-textfield__input" pattern="^[A-Za-z0-9]{1,30}$" type="text" maxlength="30" autofocus id="rule--name">
+                                    <label class="mdl-textfield__label" for="rule--name">Name...</label>
                                     <span class="mdl-textfield__error">Only alphanumeric characters are allowed.</span>
                                 </div>
                                 <div class="mdl-textfield mdl-js-textfield">
-                                    <input class="mdl-textfield__input" type="text" pattern="^[0-9]{1,5}$" maxlength="5" id="rule_priority"> <!-- -?[0-9]*(\.[0-9]+)? -->
-                                    <label class="mdl-textfield__label" for="rule_priority">Priority...</label>
-                                    <span class="mdl-textfield__error">Digits only</span>
-                                </div>
-                                <div class="mdl-textfield mdl-js-textfield getmdl-select">
-                                    <input type="text" value="" class="mdl-textfield__input" id="rule_protocol" readonly>
-                                    <input type="hidden" value="" name="rule_protocol">
-                                    <i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>
-                                    <label for="rule_protocol" class="mdl-textfield__label">Protocol</label>
-                                    <ul for="rule_protocol" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
-                                        <li class="mdl-menu__item" data-val="TCP">TCP</li>
-                                        <li class="mdl-menu__item" data-val="UDP">UDP</li>
-                                    </ul>
+                                    <input class="mdl-textfield__input" type="text" pattern="^[0-9]{1,5}$" maxlength="5" id="rule--priority"> <!-- -?[0-9]*(\.[0-9]+)? -->
+                                    <label class="mdl-textfield__label" for="rule--priority">Priority...</label>
+                                    <span class="mdl-textfield__error">Only digits are allowed.</span>
                                 </div>
                                 <br/>
                                 <div class="mdl-textfield mdl-js-textfield">
-                                    <input class="mdl-textfield__input" type="text" pattern="^(?=[\d\*]+\.[\d\*]\.[\d\*]\.[\d\*]$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9]|\*)\.?){4}$" id="rule_saddr">
-                                    <label class="mdl-textfield__label" for="rule_saddr">Source Address Range...</label>
+                                    <input class="mdl-textfield__input" type="text" pattern="^(?=[\d\*]+\.[\d\*]\.[\d\*]\.[\d\*]$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9]|\*)\.?){4}$" id="rule--source-ip">
+                                    <label class="mdl-textfield__label" for="rule--source-ip">Source Address Range...</label>
                                     <span class="mdl-textfield__error">Please enter a valid IP address</span>
                                 </div>
                                 <div class="mdl-textfield mdl-js-textfield">
-                                    <input class="rule__ports mdl-textfield__input" maxlength="5" type="text" id="rule_sport">
-                                    <label class="mdl-textfield__label" for="rule_sport">Source Port Range...</label>
+                                    <input class="rule__ports mdl-textfield__input" maxlength="5" type="text" id="rule--source-port">
+                                    <label class="mdl-textfield__label" for="rule--source-port">Source Port Range...</label>
                                     <span class="mdl-textfield__error">Please enter a port number between 0 and 65,535</span>
                                 </div>
                                 <br/>
                                 <div class="mdl-textfield mdl-js-textfield">
-                                    <input class="mdl-textfield__input" type="text" pattern="^(?=[\d\*]+\.[\d\*]\.[\d\*]\.[\d\*]$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9]|\*)\.?){4}$" id="rule_daddr">
-                                    <label class="mdl-textfield__label" for="rule_daddr">Destination Address Range...</label>
+                                    <input class="mdl-textfield__input" type="text" pattern="^(?=[\d\*]+\.[\d\*]\.[\d\*]\.[\d\*]$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9]|\*)\.?){4}$" id="rule--dest-ip">
+                                    <label class="mdl-textfield__label" for="rule--dest-ip">Destination Address Range...</label>
                                     <span class="mdl-textfield__error">Please enter a valid IP address</span>
                                 </div>
                                 <div class="mdl-textfield mdl-js-textfield">
-                                    <input class="rule__ports mdl-textfield__input" maxlength="5" type="text" id="rule_dport">
-                                    <label class="mdl-textfield__label" for="rule_dport">Destination Port Range...</label>
+                                    <input class="rule__ports mdl-textfield__input" maxlength="5" type="text" id="rule--dest-port">
+                                    <label class="mdl-textfield__label" for="rule--dest-port">Destination Port Range...</label>
                                     <span class="mdl-textfield__error">Please enter a port number between 0 and 65,535</span>
                                 </div>
                                 <div class="mdl-grid">
-                                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule_access">
-                                        <input type="checkbox" id="rule_access" class="mdl-switch__input" checked>
+                                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule--access">
+                                        <input type="checkbox" id="rule--access" class="mdl-switch__input" checked>
                                         <span class="mdl-switch__label">Allowed</span>
                                     </label>
-                                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule_virus_scanner">
-                                        <input type="checkbox" id="rule_virus_scanner" class="mdl-switch__input" checked>
+                                    <!-- <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule--virus-scanner">
+                                        <input type="checkbox" id="rule--virus-scanner" class="mdl-switch__input" checked>
                                         <span class="mdl-switch__label">Virus Scanner</span>
-                                    </label>
+                                    </label> -->
+                                    <div class="mdl-cell mdl-cell--8-col">
+                                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect mdl-cell mdl-cell--3-col" for="rule--protocol-tcp">
+                                            <input type="radio" id="rule--protocol-tcp" class="mdl-radio__button" name="proto" value="tcp" checked>
+                                            <span class="mdl-radio__label">TCP</span>
+                                        </label>
+                                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect mdl-cell mdl-cell--3-col" for="rule--protocol-udp">
+                                            <input type="radio" id="rule--protocol-udp" class="mdl-radio__button" name="proto" value="udp">
+                                            <span class="mdl-radio__label">UDP</span>
+                                        </label>
+                                    </div>
                                 </div>
+                                <!-- <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="rule--protocol-tcp">
+                                    <input type="radio" id="rule--protocol-tcp" class="mdl-radio__button" name="proto" value="tcp" checked>
+                                    <span class="mdl-radio__label">TCP</span>
+                                </label>
+                                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="rule--protocol-udp">
+                                    <input type="radio" id="rule--protocol-udp" class="mdl-radio__button" name="proto" value="udp">
+                                    <span class="mdl-radio__label">UDP</span>
+                                </label> -->
                                 
                                 <!-- <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="rule_virus_scanner">
                                     <input type="checkbox" id="rule_virus_scanner" class="mdl-switch__input" checked>
@@ -170,31 +181,147 @@
                     </div>
                     <div class="mdl-card__actions mdl-card--border">
                         <!-- <div class="mdl-layout-spacer"></div> -->
-                        <button class="firewall-button--update mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                        <button id="rule-button--update" class="rule-button--update mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
                             <i class="material-icons">edit</i> Add/Update
                         </button>
-                        <button class="firewall-button--cancel mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                        <!-- <button id="rule-button--cancel" class="rule-button--cancel mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
                             <i class="material-icons">cancel</i> Cancel
-                        </button>
+                        </button> -->
                     </div>
                 </div>
+                <div aria-live="assertive" aria-atomic="true" aria-relevant="text" class="mdl-snackbar mdl-js-snackbar">
+				    <div class="mdl-snackbar__text"></div>
+				    <button type="button" class="mdl-snackbar__action"></button>
+				</div>
             </div>
         </main>
     </div>
-    <!-- TODO: Add library for es6-promise polyfill -->
-    <!-- TODO: Add library for axios js -->
     <!-- TODO: Use the online version of /mdl/material.min.js -->
-    <script src="/mdl/material.min.js"></script>
     <script src="/scripts/es6-promise.auto.min.js"></script>
     <script src="/scripts/axios.min.js"></script>
-    <script src="/getmdl-select/getmdl-select.min.js"></script>
     <script src="/scripts/app.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var els = document.querySelectorAll('.rule__ports');
-            for (var i = 0; i < els.length; i++) {
-                els[i].addEventListener('keyup', isAValidPort);
+        var rule_create_name = document.getElementById('rule--name');
+        var rule_create_access = document.getElementById('rule--access');
+        var rule_create_proto_inputs = document.querySelectorAll('input[name="proto"]');
+        var rule_create_priority = document.getElementById('rule--priority');
+        var rule_create_sip = document.getElementById('rule--source-ip');
+        var rule_create_sport = document.getElementById('rule--source-port');
+        var rule_create_dip = document.getElementById('rule--dest-ip');
+        var rule_create_dport = document.getElementById('rule--dest-port');
+
+        var rule_create_proto = null;
+
+        for (var i = 0; i < rule_create_proto_inputs.length; i++) {
+            if (rule_create_proto_inputs[i].checked) {
+                rule_create_proto = rule_create_proto_inputs[i].value;
             }
+        }
+
+        function checkAllInputs() {
+            update_text_field_ui(rule_create_name, 
+                InputValidator.isValidRuleName(rule_create_name.value));
+            update_text_field_ui(rule_create_priority, 
+                InputValidator.isNum(rule_create_priority.value));
+            update_text_field_ui(rule_create_sip, 
+                InputValidator.isValidIp(rule_create_sip.value));
+            update_text_field_ui(rule_create_sport, 
+                InputValidator.isValidPortNum(rule_create_sport.value));
+            update_text_field_ui(rule_create_dip, 
+                InputValidator.isValidIp(rule_create_dip.value));
+            update_text_field_ui(rule_create_dport, 
+                InputValidator.isValidPortNum(rule_create_dport.value));
+        }
+
+        checkAllInputs();
+
+        rule_create_name.addEventListener('focus', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidRuleName(e.target.value));
+        }); rule_create_name.addEventListener('keyup', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidRuleName(e.target.value));
+        });
+
+        rule_create_priority.addEventListener('focus', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isNum(e.target.value));
+        }); rule_create_priority.addEventListener('keyup', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isNum(e.target.value));
+        });
+
+        rule_create_sip.addEventListener('focus', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidIp(e.target.value));
+        }); rule_create_sip.addEventListener('keyup', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidIp(e.target.value));
+        });
+
+        rule_create_sport.addEventListener('focus', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidPortNum(e.target.value));
+        }); rule_create_sport.addEventListener('keyup', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidPortNum(e.target.value));
+        });
+
+        rule_create_dip.addEventListener('focus', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidIp(e.target.value));
+        }); rule_create_dip.addEventListener('keyup', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidIp(e.target.value));
+        });
+
+        rule_create_dport.addEventListener('focus', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidPortNum(e.target.value));
+        }); rule_create_dport.addEventListener('keyup', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidPortNum(e.target.value));
+        });
+
+        document.getElementById('rule-button--update')
+        .addEventListener('click', function(e) {
+            checkAllInputs();
+            var anyFieldIsInvalid = false;
+            document.querySelectorAll('.mdl-textfield')
+                .forEach(function(input) {
+                    if (input.classList.contains('is-invalid')) {
+                        showSnackbar("Please check your input and try again.");
+                        anyFieldIsInvalid = true;
+                    }
+                });
+            if (anyFieldIsInvalid) return;
+
+            axios.post('/rule-create', {
+                name: rule_create_name.value,
+                access: rule_create_access.checked,
+                priority: rule_create_priority,
+                proto: rule_create_proto,
+                sip: rule_create_sip.value,
+                sport: rule_create_sport.value,
+                dip: rule_create_dip.value,
+                dport: rule_create_dport
+            }).then(function(response) {
+                console.log(response.data);
+                if (response.data.code === 'rule/creation-success') {
+                    location.replace('/#firewall-rule');
+                } else {
+                    showSnackbar(response.data.message);
+                }
+            })['catch'](function(error) {
+                console.error("Error while performing rule creation request: ", error);
+                if (error.message === "Network Error") {
+                    showSnackbar("Please check your network connection and try again.");
+                } else if (error.message.search('404') >= 0) {
+                    showSnackbar("Sorry. The functionality has not been enabled.");
+                } else {
+                    showSnackbar("An unexpected error occurred. Please try again later.");
+                }
+            });
         });
     </script>
 </body>

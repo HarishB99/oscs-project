@@ -49,15 +49,13 @@
     <link rel="canonical" href="http://www.example.com/">
     -->
 
-    <!-- TODO: Use the online versions of the following assets -->
-    
-
     <!-- For Online Use -->
     <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"> -->
     <!-- For Offline Use -->
     <link rel="stylesheet" href="/fonts/css.css">
     <link rel="stylesheet" href="/fonts/icon.css">
     <link rel="stylesheet" href="/mdl/material.cyan-light_blue.min.css">
+    <script async src="/mdl/material.min.js"></script>
     <link rel="stylesheet" href="/styles/styles.css">
     <style>
         .demo-card-wide.mdl-card {
@@ -133,7 +131,7 @@
                             <div class="mdl-textfield mdl-js-textfield">
                                 <input id="account-create--input-password2" class="account-create--input-password2 mdl-textfield__input" type="password" maxlength="30" >
                                 <label class="mdl-textfield__label" for="account-create--input-password2">Confirm Password...</label>
-                                <span class="mdl-textfield__error">Please enter the password you entered above.</span>
+                                <span class="mdl-textfield__error">Please enter the password you entered above, which should not be empty.</span>
                             </div>
                         </div>
                     </div>
@@ -151,11 +149,111 @@
             </div>
         </main>
     </div>
-    <!-- TODO: Add library for es6-promise polyfill -->
-    <!-- TODO: Add library for axios js -->
-    <!-- TODO: Use the online version of /mdl/material.min.js -->
-    <script src="/mdl/material.min.js"></script>
-    <script src="/scripts/axios.min.js"></script>
+    <!-- TODO: Use the online version of stylesheets and javascripts -->
+    <script async defer src="/scripts/es6-promise.auto.min.js"></script>
+    <script async defer src="/scripts/axios.min.js"></script>
     <script src="/scripts/app.js"></script>
+    <script>
+        var acc_req_email = document.getElementById("account-create--input-email");
+        var acc_req_org = document.getElementById("account-create--input-org");
+        var acc_req_phone = document.getElementById("account-create--input-phone");
+        var acc_req_pass = document.getElementById("account-create--input-password");
+        var acc_req_pass2 = document.getElementById("account-create--input-password2");
+
+        function checkAllInputs() {
+            update_text_field_ui(acc_req_email, 
+                InputValidator.isValidEmail(acc_req_email.value));
+            update_text_field_ui(acc_req_org, 
+                InputValidator.isValidOrgName(acc_req_org.value));
+            update_text_field_ui(acc_req_phone, 
+                InputValidator.isValidPhoneNum(acc_req_phone.value));
+            update_text_field_ui(acc_req_pass, 
+                InputValidator.isAReasonablyStrongPassword(acc_req_pass.value));
+            update_text_field_ui(acc_req_pass2, 
+                (acc_req_pass.value === acc_req_pass2.value && acc_req_pass2.value !== ''));
+        }
+
+        checkAllInputs();
+
+        /* ::Add keyboard event listeners to validate text fields:: */
+        acc_req_email.addEventListener('focus', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidEmail(e.target.value));
+        }); acc_req_email.addEventListener('keyup', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidEmail(e.target.value));
+        });
+
+        acc_req_org.addEventListener('focus', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidOrgName(e.target.value));
+        }); acc_req_org.addEventListener('keyup', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidOrgName(e.target.value));
+        });
+
+        acc_req_phone.addEventListener('focus', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidPhoneNum(e.target.value));
+        }); acc_req_phone.addEventListener('keyup', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidPhoneNum(e.target.value));
+        });
+
+        acc_req_pass.addEventListener('focus', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isAReasonablyStrongPassword(e.target.value));
+        }); acc_req_pass.addEventListener('keyup', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isAReasonablyStrongPassword(e.target.value));
+        });
+
+        acc_req_pass2.addEventListener('focus', function(e) {
+            update_text_field_ui(e.target, 
+                (acc_req_pass.value === e.target.value && e.target.value !== ''));
+        }); acc_req_pass2.addEventListener('keyup', function(e) {
+            update_text_field_ui(e.target, 
+                (acc_req_pass.value === e.target.value && e.target.value !== ''));
+        });
+        /* ::Add keyboard event listeners to validate text fields:: */
+
+        document.getElementById("account-create--button-submit")
+        .addEventListener("click", function(e) {
+            checkAllInputs();
+            
+            var anyFieldIsInvalid = false;
+            document.querySelectorAll('.mdl-textfield')
+                .forEach(function(input) {
+                    if (input.classList.contains('is-invalid')) {
+                        showSnackbar("Please check your input and try again.");
+                        anyFieldIsInvalid = true;
+                    }
+                });
+            
+            if (anyFieldIsInvalid) return;
+            
+            axios.post("/account-create", {
+                email: acc_req_email.value,
+                org: acc_req_org.value,
+                contact: acc_req_phone.value,
+                pass: acc_req_pass.value
+            }).then(function(response) {
+                if (response.data.code === 'account/creation-success') {
+                    location.replace('/login');
+                } else {
+                    showSnackbar(response.data.message);
+                }
+            })['catch'](function(error) {
+                console.error("Error while performing account creation request: ", error);
+                if (error.message === "Network Error") {
+                    showSnackbar("Please check your network connection and try again.");
+                } else if (error.message.search('404') >= 0) {
+                    showSnackbar("Sorry. The functionality has not been enabled.");
+                } else {
+                    showSnackbar("An unexpected error occurred. Please try again later.");
+                }
+            });
+        });
+    </script>
 </body>
 </html>
