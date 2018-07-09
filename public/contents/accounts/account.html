@@ -21,24 +21,24 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Account</title>
+    <title>Create | Account</title>
 
     <!-- TODO: Set up PWA/AMP when possible -->
     <!-- Add to homescreen for Chrome on Android -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <link rel="icon" sizes="192x192" href="/images/android-desktop.png">
+    <!-- <meta name="mobile-web-app-capable" content="yes"> -->
+    <!-- <link rel="icon" sizes="192x192" href="/images/android-desktop.png"> -->
 
     <!-- Add to homescreen for Safari on iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="Material Design Lite">
-    <link rel="apple-touch-icon-precomposed" href="/images/ios-desktop.png">
+    <!-- <meta name="apple-mobile-web-app-capable" content="yes"> -->
+    <!-- <meta name="apple-mobile-web-app-status-bar-style" content="black"> -->
+    <!-- <meta name="apple-mobile-web-app-title" content="Material Design Lite"> -->
+    <!-- <link rel="apple-touch-icon-precomposed" href="/images/ios-desktop.png"> -->
 
     <!-- Tile icon for Win8 (144x144 + tile color) -->
-    <meta name="msapplication-TileImage" content="/images/touch/ms-touch-icon-144x144-precomposed.png">
-    <meta name="msapplication-TileColor" content="#3372DF">
+    <!-- <meta name="msapplication-TileImage" content="/images/touch/ms-touch-icon-144x144-precomposed.png"> -->
+    <!-- <meta name="msapplication-TileColor" content="#3372DF"> -->
 
-    <link rel="shortcut icon" href="/images/favicon.png">
+    <!-- <link rel="shortcut icon" href="/images/favicon.png"> -->
 
     <!-- 
         SEO: If your mobile URL is different from the desktop URL, 
@@ -152,13 +152,14 @@
     <!-- TODO: Use the online version of stylesheets and javascripts -->
     <script async defer src="/scripts/es6-promise.auto.min.js"></script>
     <script async defer src="/scripts/axios.min.js"></script>
-    <script src="/scripts/app.js"></script>
+    <script async defer src="/scripts/app.js"></script>
     <script>
         var acc_req_email = document.getElementById("account-create--input-email");
         var acc_req_org = document.getElementById("account-create--input-org");
         var acc_req_phone = document.getElementById("account-create--input-phone");
         var acc_req_pass = document.getElementById("account-create--input-password");
         var acc_req_pass2 = document.getElementById("account-create--input-password2");
+        var acc_req_btn = document.getElementById("account-create--button-submit");
 
         function checkAllInputs() {
             update_text_field_ui(acc_req_email, 
@@ -217,8 +218,11 @@
         });
         /* ::Add keyboard event listeners to validate text fields:: */
 
-        document.getElementById("account-create--button-submit")
-        .addEventListener("click", function(e) {
+        document.addEventListener('keyup', function(e) {
+            if (e.keyCode === 13) acc_req_btn.click();
+        });
+
+        acc_req_btn.addEventListener("click", function(e) {
             checkAllInputs();
             
             if (stillAnyInvalid()) return;
