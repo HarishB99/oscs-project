@@ -11,17 +11,29 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@types/cors": "^2.8.4",
+    "@types/react": "^16.4.6",
+    "@types/react-dom": "^16.0.6",
     "axios": "^0.18.0",
-    "consolidate": "^0.15.1",
     "cors": "^2.8.4",
     "express": "^4.16.3",
     "firebase-admin": "^5.12.1",
     "firebase-functions": "^1.1.0",
-    "handlebars": "^4.0.11"
+    "isomorphic-fetch": "^2.2.1",
+    "preact": "^8.2.9",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "react-mdl": "^1.11.0"
   },
   "devDependencies": {
+    "awesome-typescript-loader": "^5.2.0",
+    "preact-render-to-string": "^3.7.0",
+    "source-map-loader": "^0.2.3",
+    "ts-loader": "^4.4.2",
     "tslint": "^5.8.0",
-    "typescript": "^2.5.3"
+    "typescript": "^3.0.0-dev.20180707",
+    "webpack": "^4.15.1",
+    "webpack-cli": "^3.0.8"
   },
   "private": true
 }

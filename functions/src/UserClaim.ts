@@ -4,4 +4,5 @@
  */
 export interface UserClaim {
     organisation: string;
+    phoneVerified: boolean;
 }

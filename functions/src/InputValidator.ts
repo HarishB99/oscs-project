@@ -72,4 +72,77 @@ export class InputValidator {
         const re = new RegExp('^(?=.{2,}[a-z])(?=.{2,}[A-Z])(?=.{2,}[0-9])(?=.+[!@#$%^&*])(?=.{8,})', 'u');
         return re.test(password);
     }
+
+    /**
+     * Check whether the rule name can be accepted as a valid value
+     * @param input the string input tp be validated
+     */
+    public isValidRuleName(input: string): boolean {
+        const re = /^[A-Za-z0-9]{3,10}$/;
+        return re.test(input);
+    }
+
+    /**
+     * Check whether the port number can be accepted as a valid value
+     * @param input the string input to be validated
+     */
+    public isValidPortNum(input: string): boolean {
+        if (this.isNum(input)) {
+            const port = parseInt(input, 10);
+            return (port >= 0 && port <= 65535) ? true : false;
+        }
+        return input === "*";
+    }
+
+    /**
+     * Check whether the input is a valid boolean value
+     * @param input the string or numerical value to be validated
+     */
+    public isBoolean(input: string): boolean {
+        if (this.isEmpty(input)) return false;
+        try {
+            const binary = parseInt(input);
+            return binary === 1 || binary === 0;
+        } catch (error) {
+            if (typeof input === "string") {
+                const input_lower = input.toLowerCase();
+                return input_lower === 'true' || input_lower === 'false' || input_lower === 'f' || input_lower === 't';
+            } else {
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Check whether the input is a valid numerical value
+     * @param input the string input to be validated
+     */
+    public isNum(input: string): boolean {
+        try {
+            const int = parseInt(input);
+            return !isNaN(int);
+        } catch (error) {
+            return false;
+        }
+    }
+
+    /**
+     * TODO: Validate protocol against a list of whitelist values
+     * @param input the string input to be validated
+     */
+    public isValidProto(input: string): boolean {
+        // const re = /^[A-Z]{3,6}$/;
+        // return re.test(input);
+        const input_lower = input.toLowerCase();
+        return input_lower === 'tcp' || input_lower === 'udp';
+    }
+
+    /**
+     * Check whether the IP address can be accepted as a valid value
+     * @param input the string input to be validated
+     */
+    public isValidIp(input: string): boolean {
+        const re = /^(?=[\d\*]+\.[\d\*]\.[\d\*]\.[\d\*]$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9]|\*)\.?){4}$/;
+        return re.test(input);
+    }
 }

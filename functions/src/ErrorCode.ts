@@ -2,7 +2,7 @@ export class ErrorCode {
     public static readonly ACCOUNT = {
         BAD_DATA: {
             code: 'account/bad-data',
-            message: 'Data received failed validation.'
+            message: 'Data received were not valid.'
         },
         CREATE: {
             code: 'account/creation-failure',
@@ -19,13 +19,17 @@ export class ErrorCode {
         LOGIN: {
             code: 'account/login-failure',
             message: 'Credentials received were invalid.'
+        },
+        ACCESS: {
+            code: 'account/access-denied',
+            message: 'Account details have not been verified by user.'
         }
     };
 
     public static readonly RULE = {
         BAD_DATA: {
             code: 'rule/bad-data',
-            message: 'Data received failed validation.'
+            message: 'Data received were not valid.'
         },
         CREATE: {
             code: 'rule/creation-failure',
@@ -48,7 +52,7 @@ export class ErrorCode {
     public static readonly FILTER = {
         BAD_DATA: {
             code: 'filter/bad-data',
-            message: 'Data received failed validation.'
+            message: 'Data received were not valid.'
         },
         CREATE: {
             code: 'filter/creation-failure',

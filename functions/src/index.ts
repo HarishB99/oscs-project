@@ -2,22 +2,29 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as express from 'express';
 import { InputValidator } from './InputValidator';
-import { Input } from './Input';
+import { UserInput } from './UserInput';
 import { UserClaim } from './UserClaim';
+import { RuleInput } from './RuleInput';
 import { SuccessCode } from './SuccessCode';
 import { ErrorCode } from './ErrorCode';
-import * as cors from 'cors';
+import { Authenticator } from './Authenticator';
+// import { h, render } from 'preact';
+const cors = require('cors')({ origin: true });
 
 admin.initializeApp();
 
 const app = express();
 const db = admin.firestore();
+const auth = admin.auth();
+const iv = new InputValidator();
+const authenticator = new Authenticator();
+
+const TOKEN = Authenticator.TOKEN_HEADER;
 
 /**
  * The following is a test app to test CORS
  */
-const corsHandler = cors({ origin: true });
-app.post('/cors-allowed', corsHandler, (request, response, next) => {
+app.post('/cors-allowed', cors, (request, response, next) => {
     const body = request.body;
     const email = body.email;
     const password = body.password;
@@ -25,69 +32,40 @@ app.post('/cors-allowed', corsHandler, (request, response, next) => {
     response.status(200).send(`Received Post Data: Your email is ${email}. Your password is ${password}. This was possible via Cross Origin Resource Sharing, also known as CORS for short.`);
 });
 
-/**
- * Function to retrieve the id token sent by client 
- * in the custom request header 'Authorisation'.
- * The value of the header is formatted as 'Bearer <token>'
- */
-function getToken(header: string): string {
-    if (header) {
-        const match = header.match(/^Bearer\s+([^\s]+)$/)
-        if (match) {
-            return match[1]
-        }
-    }
-    return null
-}
-
 // Accounts
 app.post('/account', async (request, response) => {
     try {
         const { access, email } = request.body;
-        if (access === 'login') {
-            const { uid, emailVerified } = await admin.auth().getUserByEmail(email);
-            const userDoc = await db.doc(`/users/${uid}`).get();
-            if (emailVerified 
-                && userDoc.data().phoneVerified) {
-                response.send(JSON.stringify({
-                    access: true
-                }));
-            } else {
-                response.send(JSON.stringify({
-                    access: false
-                }));
-            }
+        if (access === 'login' && 
+        iv.isValidEmail(email)) {
+            await authenticator
+                .checkAccess(request.get(TOKEN));
+            response.send(SuccessCode.ACCOUNT.ACCESS);
         } else {
-            response.status(400).send('Bad request');
+            response.send(ErrorCode.ACCOUNT.BAD_DATA);
         }
     } catch (error) {
         console.error('Error while serving /account: ', error);
-        response.send('Access denied');
+        response.send(ErrorCode.ACCOUNT.ACCESS);
     }
 });
 
 app.post('/account-create', async (request, response) => {
     try {
-        // The following is possible because 
-        // Content-Type on request header was 
-        // set to application/json. This was 
-        // done by axios itself.
-        //
-        // If the Content-Type flag was not 
-        // sent, JSON.parse will have to be 
-        // used on the body to extract the 
-        // JSON.data
-        const { email, organisation, phoneNumber, password } = request.body;
+        const { email, organisation, 
+            phoneNumber, password } = request.body;
 
-        let input: Input = null;
-        const iv = new InputValidator();
-        if (iv.isValidEmail(email) && iv.isValidOrgName(organisation) && 
-            iv.isValidPhoneNum(phoneNumber) && iv.isAReasonablyStrongPassword(password)) {
-            input = new Input(email, password, phoneNumber, organisation, null);
+        let input: UserInput = null;
+        if (iv.isValidEmail(email) && 
+            iv.isValidOrgName(organisation) && 
+            iv.isValidPhoneNum(phoneNumber) && 
+            iv.isAReasonablyStrongPassword(password)) {
+            input = new UserInput(email, password, 
+                phoneNumber, organisation, null);
         }
 
         if (!input) {
-            response.send(JSON.stringify(ErrorCode.ACCOUNT.BAD_DATA));
+            response.send(ErrorCode.ACCOUNT.BAD_DATA);
         } else {
             // TODO: Create user with password
             // Send verification email and verification SMS
@@ -96,7 +74,7 @@ app.post('/account-create', async (request, response) => {
             // system. Manage permissions with claims 
             // and uid from firebase client on client-side.
 
-            const { uid } = await admin.auth().createUser({
+            const { uid } = await auth.createUser({
                 email: input.email,
                 password: input.password,
                 photoURL: input.photoURL,
@@ -104,15 +82,16 @@ app.post('/account-create', async (request, response) => {
                 displayName: input.displayName
             });
 
-            await admin.auth().setCustomUserClaims(uid, {
-                organisation: input.organisation
+            await auth.setCustomUserClaims(uid, {
+                organisation: input.organisation,
+                phoneVerified: false
             });
 
-            response.send(JSON.stringify(SuccessCode.ACCOUNT.CREATE));
+            response.send(SuccessCode.ACCOUNT.CREATE);
         }
     } catch (error) {
         console.error('Error while creating account request: ', error);
-        response.send(JSON.stringify(ErrorCode.ACCOUNT.CREATE));
+        response.send(ErrorCode.ACCOUNT.CREATE);
     }
 });
 
@@ -120,18 +99,14 @@ app.post('/account-retrieve-name', async (request, response) => {
     // TODO: I might want to port over this implementation to 
     // the client side, unless python sdk also needs this.
     try {
-        const idToken = getToken(request.get('Authorisation'));
-        const { uid } = await admin.auth().verifyIdToken(idToken);
-        const { displayName } = await admin.auth().getUser(uid);
+        const { displayName } = await authenticator.checkAccess(request.get(TOKEN));
         response.send(JSON.stringify({
             displayName: displayName,
             status: 'ok'
         }));
     } catch (error) {
         console.error('Error while retrieving profile: ', error);
-        response.send(JSON.stringify({
-            status: 'access denied'
-        }));
+        response.send(ErrorCode.ACCOUNT.ACCESS);
     }
 });
 
@@ -139,18 +114,14 @@ app.post('/account-retrieve-picture', async (request, response) => {
     // TODO: I might want to port over this implementation to 
     // the client side, unless python sdk also needs this.
     try {
-        const idToken = getToken(request.get('Authorisation'));
-        const { uid } = await admin.auth().verifyIdToken(idToken);
-        const { photoURL } = await admin.auth().getUser(uid);
+        const { photoURL } = await authenticator.checkAccess(request.get(TOKEN));
         response.send(JSON.stringify({
             photoURL: photoURL,
             status: 'ok'
         }));
     } catch (error) {
         console.error('Error while retrieving profile: ', error);
-        response.send(JSON.stringify({
-            status: 'access denied'
-        }));
+        response.send(ErrorCode.ACCOUNT.ACCESS);
     }
 });
 
@@ -158,9 +129,8 @@ app.post('/account-retrieve-basic', async (request, response) => {
     // TODO: I might want to port over this implementation to 
     // the client side, unless python sdk also needs this.
     try {
-        const idToken = getToken(request.get('Authorisation'));
-        const { uid } = await admin.auth().verifyIdToken(idToken);
-        const { displayName, email, phoneNumber, customClaims } = await admin.auth().getUser(uid);
+        const { displayName, email, phoneNumber, customClaims } 
+            = await authenticator.checkAccess(request.get(TOKEN));
         const { organisation } = customClaims as UserClaim;
         response.send(JSON.stringify({
             displayName: displayName,
@@ -171,49 +141,61 @@ app.post('/account-retrieve-basic', async (request, response) => {
         }));
     } catch (error) {
         console.error('Error while retrieving profile: ', error);
-        response.send(JSON.stringify({
-            status: 'access denied'
-        }));
+        response.send(ErrorCode.ACCOUNT.ACCESS);
     }
 });
 
 app.post('/account-update', async (request, response) => {
     try {
-        const idToken = getToken(request.get('Authorisation'));
-        const { uid } = await admin.auth().verifyIdToken(idToken);
+        const { email, phoneNumber, uid } = await authenticator.checkAccess(request.get(TOKEN));
 
         const body = request.body;
-        const email = body.email;
-        const organisation = body.org;
-        const phoneNumber = body.contact;
 
-        let input: Input = null;
-        const iv = new InputValidator();
-        if (iv.isValidEmail(email) && iv.isValidOrgName(organisation) && 
-            iv.isValidPhoneNum(phoneNumber)) {
-            input = new Input(email, null, phoneNumber, organisation, null);
+        let input: UserInput = null;
+        if (iv.isValidEmail(body.email) && 
+        iv.isValidOrgName(body.org) && 
+        iv.isValidPhoneNum(body.contact)) {
+            input = new UserInput(body.email, null, 
+                body.contact, body.org, null);
         }
 
         if (!input) {
-            response.send('Bad Request');
+            response.send(ErrorCode.ACCOUNT.BAD_DATA);
         } else {
             // TODO: Send verification email and verification SMS
             // if email or phone number has been changed.
+            let emailVerified = false;
+            let phoneVerified = false;
 
-            await admin.auth().updateUser(uid, {
+            // TODO: If emailverified is not changed after a change 
+            // or emailverified is changed after every update, 
+            // use the following value to update userRecord
+            if (email === input.email)
+                emailVerified = true;
+            
+            if (phoneNumber === input.phoneNumber) {
+                phoneVerified = true;
+            }
+
+            await auth.updateUser(uid, {
                 email: input.email,
                 phoneNumber: input.phoneNumber
             });
 
-            await admin.auth().setCustomUserClaims(uid, {
-                organisation: input.organisation
+            await auth.setCustomUserClaims(uid, {
+                organisation: input.organisation,
+                phoneVerified: phoneVerified
             });
 
-            response.send('Account Update: Success');
+            await db.doc(`/users/${uid}`).set({
+                lastUpdated: FirebaseFirestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            response.send(SuccessCode.ACCOUNT.UPDATE);
         }
     } catch (error) {
         console.error('Error while updating account details: ', error);
-        response.send('Access denied');
+        response.send(ErrorCode.ACCOUNT.UPDATE);
     }
 });
 
@@ -225,12 +207,102 @@ app.post('/account-pass-update', (request, response) => {
     response.status(503).send('Functionality not available yet.');
 });
 
-app.post('/rule-create', (request, response) => {
-    response.status(503).send('Functionality not available yet.');
+app.post('/rule-create', async (request, response) => {
+    try {
+        const { uid } = await authenticator.checkAccess(request.get(TOKEN));
+        const {name, access, priority, proto, sip, sport, dip, dport}
+            = request.body;
+        
+        let input: RuleInput = null;
+    
+        if (iv.isValidRuleName(name) && iv.isBoolean(access)
+            && iv.isNum(priority) && iv.isValidProto(proto)
+            && iv.isValidIp(sip) && iv.isValidPortNum(sport)
+            && iv.isValidIp(dip) && iv.isValidPortNum(dport)) {
+            input = new RuleInput(name, access, priority, proto, sip, sport, dip, dport);
+        }
+        
+        if (!input) {
+            response.send(ErrorCode.RULE.BAD_DATA);
+        } else {
+            // Check whether user has already created 
+            // a similar rule
+            const ruleWithSameParameters = await db
+                .collection('users').doc(uid)
+                .collection('rules')
+                .where('access', '==', input.access)
+                .where('priority', '==', input.priority)
+                .where('protocol', '==', input.proto)
+                .where('sourceip', '==', input.sip)
+                .where('sourceport', '==', input.sport)
+                .where('destip', '==', input.dip)
+                .where('destport', '==', input.dport)
+            .get();
+            
+            if (!ruleWithSameParameters.empty) {
+                throw new Error(`Rule ${input.name} was already created`);
+            } else {
+                const ruleRef = db.collection('users')
+                .doc(uid).collection('rules').doc();
+                await ruleRef.set({
+                    name: input.name,
+                    access: input.access,
+                    priority: input.priority,
+                    protocol: input.proto,
+                    sourceip: sip,
+                    sourceport: input.sport,
+                    destip: input.dip,
+                    destport: input.dport,
+                    state: input.state,
+                    created: FirebaseFirestore.FieldValue.serverTimestamp()
+                });
+                response.send(SuccessCode.RULE.CREATE);
+            }
+        }
+    } catch (error) {
+        console.error(`Error while creating firewall rule: ${error}`);
+        response.send(ErrorCode.RULE.CREATE);
+    }
 });
 
-app.post('/rule-update', (request, response) => {
-    response.status(503).send('Functionality not available yet.');
+app.post('/rule-update', async (request, response) => {
+    try {
+        const { uid } = await authenticator.checkAccess(request.get(TOKEN));
+        const {name, access, priority, proto, sip, sport, dip, dport}
+            = request.body;
+        
+        let input: RuleInput = null;
+    
+        if (iv.isValidRuleName(name) && iv.isBoolean(access)
+            && iv.isNum(priority) && iv.isValidProto(proto)
+            && iv.isValidIp(sip) && iv.isValidPortNum(sport)
+            && iv.isValidIp(dip) && iv.isValidPortNum(dport)) {
+            input = new RuleInput(name, access, priority, proto, sip, sport, dip, dport);
+        }
+
+        if (!input) {
+            response.send(ErrorCode.RULE.BAD_DATA);
+        } else {
+            const ruleRef = db.collection('users')
+            .doc(uid).collection('rules').doc();
+            await ruleRef.set({
+                name: input.name,
+                access: input.access,
+                priority: input.priority,
+                protocol: input.proto,
+                sourceip: sip,
+                sourceport: input.sport,
+                destip: input.dip,
+                destport: input.dport,
+                state: input.state,
+                lastUpdate: FirebaseFirestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            response.send(SuccessCode.RULE.UPDATE);
+        }
+    } catch (error) {
+        console.error(`Error while creating firewall rule: ${error}`);
+        response.send(ErrorCode.RULE.UPDATE);
+    }
 });
 
 app.post('/rule-delete', (request, response) => {
@@ -269,12 +341,12 @@ export const createNewUser = functions.auth.user().onCreate(user => {
     // TODO: Send verification SMS
     // TODO: Set any other claims (account verified, etc)
 
-    // admin.auth().setCustomUserClaims(uid, {
+    // auth.setCustomUserClaims(uid, {
     //     organisationVerified: false,
     //     accountVerified: false
     // });
 
     return db.doc(`/users/${uid}`).set({
-        phoneVerified: false
+        created: FirebaseFirestore.FieldValue.serverTimestamp()
     }, { merge: true });
 });

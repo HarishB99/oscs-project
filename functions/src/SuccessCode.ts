@@ -15,6 +15,10 @@ export class SuccessCode {
         LOGIN: {
             code: 'account/login-success',
             message: 'The account was successfully logged into the system.'
+        },
+        ACCESS: {
+            code: 'account/access-allowed',
+            message: 'Account details have been verified by user.'
         }
     };
 

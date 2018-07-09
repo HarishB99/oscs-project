@@ -2,7 +2,7 @@
  * Interface to store user input for processing
  * @author Harish S/O Balamurugan
  */
-export class Input {
+export class UserInput {
     public email: string;
     public password: string;
     public phoneNumber: string;
