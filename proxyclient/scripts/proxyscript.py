@@ -1,6 +1,8 @@
 from mitmproxy import ctx, http
 from bs4 import BeautifulSoup
-import subprocess, json, requests, db
+from db import LogDatabase
+from checkedDomains import CheckedDomains
+import subprocess, json, requests
 
 text_clf = None
 options = {
@@ -44,7 +46,6 @@ categories = {
 checkedDomains = {}
 apiKeys = None
 log = None
-
 with open("../data/apiKeys.json", "r") as f:
     apiKeys = json.loads(f.read())
 
@@ -63,7 +64,6 @@ def addDomainGroup(groupNames):
                 blockedDomains["user"][dgDomain] = True
 
 def load(l):
-    log = LogDatabase()
     #build hash table of domains to block
     addDomainsF("../data/ad-domains-list.txt", "ad")
     addDomainsF("../data/malicious-domains-list.txt", "malicious")
@@ -92,47 +92,39 @@ def request(flow):
     if (d == 'api.mywot.com' or d == 'safebrowsing.googleapis.com'):
         return
 
-    ip = flow.client_conn.address
-    log.request(ip, d)
+    ip = flow.client_conn.ip_address[0][7:]
+    LogDatabase.request(ip, d)
 
-    if d not in checkedDomains:
+    if CheckedDomains.search(d) is None:
+        print("UNCHECKED DOMAIN-----------------" + d)
         #ignore ads
         if options["block-ads"]:
             if d in blockedDomains["ad"]:
-                flow.kill()
+                CheckedDomains.add(d, False, "Blocked by policy (advertisement)")
         #block malicious websites
         if options["block-malicious"]:
             if d in blockedDomains["malicious"]:
-                flow.response = http.HTTPResponse.make(
-                418, "Recognized as malicious site"
-                )
-
+                CheckedDomains.add(d, False, "Blocked by policy (malicious)")
         #block user defined sites
         #blacklist
         if options["isBlacklist"]:
             if d in blockedDomains["user"]:
-                u = log.getUser(ip)
+                u = LogDatabase.getUser(ip)
                 if u["events"]["blockedDomains"][d] is None:
                     u["events"]["blockedDomains"][d] = 1
                 else:
-                    u["events"]["blockedDomains"][d]++
-                log.updateUser(u)
-                checkedDomains[d] = {
-                    "isSafe" : False,
-                    "reason": "Blocked by policy (blacklist)"
-                }
+                    u["events"]["blockedDomains"][d] += 1
+                LogDatabase.updateUser(u)
+                CheckedDomains.add(d, False, "Blocked by policy (blacklist)")
         else: #whitelist
             if flow.request.pretty_host not in blockedDomains["user"]:
-                u = log.getUser(ip)
+                u = LogDatabase.getUser(ip)
                 if u["events"]["blockedDomains"][d] is None:
                     u["events"]["blockedDomains"][d] = 1
                 else:
-                    u["events"]["blockedDomains"][d]++
-                log.updateUser(u)
-                checkedDomains[d] = {
-                    "isSafe" : False,
-                    "reason": "Blocked by policy (whitelist)"
-                }
+                    u["events"]["blockedDomains"][d] += 1
+                LogDatabase.updateUser(u)
+                CheckedDomains.add(d, False, "Blocked by policy (whitelist)")
 
         #lookup stuff in the apis
         wotResults = webOfTrustLookup(d)
@@ -140,10 +132,13 @@ def request(flow):
         #check results
         results = {}
         #google safe browsing
-        if len(gResults) > 0:
-            results["threatType"] = gResults[0]["threatType"]
-            results["platform"] = gResults[0]["platformType"]
-            results["domain"] = gResults[0]["threat"]["url"]
+        if gResults != 0 and gResults != 1:
+            if len(gResults) > 0:
+                results["threatType"] = gResults[0]["threatType"]
+                results["platform"] = gResults[0]["platformType"]
+                results["domain"] = gResults[0]["threat"]["url"]
+        else:
+            () #TODO: log failure to another database
 
         #web of trust
         if wotResults["reputation"]["trustworthiness"][0] < options["block-suspicious-level"]:
@@ -159,33 +154,24 @@ def request(flow):
 
         #check api call results
         if results["childSafety"] < options["block-child-unsafe-level"]:
-            checkedDomains[d] = {
-                "isSafe" : False,
-                "reason": "Blocked by policy (child safety)"
-            }
+            CheckedDomains.add(d, False, "Blocked by policy (child safety)")
         elif results["trustworthiness"] < options["block-suspicious-level"]:
-            checkedDomains[d] = {
-                "isSafe" : False,
-                "reason": "Blocked by policy (suspicious)"
-            }
-        elif ("1" in results["categoryTypes"]) or ("2" in results["categoryTypes"]) or
-            "3" in results["categoryTypes"]:
-            checkedDomains[d] = {
-                "isSafe" : False,
-                "reason": "Blocked by policy (suspicious)"
-            }
+            CheckedDomains.add(d, False, "Blocked by policy (suspicious)")
+        elif "1" in results["categoryTypes"] or "2" in results["categoryTypes"] or "3" in results["categoryTypes"]:
+            CheckedDomains.add(d, False, "Blocked by policy (suspicious)")
 
 
-        if checkedDomains[d] is None: #passed all the tests
-            checkedDomains[d] = {"isSafe" : True, "reason" : ""}
+        if CheckedDomains.search(d) is None:
+            CheckedDomains.add(d, True, None)
 
-    if !checkedDomains[d]["isSafe"]: #previously logged as unsafe
+    sc = CheckedDomains.search(d)
+    print("-----------------"+sc)
+    if not sc["isSafe"]: #previously logged as unsafe
         flow.response = http.HTTPResponse.make(
-            418, checkDomains[d]["reason"]
+            418, sc["reason"]
         )
-    #nothing for safe domains
-
-
+    else:
+        print("SAFE DOMAIN-----------"+d)
 
 
 def response(flow):
@@ -202,12 +188,13 @@ def response(flow):
         #flow.response.headers["content-type"] = "image/png"
 
     #check downloading files
-    if flow.response.headers.get("content-disposition", "").startswith("attachment"):
+    elif flow.response.headers.get("content-disposition", "").startswith("attachment"):
         () #TODO::scan file for viruses
 
-    #classify text with ML
-    html = BeautifulSoup(flow.response.content)
-    text = html.get_text()
+    else:
+        #check text
+        html = BeautifulSoup(flow.response.content)
+        text = html.get_text()
 
 #Query Web of Trust for site reputation and category
 def webOfTrustLookup(domain):
@@ -272,8 +259,10 @@ def googleSafeBrowsingLookup(domain):
             headers=headers, json=payload)
 
         if reply.status_code == 200:
-            for match in reply.json()["matches"]:
-                result.append(match['threatType'])
+            j = reply.json()
+            if j:
+                for match in reply.json()["matches"]:
+                    result.append(match['threatType'])
             return result
         else:
             return 1 #bad request
