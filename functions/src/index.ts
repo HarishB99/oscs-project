@@ -186,7 +186,7 @@ app.post('/account-update', async (request, response) => {
             });
 
             await db.doc(`/users/${uid}`).set({
-                lastUpdated: FirebaseFirestore.FieldValue.serverTimestamp()
+                lastUpdated: admin.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
 
             response.send(SuccessCode.ACCOUNT.UPDATE);
@@ -252,7 +252,7 @@ app.post('/rule-create', async (request, response) => {
                     destip: input.dip,
                     destport: input.dport,
                     state: input.state,
-                    created: FirebaseFirestore.FieldValue.serverTimestamp()
+                    created: admin.firestore.FieldValue.serverTimestamp()
                 });
                 response.send(SuccessCode.RULE.CREATE);
             }
@@ -293,7 +293,7 @@ app.post('/rule-update', async (request, response) => {
                 destip: input.dip,
                 destport: input.dport,
                 state: input.state,
-                lastUpdate: FirebaseFirestore.FieldValue.serverTimestamp()
+                lastUpdate: admin.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
             response.send(SuccessCode.RULE.UPDATE);
         }
@@ -345,6 +345,6 @@ export const createNewUser = functions.auth.user().onCreate(user => {
     // });
 
     return db.doc(`/users/${uid}`).set({
-        created: FirebaseFirestore.FieldValue.serverTimestamp()
+        created: admin.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
 });

@@ -29,7 +29,7 @@
     "preact-render-to-string": "^3.7.0",
     "source-map-loader": "^0.2.3",
     "ts-loader": "^4.4.2",
-    "tslint": "^5.8.0",
+    "tslint": "^5.10.0",
     "typescript": "^3.0.0-dev.20180707",
     "webpack": "^4.15.1",
     "webpack-cli": "^3.0.8"
