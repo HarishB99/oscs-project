@@ -369,6 +369,9 @@
                             table.innerHTML = "";
                             table.appendChild(tableRow);
                         });
+                        document.getElementById('firewall-rule__table').classList.remove('is-upgraded');
+                        document.getElementById('firewall-rule__table').removeAttribute('data-upgraded');
+                        componentHandler.upgradeElement(document.getElementById('firewall-rule__table'));
                     }
                 }, function(error) {
                     console.log(error);

@@ -25,20 +25,20 @@
 
     <!-- TODO: Set up PWA/AMP when possible -->
     <!-- Add to homescreen for Chrome on Android -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <link rel="icon" sizes="192x192" href="/images/android-desktop.png">
+    <!-- <meta name="mobile-web-app-capable" content="yes"> -->
+    <!-- <link rel="icon" sizes="192x192" href="/images/android-desktop.png"> -->
 
     <!-- Add to homescreen for Safari on iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="Material Design Lite">
-    <link rel="apple-touch-icon-precomposed" href="/images/ios-desktop.png">
+    <!-- <meta name="apple-mobile-web-app-capable" content="yes"> -->
+    <!-- <meta name="apple-mobile-web-app-status-bar-style" content="black"> -->
+    <!-- <meta name="apple-mobile-web-app-title" content="Material Design Lite"> -->
+    <!-- <link rel="apple-touch-icon-precomposed" href="/images/ios-desktop.png"> -->
 
     <!-- Tile icon for Win8 (144x144 + tile color) -->
-    <meta name="msapplication-TileImage" content="/images/touch/ms-touch-icon-144x144-precomposed.png">
-    <meta name="msapplication-TileColor" content="#3372DF">
+    <!-- <meta name="msapplication-TileImage" content="/images/touch/ms-touch-icon-144x144-precomposed.png"> -->
+    <!-- <meta name="msapplication-TileColor" content="#3372DF"> -->
 
-    <link rel="shortcut icon" href="/images/favicon.png">
+    <!-- <link rel="shortcut icon" href="/images/favicon.png"> -->
 
     <!-- 
         SEO: If your mobile URL is different from the desktop URL, 
@@ -172,7 +172,7 @@
             </div>
             <!-- Tabs -->
             <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
-                <a href="#firewall-rule" class="mdl-layout__tab is-active">Network Rules</a>
+                <a href="#firewall-rule__table" class="mdl-layout__tab is-active">Network Rules</a>
                 <a href="#web-filter" class="mdl-layout__tab">Web Filter</a>
             </div>
         </header>
@@ -200,7 +200,7 @@
             </nav>
         </div>
         <main class="mdl-layout__content mdl-color--grey-100">
-            <section id="firewall-rule__table" class="mdl-layout__tab-panel is-active" id="firewall-rule">
+            <section id="firewall-rule__table" class="mdl-layout__tab-panel is-active">
                 <div class="search-box">
                     <!-- <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable">
                         <label class="mdl-button mdl-js-button mdl-button--icon" for="firewall-rule__search--input-name">
@@ -221,7 +221,7 @@
                 </div>
                 <div class="page-content">
                     <div class="mdl-data-table__holder">
-                        <table id="firewall-rule__table" class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp">
+                        <table id="firewall-rule__table" class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
                             <thead>
                                 <tr>
                                     <th class="mdl-data-table__cell--non-numeric sort" data-sort="rule">Rule</th>
@@ -232,19 +232,16 @@
                                     <th class="sort" data-sort="daddr">Destination Address Range</th>
                                     <th class="sort" data-sort="dport">Destination Port Range</th>
                                     <th class="sort" data-sort="protocol">Protocol</th>
-                                    <th class="sort" data-sort="direction">Direction</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody id="firewall-rule__table--list" class="list firewall-rule__table--list">
-                                <!-- <tr><td><label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="http"><input class="mdl-checkbox__input" type="checkbox" id="http"></label></td><td class="mdl-data-table__cell--non-numeric rule">http</td><td class="access">Allow</td><td class="priority">100</td><td class="saddr">*</td><td class="sport">*</td><td class="daddr">*</td><td class="dport">80</td><td class="protocol">tcp</td><td class="direction">in</td><td><button class="firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">edit</i> Edit</button></td></tr>
-                                <tr><td><label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="ssh"><input class="mdl-checkbox__input" type="checkbox" id="ssh"></label></td><td class="mdl-data-table__cell--non-numeric rule">ssh</td><td class="access">Allow</td><td class="priority">101</td><td class="saddr">*</td><td class="sport">*</td><td class="daddr">*</td><td class="dport">22</td><td class="protocol">tcp</td><td class="direction">in</td><td><button class="firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">edit</i> Edit</button></td></tr> -->
+                                
                             </tbody>
                         </table>
                     </div>
                     <div class="action-bar">
                         <button id="firewall-rule__button--add" class="firewall-rule__button--add mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"><i class="material-icons">add</i> Add</button>
-                        <button id="firewall-rule__button--delete" class="firewall-rule__button--delete mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" disabled><i class="material-icons">delete</i> Delete</button>
                     </div>
                 </div>
             </section>
@@ -271,7 +268,6 @@
             </div>
         </main>
     </div>
-    <script src="/scripts/axios.min.js"></script>
     <script src="/scripts/app.js"></script>
     <script>
         var db = firebase.firestore();
@@ -281,18 +277,19 @@
 
         auth.onAuthStateChanged(function(user) {
             console.log(user);
+            var table = document.getElementById("firewall-rule__table--list");
+            table.innerHTML = "";
             if (user) {
                 db.collection("users").doc(user.uid).collection("rules")
                 .onSnapshot(function(rules) {
                     if (rules.docs.length <= 0) {
-                        var table = document.getElementById("firewall-rule__table--list");
-                            var tableRow = document.createElement("tr");
-                                var noRules = document.createElement("td");
-                                    noRules.className = "mdl-data-table__cell--non-numeric rule";
-                                    noRules.colSpan = 9;
-                                    // TODO: Add button/link to add rule
-                                    noRules.innerHTML = "You have not configured any rules.";
-                                tableRow.appendChild(noRules);
+                        var tableRow = document.createElement("tr");
+                            var noRules = document.createElement("td");
+                                noRules.className = "mdl-data-table__cell--non-numeric rule";
+                                noRules.colSpan = 9;
+                                // TODO: Add button/link to add rule
+                                noRules.innerHTML = "You have not configured any rules.";
+                            tableRow.appendChild(noRules);
                         table.appendChild(tableRow);
                     } else {
                         rules.forEach(function(rule) {
@@ -306,38 +303,47 @@
                             var destip = params.destip;
                             var destport = params.destport;
                             var protocol = params.protocol;
-
-                            var table = document.getElementById("firewall-rule__table--list");
-                                var tableRow = document.createElement("tr");
-                                    var ruleName = document.createElement("td");
-                                        ruleName.className = "mdl-data-table__cell--non-numeric rule";
-                                        ruleName.innerHTML = name;
-                                    var access = document.createElement("td");
-                                        access.className = "access";
-                                        access.innerHTML = allow;
-                                    var prior = document.createElement("td");
-                                        prior.className = "priority";
-                                        prior.innerHTML = priority;
-                                    var sip = document.createElement("td");
-                                        sip.className = "saddr";
-                                        sip.innerHTML = sourceip;
-                                    var sport = document.createElement("td");
-                                        sport.className = "sport";
-                                        sport.innerHTML = sourceport;
-                                    var dip = document.createElement("td");
-                                        dip.className = "daddr";
-                                        dip.innerHTML = destip;
-                                    var dport = document.createElement("td");
-                                        dport.className = "dport";
-                                        dport.innerHTML = destport;
-                                    var proto = document.createElement("td");
-                                        proto.className = "protocol";
-                                        proto.innerHTML = protocol;
-                                    var toEdit = document.createElement("td");
-                                        var toEditButton = document.createElement("button");
-                                        toEditButton.className = "firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect";
-                                        toEditButton.innerHTML = "<i class=\"material-icons\">edit</i> Edit";
-                                        toEdit.appendChild(toEditButton);
+                            
+                            var tableRow = document.createElement("tr");
+                                var ruleName = document.createElement("td");
+                                    ruleName.className = "mdl-data-table__cell--non-numeric rule";
+                                    ruleName.innerHTML = name;
+                                var access = document.createElement("td");
+                                    access.className = "access";
+                                    access.innerHTML = allow;
+                                var prior = document.createElement("td");
+                                    prior.className = "priority";
+                                    prior.innerHTML = priority;
+                                var sip = document.createElement("td");
+                                    sip.className = "saddr";
+                                    sip.innerHTML = sourceip;
+                                var sport = document.createElement("td");
+                                    sport.className = "sport";
+                                    sport.innerHTML = sourceport;
+                                var dip = document.createElement("td");
+                                    dip.className = "daddr";
+                                    dip.innerHTML = destip;
+                                var dport = document.createElement("td");
+                                    dport.className = "dport";
+                                    dport.innerHTML = destport;
+                                var proto = document.createElement("td");
+                                    proto.className = "protocol";
+                                    proto.innerHTML = protocol;
+                                var buttonsHolder = document.createElement("td");
+                                    var toEditButton = document.createElement("button");
+                                    toEditButton.className = "firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect";
+                                    toEditButton.innerHTML = "<i class=\"material-icons\">edit</i> Edit";
+                                    toEditButton.style.width = "100%";
+                                    buttonsHolder.appendChild(toEditButton);
+                                    buttonsHolder.appendChild(
+                                        document.createElement('br'));
+                                    buttonsHolder.appendChild(
+                                        document.createElement('br'));
+                                    var toDeleteButton = document.createElement('button');
+                                    toDeleteButton.className = "firewall-rule__button--delete mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect";
+                                    toDeleteButton.innerHTML = "<i class=\"material-icons\">delete</i> Delete";
+                                    toDeleteButton.style.width = "100%";
+                                    buttonsHolder.appendChild(toDeleteButton);
                                 tableRow.appendChild(ruleName);
                                 tableRow.appendChild(access);
                                 tableRow.appendChild(prior);
@@ -346,11 +352,31 @@
                                 tableRow.appendChild(dip);
                                 tableRow.appendChild(dport);
                                 tableRow.appendChild(proto);
-                                tableRow.appendChild(toEdit);
-                            table.innerHTML = "";
+                                tableRow.appendChild(buttonsHolder);
                             table.appendChild(tableRow);
                         });
                     }
+                    var options = {
+                        valueNames: ['rule', 'access', 'priority', 'saddr',
+                                    'sport', 'daddr', 'dport', 
+                                    'protocol']
+                    };
+
+                    var ruleList = new List('firewall-rule__table', options);
+                    $(function() {
+                        $($('th.sort')[0]).trigger('click', function() {
+                            console.log('clicked');
+                        });
+
+                        $('input.search').on('keyup', function(e) {
+                            if (e.keyCode === 27) {
+                                $(e.currentTarget).val('');
+                                ruleList.search('');
+                            } else {
+                                ruleList.search($(this).val());
+                            }
+                        });
+                    });
                 }, function(error) {
                     console.log(error);
                     showSnackbar("An unexpected error occurred. Please try again later.");
@@ -360,28 +386,6 @@
                 // window.alert('You are not logged in.');
                 // location.replace('/contents/accounts/login.html');
             }
-        });
-    </script>
-    <script>
-        var options = {
-            valueNames: ['rule', 'access', 'priority', 'saddr',
-                        'sport', 'daddr', 'dport', 
-                        'protocol']
-        };
-
-        var ruleList = new List('firewall-rule__table', options);
-
-        $(function() {
-            $($('th.sort')[0]).trigger('click', function() {
-                console.log('clicked');
-            });
-
-            $('input.search').on('keyup', function(e) {
-                if (e.keyCode === 27) {
-                    $(e.currentTarget).val('');
-                    ruleList.search('');
-                }
-            });
         });
     </script>
 </body>
