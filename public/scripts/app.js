@@ -11,11 +11,6 @@ var delete_rule_btn = document.getElementById("firewall-rule__button--delete");
 var update_rule_btn = document.querySelector(".firewall-button--update");
 // Cancel button is to cancel the rule creation process.
 var cancel_rule_btn = document.querySelector(".firewall-button--cancel");
-// Profile Display
-var acc_prof_name = document.getElementById("account-profile--display-name");
-var acc_prof_org = document.getElementById("account-profile--display-org");
-var acc_prof_email = document.getElementById("account-profile--input-email");
-var acc_prof_phone = document.getElementById("account-profile--input-phone");
 
 // Set up path prefix i.e. '../' (for urls links in button actions)
 var path_prefix = "/";
@@ -66,6 +61,10 @@ InputValidator.isValidIp = function(input) {
     const re = /^(?=[\d\*]+\.[\d\*]\.[\d\*]\.[\d\*]$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9]|\*)\.?){4}$/;
     return re.test(input);
 };
+InputValidator.isValidOTP = function(input) {
+    const re = /^\d{6}$/;
+    return re.test(input);
+};
 
 function showSnackbar(message, actionText, actionHandler) {
     var notification = document.querySelector('.mdl-js-snackbar');
@@ -77,6 +76,7 @@ function showSnackbar(message, actionText, actionHandler) {
         data.actionText = actionText;
         data.actionHandler = actionHandler;
     }
+    console.log(data);
     if (notification.getAttribute('aria-hidden') !== "false")
         notification.MaterialSnackbar.showSnackbar(data);
 }
@@ -100,6 +100,17 @@ if (!InputValidator.isEmpty(rule_btn)) rule_btn.href = "/";
 if (!InputValidator.isEmpty(profile_btn)) {
     profile_btn.addEventListener('click', function() {
         location.href = "/profile";
+    });
+}
+
+if (!InputValidator.isEmpty(signout_btn)) {
+    signout_btn.addEventListener('click', function() {
+        firebase.auth().signOut().then(function() {
+            location.replace('/login');
+        }).catch(function(error) {
+            console.error(error);
+            showSnackbar('An unexpected error occurred. Please try again later.');
+        });
     });
 }
 

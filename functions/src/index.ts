@@ -153,10 +153,9 @@ app.post('/account-update', async (request, response) => {
 
         let input: UserInput = null;
         if (iv.isValidEmail(body.email) && 
-        iv.isValidOrgName(body.org) && 
         iv.isValidPhoneNum(body.contact)) {
             input = new UserInput(body.email, null, 
-                body.contact, body.org, null);
+                body.contact, null, null);
         }
 
         if (!input) {
@@ -183,7 +182,6 @@ app.post('/account-update', async (request, response) => {
             });
 
             await auth.setCustomUserClaims(uid, {
-                organisation: input.organisation,
                 phoneVerified: phoneVerified
             });
 

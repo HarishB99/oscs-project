@@ -65,10 +65,10 @@
         var config = {
             apiKey: "AIzaSyCUJp0rD0b9nNgA5pn4WOXtZr6mM4PxQp8",
             authDomain: "firegate-101.firebaseapp.com",
-            databaseURL: "https://firegate-101.firebaseio.com",
-            projectId: "firegate-101",
-            storageBucket: "firegate-101.appspot.com",
-            messagingSenderId: "700794827690"
+            // databaseURL: "https://firegate-101.firebaseio.com",
+            projectId: "firegate-101"
+            // storageBucket: "firegate-101.appspot.com",
+            // messagingSenderId: "700794827690"
         };
         firebase.initializeApp(config);
     </script>
@@ -85,6 +85,10 @@
         .demo-card-wide .form-holder .mdl-card__supporting-text {
             width: 95%;
             overflow-y: auto;
+        }
+        .mdl-spinner {
+            display: block;
+            margin: auto;
         }
     </style>
 </head>
@@ -112,7 +116,6 @@
                 </div>
             </header>
             <nav class="demo-navigation mdl-navigation mdl-color--blue-grey-800">
-                <a id="mdl-navigation__link--home" class="mdl-navigation__link mdl-navigation__link--home"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dashboard</i>Dashboard</a>
                 <a id="mdl-navigation__link--rules" class="mdl-navigation__link mdl-navigation__link--rules"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">flag</i>Rules & Policies</a>
                 <div class="mdl-layout-spacer"></div>
                 <a id="mdl-navigation__link--help" class="mdl-navigation__link mdl-navigation__link--help"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">help_outline</i><span class="visuallyhidden">Help</span></a>
@@ -120,40 +123,37 @@
         </div>
         <main class="mdl-layout__content mdl-color--grey-100">
             <div class="page-content">
-                <div class="demo-card-wide mdl-card mdl-shadow--2dp">
+                <div class="mdl-spinner mdl-js-spinner is-active"></div>
+                <div id="form-holder" class="demo-card-wide mdl-card mdl-shadow--2dp">
                     <div class="form-holder">
                         <div class="mdl-card__title">
-                            <h2 class="mdl-card__title-text" >Welcome, <span id="account-profile--display-name"></span></h2>
+                            <h2 class="mdl-card__title-text" >Welcome,&nbsp;<span id="account-profile--display-name"></span></h2>
                         </div>
                         <div class="mdl-card__supporting-text">
-                            <div class="mdl-typography--title-color-contrast" id="account-profile--display-org">
-                                
+                            <div class="mdl-typography--title-color-contrast">
+                                From: <span id="account-profile--display-org"></span>
                             </div>
                             <!-- <br/> -->
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input class="mdl-textfield__input" type="email" id="account-profile--input-email"> <!-- pattern="^[A-Za-z0-9 ]{1,30}$" -->
-                                <label class="mdl-textfield__label" for="email">Email Address...</label>
+                                <input class="mdl-textfield__input" type="email" id="account-profile--input-email">
+                                <label class="mdl-textfield__label" for="account-profile--input-email">Email Address...</label>
                                 <span class="mdl-textfield__error">Please enter a valid email address.</span>
                             </div>
                             <!-- <br/> -->
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input class="mdl-textfield__input" type="text" pattern="^[89]+[0-9]{7}$" id="account-profile--input-phone" maxlength="8" >
-                                <label class="mdl-textfield__label" for="num">Contact number...</label>
+                                <input class="mdl-textfield__input" type="text" id="account-profile--input-phone" maxlength="8">
+                                <label class="mdl-textfield__label" for="account-profile--input-phone">Contact number...</label>
                                 <span class="mdl-textfield__error">Please enter a valid contact number.</span>
                             </div>
                             <br/>
-                            <a href="" class="mdl-button mdl-js-button mdl-button--colored mdl-button--raised mdl-js-ripple-effect">
+                            <button class="mdl-button mdl-js-button mdl-button--colored mdl-button--raised mdl-js-ripple-effect">
                                 <i class="material-icons">update</i> Reset Password
-                            </a>
+                            </button>
                         </div>
                     </div>
-                    <div class="mdl-layout__header-row mdl-card__actions mdl-card--border">
-                        <div class="mdl-layout-spacer"></div>
-                        <button class="firewall-button--update mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                    <div class="mdl-card__actions mdl-card--border">
+                        <button id="account-update--button" class="account-update--button mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
                             <i class="material-icons">edit</i> Update
-                        </button>
-                        <button class="firewall-button--cancel mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-                            <i class="material-icons">cancel</i> Cancel
                         </button>
                     </div>
                 </div>
@@ -173,23 +173,109 @@
     <script src="/scripts/axios.min.js"></script>
     <script src="/scripts/app.js"></script>
     <script>
+        document.querySelector(".mdl-spinner").style.display = "block";
+        document.getElementById("form-holder").style.display = "none";
+        var acc_prof_name = document.getElementById("account-profile--display-name");
+        var acc_prof_org = document.getElementById("account-profile--display-org");
+        var acc_prof_email = document.getElementById("account-profile--input-email");
+        var acc_prof_phone = document.getElementById("account-profile--input-phone");
+        var acc_prof_btn = document.getElementById("account-update--button");
+
+        function checkAllInputs() {
+            update_text_field_ui(acc_prof_email,
+                InputValidator.isValidEmail(acc_prof_email.value));
+            update_text_field_ui(acc_prof_phone, 
+                InputValidator.isValidPhoneNum(acc_prof_phone.value));
+        }
+
+        // checkAllInputs();
+
+        /* ::Add keyboard event listeners to validate text fields:: */
+        acc_prof_email.addEventListener('focus', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidEmail(e.target.value));
+        }); acc_prof_email.addEventListener('keyup', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidEmail(e.target.value));
+        }); acc_prof_email.addEventListener('change', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidEmail(e.target.value));
+        });
+
+        acc_prof_phone.addEventListener('focus', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidPhoneNum(e.target.value));
+        }); acc_prof_phone.addEventListener('keyup', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidPhoneNum(e.target.value));
+        }); acc_prof_phone.addEventListener('change', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidPhoneNum(e.target.value));
+        });
+        /* ::Add keyboard event listeners to validate text fields:: */
+
+        document.addEventListener('keyup', function(e) {
+            if (e.keyCode === 13) acc_prof_btn.click();
+        });
+
+        acc_prof_btn.addEventListener('click', function(e) {
+            checkAllInputs();
+
+            if (stillAnyInvalid()) return;
+
+            firebase.auth().currentUser.getIdToken(true)
+            .then(function(token) {
+                return axios({
+                    url: '/account-update',
+                    method: 'POST',
+                    headers: {
+                        'Authorisation': 'Bearer ' + token
+                    },
+                    data: {
+                        email: acc_prof_email.value,
+                        contact: acc_prof_phone.value
+                    }
+                });
+            })
+            .then(function(response) {
+                var res = response.data;
+                console.log(response);
+                console.log(res);
+                if (res.code === "account/update-success") {
+                    // TODO: Update successful
+                    location.replace('');
+                } else {
+                    showSnackbar(res.message);
+                }
+            })['catch'](function(error) {
+                console.error('Error while sending account update request to server: ', error);
+                showSnackbar('An unexpected error occurred. Please try again.');
+            });
+        });
+
+        function displayProfile(user, tokenResult) {
+            acc_prof_name.innerHTML = user.displayName;
+            acc_prof_org.innerHTML = tokenResult.claims.organisation;
+            acc_prof_email.value = user.email;
+            acc_prof_phone.value = user.phoneNumber.split("+65")[1];
+            checkAllInputs();
+            document.querySelector(".mdl-spinner").style.display = "none";
+            document.getElementById("form-holder").style.display = "block";
+        }
+
         firebase.auth().onAuthStateChanged(function(user) {
-            if (user) {
-                user.getIdToken(true).then(function(token) {
-                    return retrieveProfile(token);
-                }).then(function(response) {
-                    var profile = response.data;
-                    acc_prof_name.innerHTML = profile.displayName;
-                    acc_prof_org.innerHTML = profile.organisation;
-                    acc_prof_email.value = profile.email;
-                    acc_prof_phone.value = profile.phoneNumber;
-                })['catch'](function(error) {
+            if (!InputValidator.isEmpty(user)) {
+                user.getIdTokenResult(true)
+                .then(function(tokenResult) {
+                    displayProfile(user, tokenResult);
+                })
+                ['catch'](function(error) {
                     console.error('Error while retrieving profile data: ', error);
                     showSnackbar('An unexpected error occurred. Please try again later.');
                 });
             } else {
                 window.alert('You are not logged in.');
-                location.replace('/contents/accounts/login.html');
+                location.replace('/login');
             }
         });
     </script>

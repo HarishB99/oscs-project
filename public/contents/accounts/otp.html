@@ -1,28 +1,44 @@
 <!DOCTYPE html>
+<!--
+    Material Design Lite
+    Copyright 2015 Google Inc. All right reserved.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        https://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License
+-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Login</title>
+    <title>OTP | Account</title>
 
     <!-- TODO: Set up PWA/AMP when possible -->
     <!-- Add to homescreen for Chrome on Android -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <link rel="icon" sizes="192x192" href="/images/android-desktop.png">
+    <!-- <meta name="mobile-web-app-capable" content="yes"> -->
+    <!-- <link rel="icon" sizes="192x192" href="/images/android-desktop.png"> -->
 
     <!-- Add to homescreen for Safari on iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="Material Design Lite">
-    <link rel="apple-touch-icon-precomposed" href="/images/ios-desktop.png">
+    <!-- <meta name="apple-mobile-web-app-capable" content="yes"> -->
+    <!-- <meta name="apple-mobile-web-app-status-bar-style" content="black"> -->
+    <!-- <meta name="apple-mobile-web-app-title" content="Material Design Lite"> -->
+    <!-- <link rel="apple-touch-icon-precomposed" href="/images/ios-desktop.png"> -->
 
     <!-- Tile icon for Win8 (144x144 + tile color) -->
-    <meta name="msapplication-TileImage" content="/images/touch/ms-touch-icon-144x144-precomposed.png">
-    <meta name="msapplication-TileColor" content="#3372DF">
+    <!-- <meta name="msapplication-TileImage" content="/images/touch/ms-touch-icon-144x144-precomposed.png"> -->
+    <!-- <meta name="msapplication-TileColor" content="#3372DF"> -->
 
-    <link rel="shortcut icon" href="/images/favicon.png">
+    <!-- <link rel="shortcut icon" href="/images/favicon.png"> -->
 
     <!-- 
         SEO: If your mobile URL is different from the desktop URL, 
@@ -37,8 +53,9 @@
     <link rel="stylesheet" href="/fonts/css.css">
     <link rel="stylesheet" href="/fonts/icon.css">
     <link rel="stylesheet" href="/mdl/material.cyan-light_blue.min.css">
-    <link rel="stylesheet" href="/getmdl-select/getmdl-select.min.css">
     <link rel="stylesheet" href="/styles/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase-auth.js"></script>
     <style>
         .demo-card-wide.mdl-card {
             /* width: 60%; */
@@ -85,15 +102,16 @@
                         <div class="mdl-card__supporting-text">
                             <!-- Textfield with Floating Label -->
                             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                <input class="mdl-textfield__input" pattern="\d{6,6}" type="password" maxlength="6" id="otp">
-                                <label class="mdl-textfield__label" for="otp">One-Time Pin...</label>
+                                <input class="mdl-textfield__input" pattern="\d{6,6}" type="password" maxlength="6" id="account-login--otp">
+                                <label class="mdl-textfield__label" for="account-login--otp">One-Time Pin...</label>
                                 <span class="mdl-textfield__error">Please enter a six-digit number.</span>
                             </div>
+                            <div id="recaptcha-container"></div>
                         </div>
                     </div>
                     <div class="mdl-layout__header-row mdl-card__actions mdl-card--border">
                         <div class="mdl-layout-spacer"></div>
-                        <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                        <button id="account-login--otp-button" class="account-login--otp-button mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
                             Next
                         </button>
                     </div>
@@ -101,11 +119,44 @@
             </div>
         </main>
     </div>
-    <!-- TODO: Add library for es6-promise polyfill -->
-    <!-- TODO: Add library for axios js -->
     <!-- TODO: Use the online version of /mdl/material.min.js -->
-    <script src="/mdl/material.min.js"></script>
-    <script src="/getmdl-select/getmdl-select.min.js"></script>
-    <script src="/scripts/app.js"></script>
+    <script async src="/mdl/material.min.js"></script>
+    <script async src="/scripts/es6-promise.auto.min.js"></script>
+    <script async defer src="/scripts/axios.min.js"></script>
+    <script async defer src="/scripts/app.js"></script>
+    <script>
+        var acc_login_otp = document.getElementById("account-login--otp");
+        var acc_login_otp_btn = document.getElementById("account-login--otp-button");
+
+        update_text_field_ui(acc_login_otp, 
+            InputValidator.isValidOTP(acc_login_otp.value));
+        
+        acc_login_otp.addEventListener('focus', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidOTP(e.target.value));
+        }); acc_login_otp.addEventListener('keyup', function(e) {
+            update_text_field_ui(e.target, 
+                InputValidator.isValidOTP(e.target.value));
+        });
+
+        // window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+        // recaptchaVerifier.render()
+        // .then(function(widgetId) {
+        //     window.recaptchaWidgetId =widgetId;
+        // });
+
+        acc_login_otp_btn.addEventListener('click', function(e) {
+            update_text_field_ui(acc_login_otp, 
+                InputValidator.isValidOTP(acc_login_otp.value));
+            
+            if (stillAnyInvalid()) return;
+
+            
+            // firebase.auth().signInWithPhoneNumber('', window.recaptchaVerifier)
+            // .then()['catch'](function(error) {
+
+            // });
+        });
+    </script>
 </body>
 </html>
