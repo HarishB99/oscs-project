@@ -94,82 +94,101 @@ def request(flow):
 
     ip = flow.client_conn.ip_address[0][7:]
     LogDatabase.request(ip, d)
-
+    apiSkip = False
     if CheckedDomains.search(d) is None:
         print("UNCHECKED DOMAIN-----------------" + d)
         #ignore ads
         if options["block-ads"]:
             if d in blockedDomains["ad"]:
-                CheckedDomains.add(d, False, "Blocked by policy (advertisement)")
+                CheckedDomains.add(d, False, "Blocked by policy (listed advertisement)", True)
+                apiSkip = True
         #block malicious websites
         if options["block-malicious"]:
             if d in blockedDomains["malicious"]:
-                CheckedDomains.add(d, False, "Blocked by policy (malicious)")
+                CheckedDomains.add(d, False, "Blocked by policy (listed malicious)", False)
+                apiSkip = True
         #block user defined sites
         #blacklist
         if options["isBlacklist"]:
-            if d in blockedDomains["user"]:
-                u = LogDatabase.getUser(ip)
-                if u["events"]["blockedDomains"][d] is None:
-                    u["events"]["blockedDomains"][d] = 1
-                else:
-                    u["events"]["blockedDomains"][d] += 1
-                LogDatabase.updateUser(u)
-                CheckedDomains.add(d, False, "Blocked by policy (blacklist)")
+            for key, value in blockedDomains["user"].items():
+                if d in key:
+                    print("USER DEFINED BLOCKED DOMAIN--------------" +d)
+                    apiSkip = True
+                    u = LogDatabase.getUser(ip)
+                    if d not in u["events"]["blockedDomains"]:
+                        u["events"]["blockedDomains"][d] = 1
+                    else:
+                        u["events"]["blockedDomains"][d] += 1
+                    LogDatabase.updateUser(u)
+                    CheckedDomains.add(d, False, "Blocked by policy (user blacklist)", False)
+                    break
         else: #whitelist
             if flow.request.pretty_host not in blockedDomains["user"]:
+                apiSkip = True
                 u = LogDatabase.getUser(ip)
-                if u["events"]["blockedDomains"][d] is None:
+                if d not in u["events"]["blockedDomains"]:
                     u["events"]["blockedDomains"][d] = 1
                 else:
                     u["events"]["blockedDomains"][d] += 1
                 LogDatabase.updateUser(u)
-                CheckedDomains.add(d, False, "Blocked by policy (whitelist)")
+                CheckedDomains.add(d, False, "Blocked by policy (user whitelist)", False)
 
-        #lookup stuff in the apis
-        wotResults = webOfTrustLookup(d)
-        gResults = googleSafeBrowsingLookup(d)
-        #check results
-        results = {}
-        #google safe browsing
-        if gResults != 0 and gResults != 1:
-            if len(gResults) > 0:
-                results["threatType"] = gResults[0]["threatType"]
-                results["platform"] = gResults[0]["platformType"]
-                results["domain"] = gResults[0]["threat"]["url"]
-        else:
-            () #TODO: log failure to another database
+        if not apiSkip:
+            #lookup stuff in the apis
+            wotResults = webOfTrustLookup(d)
+            gResults = googleSafeBrowsingLookup(d)
+            #check results
+            results = {}
+            #google safe browsing
+            if gResults != 0 and gResults != 1:
+                if len(gResults) > 0:
+                    print(gResults)
+                    results["threatType"] = gResults[0]["threatType"]
+                    results["platform"] = gResults[0]["platformType"]
+                    results["domain"] = gResults[0]["threat"]["url"]
+            else:
+                () #TODO: log failure to another database
 
-        #web of trust
-        if wotResults["reputation"]["trustworthiness"][0] < options["block-suspicious-level"]:
+            #web of trust
+            print("WOTRESULTS---------------------:")
+            print(wotResults)
             results["trustworthiness"] = wotResults["reputation"]["trustworthiness"][0]
-        if wotResults["reputation"]["childSafety"][0] < options["block-child-unsafe"]:
             results["childSafety"] = wotResults["reputation"]["childSafety"][0]
-        results["categories"] = []
-        results["categoryTypes"] = []
-        for key, value in wotResults["categories"].items():
-            results["categories"].append(key)
-            results["categoryTypes"].append(key[0])
+            results["categories"] = []
+            results["categoryTypes"] = []
+            for value in wotResults["categories"]:
+                results["categories"].append(value)
+                results["categoryTypes"].append(value[0][0])
+            print(results)
 
 
-        #check api call results
-        if results["childSafety"] < options["block-child-unsafe-level"]:
-            CheckedDomains.add(d, False, "Blocked by policy (child safety)")
-        elif results["trustworthiness"] < options["block-suspicious-level"]:
-            CheckedDomains.add(d, False, "Blocked by policy (suspicious)")
-        elif "1" in results["categoryTypes"] or "2" in results["categoryTypes"] or "3" in results["categoryTypes"]:
-            CheckedDomains.add(d, False, "Blocked by policy (suspicious)")
-
+            #check api call results
+            if results["childSafety"] < options["block-child-unsafe-level"]:
+                CheckedDomains.add(d, False, "Blocked by policy (child safety)", False)
+            elif results["trustworthiness"] < options["block-suspicious-level"]:
+                CheckedDomains.add(d, False, "Blocked by policy (suspicious)", False)
+            for cat in results["categories"]:
+                if cat[0][0] == "1" and int(cat[1]) > 90:
+                    CheckedDomains.add(d, False, "Blocked by policy (" + category[cat[0]])
+                if cat[0][0] == "2" and int(cat[1]) > 70:
+                    CheckedDomains.add(d, False, "Blocked by policy (" + catefory[cat[0]])
+                if cat[0][0] == "3" and int(cat[1]) > 40:
+                    () #TODO: Add filters for certain topics
 
         if CheckedDomains.search(d) is None:
-            CheckedDomains.add(d, True, None)
+            CheckedDomains.add(d, True, None, False)
 
     sc = CheckedDomains.search(d)
-    print("-----------------"+sc)
     if not sc["isSafe"]: #previously logged as unsafe
-        flow.response = http.HTTPResponse.make(
-            418, sc["reason"]
-        )
+        if sc["kill"]:
+            flow.kill()
+        else:
+            r = ""
+            for reason in sc["reason"]:
+                r += reason + '\n'
+            flow.response = http.HTTPResponse.make(
+                418, r
+            )
     else:
         print("SAFE DOMAIN-----------"+d)
 
@@ -193,7 +212,7 @@ def response(flow):
 
     else:
         #check text
-        html = BeautifulSoup(flow.response.content)
+        html = BeautifulSoup(flow.response.content, "html.parser")
         text = html.get_text()
 
 #Query Web of Trust for site reputation and category
@@ -223,8 +242,12 @@ def webOfTrustLookup(domain):
                     elif key == "2":
                         ()  # Deprecated
                     elif key == "0":
+                        if value is None:
+                            results["reputation"]["trustworthiness"] = (0, 100)
                         results["reputation"]["trustworthiness"] = value
                     elif key == "4":
+                        if value is None:
+                            results["reputation"]["trustworthiness"] = (0, 100)
                         results["reputation"]["childSafety"] = value
                     elif key == "categories":
                         for categoryId, confidence in value.items():
@@ -232,7 +255,7 @@ def webOfTrustLookup(domain):
                     elif key == "blacklists":
                         continue #lazy to handle this
                     else:
-                        return 4 #unknown response
+                        continue
                 return results
             if reply.status_code != 200:
                 return 2 #Server return unusual status code

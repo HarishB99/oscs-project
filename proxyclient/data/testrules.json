@@ -69,7 +69,7 @@
     "blockMalicious": true,
     "domainGroups" : ["socialMedia"],
     "domains": [
-      "kongregate.com"
+      "www.kongregate.com"
     ]
   },
   "dpi" : true,
