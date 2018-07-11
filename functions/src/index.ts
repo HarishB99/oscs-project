@@ -219,7 +219,7 @@ app.post('/rule-create', async (request, response) => {
             && iv.isValidIp(dip) && iv.isValidPortNum(dport)) {
             input = new RuleInput(name, access, priority, proto, sip, sport, dip, dport);
         }
-        
+
         if (!input) {
             response.send(ErrorCode.RULE.BAD_DATA);
         } else {
@@ -230,7 +230,7 @@ app.post('/rule-create', async (request, response) => {
                 .collection('rules')
                 .where('access', '==', input.access)
                 .where('priority', '==', input.priority)
-                .where('protocol', '==', input.proto)
+                .where('protocol', '==', input.proto.toUpperCase())
                 .where('sourceip', '==', input.sip)
                 .where('sourceport', '==', input.sport)
                 .where('destip', '==', input.dip)
@@ -246,7 +246,7 @@ app.post('/rule-create', async (request, response) => {
                     name: input.name,
                     access: input.access,
                     priority: input.priority,
-                    protocol: input.proto,
+                    protocol: input.proto.toUpperCase(),
                     sourceip: sip,
                     sourceport: input.sport,
                     destip: input.dip,
