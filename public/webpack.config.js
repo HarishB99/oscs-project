@@ -1,13 +1,15 @@
-const autoprefixer = require('autoprefixer');
 module.exports = [{
-    entry: './scripts/app.js',
+    entry: {
+        index: './src/index.js'
+    },
     module: {
         rules: [
             { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ }
         ]
     },
     output: {
-        filename: 'bundle.js',
-        path: __dirname
-    }
+        filename: '[name].bundle.js',
+        path: __dirname + '/scripts'
+    },
+    mode: 'production'
 }];
