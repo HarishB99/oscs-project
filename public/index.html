@@ -145,8 +145,6 @@
     <script src="/mdl/material.min.js"></script>
     <script src="/scripts/jquery-3.3.1.min.js"></script>
     <script src="/scripts/list.min.js"></script>
-    <script src="/scripts/es6-promise.auto.min.js"></script>
-    <script src="/scripts/axios.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase-firestore.js"></script>
@@ -270,18 +268,23 @@
     </div>
     <script src="/scripts/app.js"></script>
     <script>
+        document.getElementById('firewall-rule__button--add')
+        .addEventListener('click', function(e) {
+            location.href = '/create_rule';
+        });
+
         var db = firebase.firestore();
         var settings = {/* your settings... */ timestampsInSnapshots: true};
         db.settings(settings);
         var auth = firebase.auth();
 
         auth.onAuthStateChanged(function(user) {
-            console.log(user);
-            var table = document.getElementById("firewall-rule__table--list");
-            table.innerHTML = "";
+            // console.log(user);s
             if (user) {
                 db.collection("users").doc(user.uid).collection("rules")
                 .onSnapshot(function(rules) {
+                    var table = document.getElementById("firewall-rule__table--list");
+                    table.innerHTML = "";
                     if (rules.docs.length <= 0) {
                         var tableRow = document.createElement("tr");
                             var noRules = document.createElement("td");
@@ -382,9 +385,8 @@
                     showSnackbar("An unexpected error occurred. Please try again later.");
                 });
             } else {
-                // showSnackbar("You are not logged in.");
-                // window.alert('You are not logged in.');
-                // location.replace('/contents/accounts/login.html');
+                window.alert('You are not logged in.');
+                location.replace('/login');
             }
         });
     </script>

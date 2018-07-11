@@ -72,6 +72,21 @@
             overflow-y: auto;
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase-firestore.js"></script>
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyCUJp0rD0b9nNgA5pn4WOXtZr6mM4PxQp8",
+            authDomain: "firegate-101.firebaseapp.com",
+            databaseURL: "https://firegate-101.firebaseio.com",
+            projectId: "firegate-101",
+            storageBucket: "firegate-101.appspot.com",
+            messagingSenderId: "700794827690"
+        };
+        firebase.initializeApp(config);
+    </script>
 </head>
 <body>
     <div class="demo-layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
@@ -190,14 +205,6 @@
         var rule_create_dport = document.getElementById('rule--dest-port');
         var rule_create_btn = document.getElementById('rule-button--update');
 
-        var rule_create_proto = null;
-
-        for (var i = 0; i < rule_create_proto_inputs.length; i++) {
-            if (rule_create_proto_inputs[i].checked) {
-                rule_create_proto = rule_create_proto_inputs[i].value;
-            }
-        }
-
         function checkAllInputs() {
             update_text_field_ui(rule_create_name, 
                 InputValidator.isValidRuleName(rule_create_name.value));
@@ -269,38 +276,67 @@
             if (e.keyCode === 13) rule_create_btn.click();
         });
 
-        rule_create_btn.addEventListener('click', function(e) {
-            checkAllInputs();
-            
-            if (stillAnyInvalid()) return;
+        firebase.auth()
+        .onAuthStateChanged(function(user) {
+            if (!InputValidator.isEmpty(user)) {
+                rule_create_btn.addEventListener('click', function(e) {
+                    checkAllInputs();
+                    
+                    if (stillAnyInvalid()) return;
+                    
+                    var rule_create_proto = null;
 
-            axios.post('/rule-create', {
-                name: rule_create_name.value,
-                access: rule_create_access.checked,
-                priority: rule_create_priority,
-                proto: rule_create_proto,
-                sip: rule_create_sip.value,
-                sport: rule_create_sport.value,
-                dip: rule_create_dip.value,
-                dport: rule_create_dport
-            }).then(function(response) {
-                console.log(response.data);
-                if (response.data.code === 'rule/creation-success') {
-                    location.replace('/#firewall-rule');
-                } else {
-                    showSnackbar(response.data.message);
-                }
-            })['catch'](function(error) {
-                console.error("Error while performing rule creation request: ", error);
-                if (error.message === "Network Error") {
-                    showSnackbar("Please check your network connection and try again.");
-                } else if (error.message.search('404') >= 0) {
-                    showSnackbar("Sorry. The functionality has not been enabled.");
-                } else {
-                    showSnackbar("An unexpected error occurred. Please try again later.");
-                }
-            });
+                    for (var i = 0; i < rule_create_proto_inputs.length; i++) {
+                        if (rule_create_proto_inputs[i].checked) {
+                            rule_create_proto = rule_create_proto_inputs[i].value;
+                        }
+                    }
+
+                    user.getIdToken(true)
+                    .then(function(token) {
+                        return axios({
+                            url: '/rule-create',
+                            method: 'POST',
+                            headers: {
+                                'Authorisation': 'Bearer ' + token,
+                                'Content-Type': 'application/json'
+                            },
+                            data: {
+                                name: rule_create_name.value,
+                                access: rule_create_access.checked.toString(),
+                                priority: rule_create_priority.value,
+                                proto: rule_create_proto,
+                                sip: rule_create_sip.value,
+                                sport: rule_create_sport.value,
+                                dip: rule_create_dip.value,
+                                dport: rule_create_dport.value
+                            }
+                        });
+                    }).then(function(response) {
+                        console.log(response.data);
+                        if (response.data.code === 'rule/creation-success') {
+                            location.replace('/#firewall-rule');
+                        } else {
+                            showSnackbar(response.data.message);
+                        }
+                    })['catch'](function(error) {
+                        console.error("Error while performing rule creation request: ", error);
+                        if (error.message === "Network Error") {
+                            showSnackbar("Please check your network connection and try again.");
+                        } else if (error.message.search('404') >= 0) {
+                            showSnackbar("Sorry. The functionality has not been enabled.");
+                        } else {
+                            showSnackbar("An unexpected error occurred. Please try again later.");
+                        }
+                    });
+                });
+            } else {
+                window.alert('You are not logged in.');
+                location.replace('/login');
+            }
         });
+
+        
     </script>
 </body>
 </html>
