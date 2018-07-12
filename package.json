@@ -1,14 +1,22 @@
 {
-  "name": "firegate-101-client",
+  "name": "firgate-101",
   "version": "1.0.0",
-  "description": "",
+  "description": "* Clone this repository `git clone https://github.com/harishbalamurugan/oscs-project.git`",
   "main": "index.js",
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
     "webpack": "node_modules/.bin/webpack"
   },
-  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harishbalamurugan/oscs-project.git"
+  },
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/harishbalamurugan/oscs-project/issues"
+  },
+  "homepage": "https://github.com/harishbalamurugan/oscs-project#readme",
   "dependencies": {
     "axios": "^0.18.0",
     "es6-promise-polyfill": "^1.2.0",
@@ -30,5 +38,6 @@
     "style-loader": "^0.21.0",
     "webpack": "^4.15.1",
     "webpack-cli": "^3.0.8"
-  }
+  },
+  "private": true
 }

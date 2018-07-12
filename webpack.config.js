@@ -1,6 +1,8 @@
 module.exports = [{
     entry: {
-        index: './src/index.js'
+        index: './src/index.js',
+        login: './src/login.js',
+        rule: './src/rule.js'
     },
     module: {
         rules: [
@@ -9,7 +11,7 @@ module.exports = [{
     },
     output: {
         filename: '[name].bundle.js',
-        path: __dirname + '/scripts'
+        path: __dirname + '/public/scripts'
     },
     mode: 'production'
 }];
