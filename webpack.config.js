@@ -2,7 +2,8 @@ module.exports = [{
     entry: {
         index: './src/index.js',
         login: './src/login.js',
-        rule: './src/rule.js'
+        rule: './src/rule.js',
+        profile: './src/profile.js'
     },
     module: {
         rules: [
