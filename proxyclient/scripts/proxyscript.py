@@ -1,12 +1,16 @@
 from mitmproxy import ctx, http
 from bs4 import BeautifulSoup
+from db import LogDatabase
+from checkedDomains import CheckedDomains
 import subprocess, json, requests
 
 text_clf = None
 options = {
     "block-ads" : True,
     "block-malicious" : True,
-    "isBlacklist" : True
+    "isBlacklist" : True,
+    "block-child-unsafe-level": 80,
+    "block-suspicious-level": 80
 }
 
 blockedDomains = {
@@ -39,7 +43,9 @@ categories = {
     '501': 'Positive: Good site'
 }
 
+checkedDomains = {}
 apiKeys = None
+log = None
 with open("../data/apiKeys.json", "r") as f:
     apiKeys = json.loads(f.read())
 
@@ -80,56 +86,98 @@ def load(l):
         #add user-defined domains
         for domain in r["domains"]:
             blockedDomains["user"][domain] = True
-    print(apiKeys["webOfTrust"])
-    print(apiKeys["googleSafeBrowsing"])
 
 def request(flow):
-    if (flow.request.pretty_host == 'api.mywot.com' or
-     flow.request.pretty_host == 'safebrowsing.googleapis.com'):
+    d = flow.request.pretty_host
+    if (d == 'api.mywot.com' or d == 'safebrowsing.googleapis.com'):
         return
-    print("LOGGING")
-    with open("../logs/urls.log", "a+") as u:
-        u.write(flow.request.method + " " + flow.request.path + " " + flow.request.http_version)
-    with open("../logs/pretty_hosts.log", "a+") as l:
-        l.write(flow.request.pretty_host + '\n')
 
-    print("FILTERING")
-    #ignore ads
-    if options["block-ads"]:
-        if flow.request.pretty_host in blockedDomains["ad"]:
-            flow.kill()
-    #block malicious websites
-    if options["block-malicious"]:
-        if flow.request.pretty_host in blockedDomains["malicious"]:
-            flow.response = http.HTTPResponse.make(
-            418, "Recognized as malicious site"
-            )
+    ip = flow.client_conn.ip_address[0][7:]
+    LogDatabase.request(ip, d)
 
-    #block user defined sites
-    #blacklist
-    if options["isBlacklist"]:
-        if flow.request.pretty_host in blockedDomains["user"]:
-            flow.response = http.HTTPResponse.make(
-            418, "Blocked by policy (blacklist)"
-            )
-    else: #whitelist
-        if flow.request.pretty_host not in blockedDomains["user"]:
-            flow.response = http.HTTPResponse.make(
-            418, "Blocked by policy (whitelist)"
-            )
+    if CheckedDomains.search(d) is None:
+        print("UNCHECKED DOMAIN-----------------" + d)
+        #ignore ads
+        if options["block-ads"]:
+            if d in blockedDomains["ad"]:
+                CheckedDomains.add(d, False, "Blocked by policy (advertisement)")
+        #block malicious websites
+        if options["block-malicious"]:
+            if d in blockedDomains["malicious"]:
+                CheckedDomains.add(d, False, "Blocked by policy (malicious)")
+        #block user defined sites
+        #blacklist
+        if options["isBlacklist"]:
+            if d in blockedDomains["user"]:
+                u = LogDatabase.getUser(ip)
+                if u["events"]["blockedDomains"][d] is None:
+                    u["events"]["blockedDomains"][d] = 1
+                else:
+                    u["events"]["blockedDomains"][d] += 1
+                LogDatabase.updateUser(u)
+                CheckedDomains.add(d, False, "Blocked by policy (blacklist)")
+        else: #whitelist
+            if flow.request.pretty_host not in blockedDomains["user"]:
+                u = LogDatabase.getUser(ip)
+                if u["events"]["blockedDomains"][d] is None:
+                    u["events"]["blockedDomains"][d] = 1
+                else:
+                    u["events"]["blockedDomains"][d] += 1
+                LogDatabase.updateUser(u)
+                CheckedDomains.add(d, False, "Blocked by policy (whitelist)")
 
-    #lookup stuff in the apis
-    print("API LOOKUPS")
-    #wotResults = webOfTrustLookup(flow.request.host)
-    gResults = googleSafeBrowsingLookup(flow.request.host)
-    #check results
-    print("CHECK RESULT")
+        #lookup stuff in the apis
+        wotResults = webOfTrustLookup(d)
+        gResults = googleSafeBrowsingLookup(d)
+        #check results
+        results = {}
+        #google safe browsing
+        if gResults != 0 and gResults != 1:
+            if len(gResults) > 0:
+                results["threatType"] = gResults[0]["threatType"]
+                results["platform"] = gResults[0]["platformType"]
+                results["domain"] = gResults[0]["threat"]["url"]
+        else:
+            () #TODO: log failure to another database
+
+        #web of trust
+        if wotResults["reputation"]["trustworthiness"][0] < options["block-suspicious-level"]:
+            results["trustworthiness"] = wotResults["reputation"]["trustworthiness"][0]
+        if wotResults["reputation"]["childSafety"][0] < options["block-child-unsafe"]:
+            results["childSafety"] = wotResults["reputation"]["childSafety"][0]
+        results["categories"] = []
+        results["categoryTypes"] = []
+        for key, value in wotResults["categories"].items():
+            results["categories"].append(key)
+            results["categoryTypes"].append(key[0])
+
+
+        #check api call results
+        if results["childSafety"] < options["block-child-unsafe-level"]:
+            CheckedDomains.add(d, False, "Blocked by policy (child safety)")
+        elif results["trustworthiness"] < options["block-suspicious-level"]:
+            CheckedDomains.add(d, False, "Blocked by policy (suspicious)")
+        elif "1" in results["categoryTypes"] or "2" in results["categoryTypes"] or "3" in results["categoryTypes"]:
+            CheckedDomains.add(d, False, "Blocked by policy (suspicious)")
+
+
+        if CheckedDomains.search(d) is None:
+            CheckedDomains.add(d, True, None)
+
+    sc = CheckedDomains.search(d)
+    print("-----------------"+sc)
+    if not sc["isSafe"]: #previously logged as unsafe
+        flow.response = http.HTTPResponse.make(
+            418, sc["reason"]
+        )
+    else:
+        print("SAFE DOMAIN-----------"+d)
 
 
 def response(flow):
     #check images using header
     if flow.response.headers.get("content-type", "").startswith("image"):
-        () #TODO:: check images (may abondon)
+        () #TODO:: check images (may abondon for performance reasons)
         #check image
         #encoded_image = base64.b64encode(flow.response.content)
         #subprocess.run(["python3", "classify_nsfw.py", "-m", "data/open_nsfw-weights.py", "-t", "base64_"])
@@ -140,55 +188,56 @@ def response(flow):
         #flow.response.headers["content-type"] = "image/png"
 
     #check downloading files
-    if flow.response.headers.get("content-disposition", "").startswith("attachment"):
+    elif flow.response.headers.get("content-disposition", "").startswith("attachment"):
         () #TODO::scan file for viruses
 
-    #classify text with ML
-    html = BeautifulSoup(flow.response.content)
-    text = html.get_text()
+    else:
+        #check text
+        html = BeautifulSoup(flow.response.content)
+        text = html.get_text()
 
 #Query Web of Trust for site reputation and category
 def webOfTrustLookup(domain):
-    results = {
-        'reputation' : {
-            'trustworthiness' : None,
-            'childSafety' : None
-        },
-        'categories' : []
-    }
-    try:
-        target = 'http://' + domain + '/'
-        parameters = {'hosts': domain + "/", 'key': apiKeys["webOfTrust"]}
-        print("WEB OF TRUST")
-        reply = requests.get(
-            "http://api.mywot.com/0.4/public_link_json2",
-            params=parameters,
-            headers={'user-agent': 'Mozilla/5.0'})
-        print("REQUEST SENT")
-        reply_dict = json.loads(reply.text)
-        print(json.dumps(reply_dict))
-        if reply.status_code == 200:
-            for key, value in reply_dict[domain].items():
-                if key == "1":
-                    ()  # Deprecated
-                elif key == "2":
-                    ()  # Deprecated
-                elif key == "0":
-                    results["reputation"]["trustworthiness"] = value
-                elif key == "4":
-                    results["reputation"]["childSafety"] = value
-                elif key == "categories":
-                    for categoryId, confidence in value.items():
-                        results["categories"].append((categoryId, confidence))
-                elif key == "blacklists":
-                    continue #lazy to handle this
-                else:
-                    return 4 #unknown response
-            return results
-        if reply.status_code != 200:
-            return 2 #Server return unusual status code
-    except KeyError:
-        return 0 #Web of Trust API key does not work
+    if domain in checkedDomains:
+        return True
+    else:
+        results = {
+            'reputation' : {
+                'trustworthiness' : None,
+                'childSafety' : None
+            },
+            'categories' : []
+        }
+        try:
+            target = 'http://' + domain + '/'
+            parameters = {'hosts': domain + "/", 'key': apiKeys["webOfTrust"]}
+            reply = requests.get(
+                "http://api.mywot.com/0.4/public_link_json2",
+                params=parameters,
+                headers={'user-agent': 'Mozilla/5.0'})
+            reply_dict = json.loads(reply.text)
+            if reply.status_code == 200:
+                for key, value in reply_dict[domain].items():
+                    if key == "1":
+                        ()  # Deprecated
+                    elif key == "2":
+                        ()  # Deprecated
+                    elif key == "0":
+                        results["reputation"]["trustworthiness"] = value
+                    elif key == "4":
+                        results["reputation"]["childSafety"] = value
+                    elif key == "categories":
+                        for categoryId, confidence in value.items():
+                            results["categories"].append((categoryId, confidence))
+                    elif key == "blacklists":
+                        continue #lazy to handle this
+                    else:
+                        return 4 #unknown response
+                return results
+            if reply.status_code != 200:
+                return 2 #Server return unusual status code
+        except KeyError:
+            return 0 #Web of Trust API key does not work
 
 def googleSafeBrowsingLookup(domain):
     result = []
@@ -210,8 +259,10 @@ def googleSafeBrowsingLookup(domain):
             headers=headers, json=payload)
 
         if reply.status_code == 200:
-            for match in reply.json()["matches"]:
-                result.append(match['threatType'])
+            j = reply.json()
+            if j:
+                for match in reply.json()["matches"]:
+                    result.append(match['threatType'])
             return result
         else:
             return 1 #bad request

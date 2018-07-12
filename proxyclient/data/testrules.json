@@ -6,9 +6,9 @@
         "name": "http",
         "allow": true,
         "sourceip" : "0.0.0.0",
-        "sourceport": "80",
+        "sourceport": "*",
         "destip": "0.0.0.0",
-        "destport": "*",
+        "destport": "80",
         "protocol" : "tcp",
         "state" : "NEW,ESTABLISHED,RELATED",
         "direction" : "incoming"
@@ -18,9 +18,9 @@
         "name": "ssh",
         "allow": true,
         "sourceip" : "0.0.0.0",
-        "sourceport": "22",
+        "sourceport": "*",
         "destip": "0.0.0.0",
-        "destport": "*",
+        "destport": "22",
         "protocol" : "tcp",
         "state" : "NEW,ESTABLISHED,RELATED",
         "direction": "incoming"

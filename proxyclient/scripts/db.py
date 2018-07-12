@@ -1,5 +1,48 @@
-from pymongo import MongoClient
+import pymongo
 
-client = MongoClient('localhost', 27017)
+class LogDatabase:
+    client = pymongo.MongoClient('localhost', 27017)
+    database = client.logDatabase
+    users = database.users
 
-db = client.log_database
+    @staticmethod
+    def newUser(ip):
+        user = {
+            "_id": ip,
+            "domains" : {},
+            "events": {
+                "maliciousFile": [],
+                "blockedDomains" : {},
+                "suspiciousDomain": [],
+                "downloadedFile": []
+            }
+        }
+        return LogDatabase.users.insert_one(user)
+
+    @staticmethod
+    def getUser(ip):
+        u = LogDatabase.users.find_one({"_id":ip})
+        if u is None:
+            LogDatabase.newUser(ip)
+            return LogDatabase.getUser(ip)
+        else:
+            return u
+
+    @staticmethod
+    def updateUser(u):
+        LogDatabase.users.update_one({'_id':u["_id"]}, {"$set": u}, upsert=False)
+
+    @staticmethod
+    def request(ip, domain):
+        u = LogDatabase.getUser(ip)
+        if domain not in u["domains"]:
+            u["domains"][domain] = 1
+        else:
+            u["domains"][domain] += 1
+        LogDatabase.updateUser(u)
+
+    @staticmethod
+    def securityEvent(ip, eventType, details):
+        u = LogDatabase.getUser(ip)
+        u["events"][eventType].append(details)
+        LogDatabase.updateUser(u)
