@@ -6,3 +6,4 @@ proxyclient/scripts/googleTest.py
 proxyclient/scripts/WOTtest.py
 **/bac/
 **/*bundle*
+**/extra/
