@@ -63,7 +63,12 @@
       "**/licenses/**",
       "**/*.json",
       "**/LICENSE",
-      "**/*.map"
+      "**/*.map",
+      "**/*.config.*",
+      "**/src/**",
+      "**/package*.json",
+      "**/.babelrc",
+      "**/*.bac"
     ]
   },
   "functions": {

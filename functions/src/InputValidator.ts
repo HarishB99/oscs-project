@@ -96,20 +96,20 @@ export class InputValidator {
 
     /**
      * Check whether the input is a valid boolean value
-     * @param input the string or numerical value to be validated
+     * @param input the value to be validated
      */
-    public isBoolean(input: string): boolean {
+    public isBoolean(input: any): boolean {
         if (this.isEmpty(input)) return false;
-        try {
-            const binary = parseInt(input);
-            return binary === 1 || binary === 0;
-        } catch (error) {
-            if (typeof input === "string") {
+        switch((typeof input)) {
+            case 'string':
                 const input_lower = input.toLowerCase();
-                return input_lower === 'true' || input_lower === 'false' || input_lower === 'f' || input_lower === 't';
-            } else {
+                return input_lower === 'true' || input_lower === 'false' || input_lower === 'f' || input_lower === 't' || input_lower === '1' || input === '0';
+            case 'boolean':
+                return true;
+            case 'number':
+                return input === 1 || input === 0;
+            default:
                 return false;
-            }
         }
     }
 

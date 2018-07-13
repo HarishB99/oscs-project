@@ -90,18 +90,7 @@ app.post('/rules.json', (request, response) => {
 
     if (rules_final) {
         rules_final.forEach(rule => {
-            responseJson.rules.push({
-                priority: rule.priority,
-                name: rule.name,
-                allow: rule.allow,
-                sourceip: rule.sourceip,
-                sourceport: rule.sourceport,
-                destip: rule.destip,
-                destport: rule.destport,
-                protocol: rule.protocol,
-                state: rule.state,
-                direction: rule.direction
-            });
+            responseJson.rules.push(rule);
         });
     }
 
