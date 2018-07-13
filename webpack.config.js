@@ -11,7 +11,7 @@ module.exports = [{
         ]
     },
     output: {
-        filename: '[name].bundle.js',
+        filename: '[name].js',
         path: __dirname + '/public/scripts'
     },
     mode: 'production'

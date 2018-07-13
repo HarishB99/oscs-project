@@ -5,5 +5,6 @@ proxyclient/logs
 proxyclient/scripts/googleTest.py
 proxyclient/scripts/WOTtest.py
 **/bac/
-**/*bundle*
+**/scripts/**
+!**/scripts/app.js
 **/extra/

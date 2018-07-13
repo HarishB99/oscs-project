@@ -143,8 +143,5 @@ firebase.auth()
                 }
             });
         });
-    } else {
-        // UIUtils.logoutUI();
-        console.log();
-    }
+    } else { UIUtils.logoutUI(); }
 });

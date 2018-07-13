@@ -5,8 +5,11 @@ const UIUtils = require('./modules/UIUtils').default;
 const InputValidator = require('./modules/InputValidator').default;
 const axios = require('axios').default;
 
-const mdlSpinner = document.querySelector('.mdl-spinner').style.display = 'block';
-const formHolder = document.getElementById('form-holder').style.display = 'none';
+const mdlSpinner = document.querySelector('.mdl-spinner');
+const formHolder = document.getElementById('form-holder');
+
+mdlSpinner.style.display = 'block';
+formHolder.style.display = 'none';
 
 const acc_prof_name = document.getElementById("account-profile--display-name");
 const acc_prof_org = document.getElementById("account-profile--display-org");
@@ -87,8 +90,8 @@ function displayProfile(user, tokenResult) {
     acc_prof_email.value = user.email;
     acc_prof_phone.value = user.phoneNumber.split("+65")[1];
     checkAllInputs();
-    document.querySelector(".mdl-spinner").style.display = "none";
-    document.getElementById("form-holder").style.display = "block";
+    mdlSpinner.style.display = "none";
+    formHolder.style.display = "block";
 }
 
 firebase.auth().onAuthStateChanged(user => {
@@ -100,7 +103,5 @@ firebase.auth().onAuthStateChanged(user => {
             console.error('Error while retrieving profile data: ', error);
             UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
         });
-    } else {
-        UIUtils.logoutUI();
-    }
+    } else { UIUtils.logoutUI(); }
 });
