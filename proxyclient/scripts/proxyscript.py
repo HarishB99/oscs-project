@@ -114,23 +114,13 @@ def request(flow):
                 if d in key:
                     print("USER DEFINED BLOCKED DOMAIN--------------" +d)
                     apiSkip = True
-                    u = LogDatabase.getUser(ip)
-                    if d not in u["events"]["blockedDomains"]:
-                        u["events"]["blockedDomains"][d] = 1
-                    else:
-                        u["events"]["blockedDomains"][d] += 1
-                    LogDatabase.updateUser(u)
+                    LogDatabase.blockedDomain(ip, d)
                     CheckedDomains.add(d, False, "Blocked by policy (user blacklist)", False)
                     break
         else: #whitelist
             if flow.request.pretty_host not in blockedDomains["user"]:
                 apiSkip = True
-                u = LogDatabase.getUser(ip)
-                if d not in u["events"]["blockedDomains"]:
-                    u["events"]["blockedDomains"][d] = 1
-                else:
-                    u["events"]["blockedDomains"][d] += 1
-                LogDatabase.updateUser(u)
+                LogDatabase.blockedDomain(ip, d)
                 CheckedDomains.add(d, False, "Blocked by policy (user whitelist)", False)
 
         if not apiSkip:
@@ -165,13 +155,17 @@ def request(flow):
             #check api call results
             if results["childSafety"] < options["block-child-unsafe-level"]:
                 CheckedDomains.add(d, False, "Blocked by policy (child safety)", False)
-            elif results["trustworthiness"] < options["block-suspicious-level"]:
+                LogDatabase.securityEvent(ip, d, "childUnsafe")
+            if results["trustworthiness"] < options["block-suspicious-level"]:
                 CheckedDomains.add(d, False, "Blocked by policy (suspicious)", False)
+                LogDatabase.securityEvent(ip, d, "suspiciousDomain")
             for cat in results["categories"]:
                 if cat[0][0] == "1" and int(cat[1]) > 90:
                     CheckedDomains.add(d, False, "Blocked by policy (" + category[cat[0]])
+                    LogDatabase.securityEvent(ip, d, str(cat[0]))
                 if cat[0][0] == "2" and int(cat[1]) > 70:
                     CheckedDomains.add(d, False, "Blocked by policy (" + catefory[cat[0]])
+                    LogDatabase.securityEvent(ip, d, str(cat[0]))
                 if cat[0][0] == "3" and int(cat[1]) > 40:
                     () #TODO: Add filters for certain topics
 
@@ -183,6 +177,7 @@ def request(flow):
         if sc["kill"]:
             flow.kill()
         else:
+            #list all reasons the domain is bad
             r = ""
             for reason in sc["reason"]:
                 r += reason + '\n'

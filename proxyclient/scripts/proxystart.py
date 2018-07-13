@@ -38,14 +38,14 @@ else:
     if r.status_code == 200:
         #parse the json containing data
         rules = json.loads(r.text)
-for r in rules["firewallRules"]["incoming"]:
+for r in rules["firewallRules"]
     if r["direction"] == "incoming":
         IptablesHandler.createRule(r, True)
     elif r["direction"] == "outgoing":
         IptablesHandler.createRule(r, False)
     else:
         print("Error: Unrecognized firewall rule direction")
-        
+
 #write test rules to file for proxy script
 with open('../data/temprules.json', 'rw+') as rulefile:
     rulefile.write(json.dumps(rules))

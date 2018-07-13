@@ -1,6 +1,5 @@
 {
-  "firewallRules": {
-    "rules":[
+  "firewallRules": [
       {
         "priority": 100,
         "name": "http",
@@ -61,8 +60,7 @@
         "state" : "NEW,ESTABLISHED,RELATED",
         "direction" : "outgoing"
       }
-    ]
-  },
+  ],
   "webfilter" : {
     "mode": "blacklist",
     "blockAds": true,
