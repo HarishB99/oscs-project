@@ -28,11 +28,11 @@ auth.onAuthStateChanged(user => {
             tbody.innerHTML = '';
             if (rules.empty) {
                 const tr = document.createElement('tr');
-                    const noRule = document.createElement('td');
+                    const noRules = document.createElement('td');
                         noRules.className = "mdl-data-table__cell--non-numeric rule";
                         noRules.colSpan = 9;
                         noRules.innerHTML = "You have not configured any rules.";
-                    tr.appendChild(noRule);
+                    tr.appendChild(noRules);
                 tbody.appendChild(tr);
             } else {
                 // Rules is not empty
