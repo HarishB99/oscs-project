@@ -1,6 +1,7 @@
 import subprocess, json, sys, argparse, requests, platform, socket
 import FirewallRule
 from iptableSetup import IptablesHandler
+from WindowsFirewallHandler import WindowsFirewallHandler
 
 #argument parser
 parser = argparse.ArgumentParser()
@@ -38,17 +39,19 @@ else:
     if r.status_code == 200:
         #parse the json containing data
         rules = json.loads(r.text)
-for r in rules["firewallRules"]
-    if r["direction"] == "incoming":
-        IptablesHandler.createRule(r, True)
-    elif r["direction"] == "outgoing":
-        IptablesHandler.createRule(r, False)
-    else:
-        print("Error: Unrecognized firewall rule direction")
 
-#write test rules to file for proxy script
-with open('../data/temprules.json', 'rw+') as rulefile:
-    rulefile.write(json.dumps(rules))
+#configuring firewall according to rules
+if sys.platform.startswith('linux'): #iptables for linux
+    for r in rules["firewallRules"]
+        if r["direction"] == "incoming":
+            IptablesHandler.createRule(r, True)
+        elif r["direction"] == "outgoing":
+            IptablesHandler.createRule(r, False)
+        else:
+            print("Error: Unrecognized firewall rule direction")
+else if sys.platform == 'win32': #windows firewall for windows
+    WindowsFirewallHandler.clear()
+    WindowsFirewallHandler.addRules(rules)
 
 
 

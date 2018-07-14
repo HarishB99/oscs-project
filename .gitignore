@@ -3,9 +3,8 @@
 proxyclient/data/apiKeys.json
 proxyclient/logs
 **/bac/
-**/scripts/**
-!**/scripts/app.js
-!proxyclient/scripts/
+public/scripts/**
+!public/scripts/app.js
 proxyclient/scripts/googleTest.py
 proxyclient/scripts/WOTtest.py
 **/extra/
