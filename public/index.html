@@ -375,6 +375,15 @@
         th.sort {
             cursor: pointer;
         }
+        .mdl-spinner {
+            display: block;
+            margin: auto;
+        }
+        @media screen and (max-width: 1360px) {
+            .mdl-spinner {
+                margin-left: 0;
+            }
+        }
     </style>
     <script async defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script async defer src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
@@ -452,7 +461,9 @@
                                 </tr>
                             </thead>
                             <tbody id="firewall-rule__table--list" class="list firewall-rule__table--list">
-                                
+                                <!-- <tr>
+                                    <td colspan="9"><div id="mdl-spinner" class="mdl-spinner mdl-js-spinner is-active"></div></td>
+                                </tr> -->
                             </tbody>
                         </table>
                     </div>
