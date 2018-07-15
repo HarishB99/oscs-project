@@ -3,14 +3,6 @@ var rule_btn = document.getElementById("mdl-navigation__link--rules");
 // Side panel menu button
 var profile_btn = document.getElementById("mdl-menu__item--profile");
 var signout_btn = document.getElementById("mdl-menu__item--signout");
-// Add rule button is to proceed to the "Add Rule" page to add a rule.
-var add_rule_btn = document.getElementById("firewall-rule__button--add");
-// Delete button is to delete an existing rule.
-var delete_rule_btn = document.getElementById("firewall-rule__button--delete");
-// Update button is to create/edit a new rule.
-var update_rule_btn = document.querySelector(".firewall-button--update");
-// Cancel button is to cancel the rule creation process.
-var cancel_rule_btn = document.querySelector(".firewall-button--cancel");
 
 // Set up path prefix i.e. '../' (for urls links in button actions)
 var path_prefix = "/";
@@ -111,16 +103,6 @@ if (!InputValidator.isEmpty(signout_btn)) {
             console.error(error);
             showSnackbar('An unexpected error occurred. Please try again later.');
         });
-    });
-}
-
-function retrieveProfile(uid) {
-    return axios({
-        url: '/account-retrieve-basic',
-        method: 'POST',
-        headers: {
-            'Authorisation': 'Bearer ' + uid
-        }
     });
 }
 
