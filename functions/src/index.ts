@@ -100,9 +100,8 @@ app.post('/account-retrieve-name', async (request, response) => {
     // the client side, unless python sdk also needs this.
     try {
         const { displayName } = await authenticator.checkAccess(request.get(TOKEN));
-        response.send(JSON.stringify({
-            displayName: displayName,
-            status: 'ok'
+        response.send(Object.assign(SuccessCode.ACCOUNT.ACCESS, {
+            displayName: displayName
         }));
     } catch (error) {
         console.error('Error while retrieving profile: ', error);
@@ -115,9 +114,8 @@ app.post('/account-retrieve-picture', async (request, response) => {
     // the client side, unless python sdk also needs this.
     try {
         const { photoURL } = await authenticator.checkAccess(request.get(TOKEN));
-        response.send(JSON.stringify({
-            photoURL: photoURL,
-            status: 'ok'
+        response.send(Object.assign(SuccessCode.ACCOUNT.ACCESS, {
+            photoURL: photoURL
         }));
     } catch (error) {
         console.error('Error while retrieving profile: ', error);
@@ -129,10 +127,10 @@ app.post('/account-retrieve-basic', async (request, response) => {
     // TODO: I might want to port over this implementation to 
     // the client side, unless python sdk also needs this.
     try {
-        const { displayName, email, phoneNumber, customClaims } 
+        const {displayName, email, phoneNumber, customClaims} 
             = await authenticator.checkAccess(request.get(TOKEN));
         const { organisation } = customClaims as UserClaim;
-        response.send(JSON.stringify({
+        response.send(Object.assign(SuccessCode.ACCOUNT.ACCESS, {
             displayName: displayName,
             email: email,
             phoneNumber: phoneNumber.split("+65")[1],
