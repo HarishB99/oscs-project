@@ -1,26 +1,48 @@
 require('babel-polyfill');
+
+// Firebase libraries
 const firebase = require('firebase/app');
 require('firebase/auth');
 require('firebase/firestore');
-const InputValidator = require('./modules/InputValidator').default;
-const UIUtils = require('./modules/UIUtils').default;
-const config = require('./modules/config').config;
 
+// Initialise firebase
+const config = require('./modules/config').config;
 firebase.initializeApp(config);
 
-const auth = firebase.auth();
-const db = firebase.firestore();
-db.settings({
-    timestampsInSnapshots: true
-});
+// Import other custom libraries
+const InputValidator = require('./modules/InputValidator').default;
+const UIUtils = require('./modules/UIUtils').default;
 
-auth.onAuthStateChanged(user => {
-    document.getElementById('firewall-rule__button--add')
-    .addEventListener('click', e => {
-        location.href = '/create_rule';
+firebase.auth().onAuthStateChanged(user => {
+    const profile_btn = document.getElementById('mdl-menu__item--profile');
+    const signout_btn = document.getElementById('mdl-menu__item--signout');
+    
+    profile_btn.addEventListener('click', () => {
+        location.href = '/profile';
     });
-
+    
+    signout_btn.addEventListener('click', () => {
+        firebase.auth().signOut()
+        .then(() => {
+            location.replace('/login');
+        })
+        .catch(error => {
+            console.error('Error while signing out user: ', error);
+            UIUtils.showSnackbar('An unexpected error occurred. Please clear your browser cache, restart your browser and try again.');
+        });
+    });
+    
     if (!InputValidator.isEmpty(user)) {
+        document.getElementById('firewall-rule__button--add')
+        .addEventListener('click', e => {
+            location.href = '/create_rule';
+        });
+    
+        const db = firebase.firestore();
+        db.settings({
+            timestampsInSnapshots: true
+        });
+
         db.collection('users').doc(user.uid)
         .collection('rules').onSnapshot(rules => {
             const tbody = document.getElementById('firewall-rule__table--list');
