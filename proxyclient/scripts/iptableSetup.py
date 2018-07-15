@@ -1,6 +1,4 @@
-import subprocess
-import json
-import subprocess
+import subprocess, json
 from FirewallRule import FirewallRule
 
 class IptablesHandler:

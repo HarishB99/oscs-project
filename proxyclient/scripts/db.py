@@ -58,5 +58,6 @@ class LogDatabase:
             u["events"][eventType] = {}
         if u["events"][eventType][domain] is None:
             u["events"][eventType][domain] = 1
-        else u["events"][eventType][domain] += 1
+        else:
+            u["events"][eventType][domain] += 1
         LogDatabase.updateUser(u)
