@@ -8,3 +8,4 @@ proxyclient/scripts/WOTtest.py
 **/scripts/**
 !**/scripts/app.js
 **/extra/
+**/private
