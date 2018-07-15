@@ -13,7 +13,7 @@ export class Authenticator {
      * in the custom request header 'Authorisation'.
      * The value of the header is formatted as 'Bearer <token>'
      */
-    public getAccessToken(header: string): string {
+    private getAccessToken(header: string): string {
         if (!(new InputValidator().isEmpty(header))) {
             const match = header.match(/^Bearer\s+([^\s]+)$/);
             if (match) {
