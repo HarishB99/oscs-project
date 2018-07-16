@@ -1,6 +1,5 @@
 {
-  "firewallRules": {
-    "rules":[
+  "firewallRules": [
       {
         "priority": 100,
         "name": "http",
@@ -61,15 +60,14 @@
         "state" : "NEW,ESTABLISHED,RELATED",
         "direction" : "outgoing"
       }
-    ]
-  },
+  ],
   "webfilter" : {
     "mode": "blacklist",
     "blockAds": true,
     "blockMalicious": true,
     "domainGroups" : ["socialMedia"],
     "domains": [
-      "kongregate.com"
+      "www.kongregate.com"
     ]
   },
   "dpi" : true,

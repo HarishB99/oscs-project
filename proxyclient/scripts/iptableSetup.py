@@ -1,6 +1,4 @@
-import subprocess
-import json
-import subprocess
+import subprocess, json
 from FirewallRule import FirewallRule
 
 class IptablesHandler:
@@ -25,11 +23,6 @@ class IptablesHandler:
          "tcp", "--dport", "80", "-j", "REDIRECT", "--to-ports", str(port)])
         subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "PREROUTING", "-p",
          "tcp", "--dport", "443", "-j", "REDIRECT", "--to-ports", str(port)])
-        #ALlow DNS requests
-        subprocess.run(["sudo", "iptables", "-A", "INPUT", "-p", "tcp", "--sport",
-         "53", "-j", "ACCEPT"])
-        subprocess.run(["sudo", "iptables", "-A", "INPUT", "-p", "udp", "--sport",
-         "53", "-j", "ACCEPT"])
         #TODO::Rule to allow traffic from cloud server
         return True
 

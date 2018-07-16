@@ -2,7 +2,7 @@ class CheckedDomains:
     list = {}
 
     @staticmethod
-    def add(domain, safe, reason):
+    def add(domain, safe, reason, kill):
             if domain in CheckedDomains.list:
                 if not safe:
                     CheckedDomains.list[domain]["isSafe"] = False
@@ -10,7 +10,8 @@ class CheckedDomains:
             else:
                 CheckedDomains.list[domain] = {
                     "isSafe" : safe,
-                    "reason" : [reason]
+                    "reason" : [reason],
+                    "kill": kill
                 }
 
     @staticmethod

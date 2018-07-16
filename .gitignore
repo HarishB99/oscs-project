@@ -2,10 +2,10 @@
 **/lib/
 proxyclient/data/apiKeys.json
 proxyclient/logs
+**/bac/
+public/scripts/**
+!public/scripts/app.js
 proxyclient/scripts/googleTest.py
 proxyclient/scripts/WOTtest.py
-**/bac/
-**/scripts/**
-!**/scripts/app.js
 **/extra/
 **/private

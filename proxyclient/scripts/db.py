@@ -13,7 +13,9 @@ class LogDatabase:
             "events": {
                 "maliciousFile": [],
                 "blockedDomains" : {},
-                "suspiciousDomain": [],
+                "suspiciousDomain": {},
+                "questionableDomain": {},
+                "childUnsafe": {},
                 "downloadedFile": []
             }
         }
@@ -42,7 +44,20 @@ class LogDatabase:
         LogDatabase.updateUser(u)
 
     @staticmethod
-    def securityEvent(ip, eventType, details):
+    def blockedDomain(ip, domain):
         u = LogDatabase.getUser(ip)
-        u["events"][eventType].append(details)
+        if domain not in u["events"]["blockedDomains"]:
+            u["events"]["blockedDomains"][domain] = 1
+        else:
+            u["events"]["blockedDomains"][domain] += 1
+        LogDatabase.updateUser(u)
+
+    def securityEvent(ip, domain, eventType):
+        u = LogDatabase.getUser(ip)
+        if u["events"][eventType] is None:
+            u["events"][eventType] = {}
+        if u["events"][eventType][domain] is None:
+            u["events"][eventType][domain] = 1
+        else:
+            u["events"][eventType][domain] += 1
         LogDatabase.updateUser(u)
