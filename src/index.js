@@ -112,9 +112,9 @@ firebase.auth().onAuthStateChanged(user => {
                             deleteBtn.innerHTML = "<i class=\"material-icons\">delete</i> Delete";
                             deleteBtn.style.width = "100%";
                             buttonsHolder.appendChild(deleteBtn);
+                        tr.appendChild(prior);
                         tr.appendChild(ruleName);
                         tr.appendChild(access);
-                        tr.appendChild(prior);
                         tr.appendChild(sip);
                         tr.appendChild(sport);
                         tr.appendChild(dip);
@@ -125,7 +125,7 @@ firebase.auth().onAuthStateChanged(user => {
                 });
             }
             const options = {
-                valueNames: ['rule', 'access', 'priority', 
+                valueNames: ['priority', 'rule', 'access', 
                 'saddr','sport', 'daddr', 'dport', 'protocol']
             };
             const ruleList = new List('firewall-rule__table', options);
