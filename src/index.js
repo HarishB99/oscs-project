@@ -130,7 +130,7 @@ firebase.auth().onAuthStateChanged(user => {
             };
             const ruleList = new List('firewall-rule__table', options);
             $(function() {
-                $($('th.sort')[0]).trigger('click', function() {
+                $('th[data-sort=\'priority\']').trigger('click', function() {
                     console.log('clicked');
                 });
 
