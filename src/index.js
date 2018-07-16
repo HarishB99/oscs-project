@@ -73,13 +73,13 @@ firebase.auth().onAuthStateChanged(user => {
 
                     const tr = document.createElement('tr');
                         const ruleName = document.createElement("td");
-                            ruleName.className = "mdl-data-table__cell--non-numeric rule";
+                            ruleName.className = "rule";
                             ruleName.innerHTML = name;
                         const access = document.createElement("td");
                             access.className = "access";
                             access.innerHTML = allow;
                         const prior = document.createElement("td");
-                            prior.className = "priority";
+                            prior.className = "mdl-data-table__cell--non-numeric priority";
                             prior.innerHTML = priority;
                         const sip = document.createElement("td");
                             sip.className = "saddr";
