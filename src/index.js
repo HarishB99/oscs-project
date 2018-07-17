@@ -14,6 +14,9 @@ const InputValidator = require('./modules/InputValidator').default;
 const UIUtils = require('./modules/UIUtils').default;
 
 firebase.auth().onAuthStateChanged(user => {
+    const mdl_spinner_holder = document.getElementById('mdl-spinner--holder');
+    const ruleRowsName = 'rules';
+
     const profile_btn = document.getElementById('mdl-menu__item--profile');
     const signout_btn = document.getElementById('mdl-menu__item--signout');
     
@@ -31,6 +34,23 @@ firebase.auth().onAuthStateChanged(user => {
             UIUtils.showSnackbar('An unexpected error occurred. Please clear your browser cache, restart your browser and try again.');
         });
     });
+
+    function clearTable(tbody) {
+        const ruleRows = document.querySelectorAll('.'.concat(ruleRowsName));
+        if (ruleRows.length !== 0) {
+            for (let i = 0; i < ruleRows.length; i++) {
+                tbody.removeChild(ruleRows[i]);
+            }
+        }
+    }
+
+    function hideLoader() {
+        mdl_spinner_holder.style.display = 'none';
+    }
+
+    function showLoader() {
+        mdl_spinner_holder.style.display = 'block';
+    }
     
     if (!InputValidator.isEmpty(user)) {
         document.getElementById('firewall-rule__button--add')
@@ -45,10 +65,15 @@ firebase.auth().onAuthStateChanged(user => {
 
         db.collection('users').doc(user.uid)
         .collection('rules').onSnapshot(rules => {
+            showLoader();
             const tbody = document.getElementById('firewall-rule__table--list');
             // Reset table body
-            tbody.innerHTML = '';
+            // tbody.innerHTML = '';
+
+            clearTable(tbody);
+
             if (rules.empty) {
+                hideLoader();
                 const tr = document.createElement('tr');
                     const noRules = document.createElement('td');
                         noRules.className = "mdl-data-table__cell--non-numeric rule";
@@ -57,10 +82,12 @@ firebase.auth().onAuthStateChanged(user => {
                     tr.appendChild(noRules);
                 tbody.appendChild(tr);
             } else {
+                hideLoader();
                 // Rules is not empty
                 rules.forEach(rule => {
                     const params = rule.data();
                     const {
+                        access,
                         name, 
                         priority, 
                         sourceip, 
@@ -69,15 +96,17 @@ firebase.auth().onAuthStateChanged(user => {
                         destport, 
                         protocol
                     } = params;
-                    const allow = params.allow ? "Allow" : "Deny";
+
+                    const allow = params.access ? "Allow" : "Deny";
 
                     const tr = document.createElement('tr');
+                    tr.className = ruleRowsName;
                         const ruleName = document.createElement("td");
                             ruleName.className = "rule";
                             ruleName.innerHTML = name;
-                        const access = document.createElement("td");
-                            access.className = "access";
-                            access.innerHTML = allow;
+                        const allowed = document.createElement("td");
+                            allowed.className = "access";
+                            allowed.innerHTML = allow;
                         const prior = document.createElement("td");
                             prior.className = "mdl-data-table__cell--non-numeric priority";
                             prior.innerHTML = priority;
@@ -114,7 +143,7 @@ firebase.auth().onAuthStateChanged(user => {
                             buttonsHolder.appendChild(deleteBtn);
                         tr.appendChild(prior);
                         tr.appendChild(ruleName);
-                        tr.appendChild(access);
+                        tr.appendChild(allowed);
                         tr.appendChild(sip);
                         tr.appendChild(sport);
                         tr.appendChild(dip);
@@ -130,7 +159,7 @@ firebase.auth().onAuthStateChanged(user => {
             };
             const ruleList = new List('firewall-rule__table', options);
             $(function() {
-                $('th[data-sort=\'priority\']').trigger('click', function() {
+                $($('th.sort')[0]).trigger('click', function() {
                     console.log('clicked');
                 });
 

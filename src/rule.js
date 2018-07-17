@@ -47,7 +47,7 @@ firebase.auth().onAuthStateChanged(user => {
             UIUtils.update_text_field_ui(rule_create_name, 
                 InputValidator.isValidRuleName(rule_create_name.value));
             UIUtils.update_text_field_ui(rule_create_priority, 
-                InputValidator.isNum(rule_create_priority.value));
+                InputValidator.isValidPriorityNum(rule_create_priority.value));
             UIUtils.update_text_field_ui(rule_create_sip, 
                 InputValidator.isValidIp(rule_create_sip.value));
             UIUtils.update_text_field_ui(rule_create_sport, 
@@ -71,10 +71,10 @@ firebase.auth().onAuthStateChanged(user => {
         
         rule_create_priority.addEventListener('focus', e => {
             UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isNum(e.target.value));
+                InputValidator.isValidPriorityNum(e.target.value));
         }); rule_create_priority.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isNum(e.target.value));
+                InputValidator.isValidPriorityNum(e.target.value));
         });
         
         rule_create_sip.addEventListener('focus', e => {

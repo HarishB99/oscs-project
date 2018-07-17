@@ -212,7 +212,7 @@ app.post('/rule-create', async (request, response) => {
         let input: RuleInput = null;
     
         if (iv.isValidRuleName(name) && iv.isBoolean(access)
-            && iv.isNum(priority) && iv.isValidProto(proto)
+            && iv.isValidPriorityNum(priority) && iv.isValidProto(proto)
             && iv.isValidIp(sip) && iv.isValidPortNum(sport)
             && iv.isValidIp(dip) && iv.isValidPortNum(dport)) {
             input = new RuleInput(name, access, priority, proto, sip, sport, dip, dport);
@@ -270,7 +270,7 @@ app.post('/rule-update', async (request, response) => {
         let input: RuleInput = null;
     
         if (iv.isValidRuleName(name) && iv.isBoolean(access)
-            && iv.isNum(priority) && iv.isValidProto(proto)
+            && iv.isValidPriorityNum(priority) && iv.isValidProto(proto)
             && iv.isValidIp(sip) && iv.isValidPortNum(sport)
             && iv.isValidIp(dip) && iv.isValidPortNum(dport)) {
             input = new RuleInput(name, access, priority, proto, sip, sport, dip, dport);
