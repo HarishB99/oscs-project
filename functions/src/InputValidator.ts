@@ -52,6 +52,15 @@ export class InputValidator {
     }
 
     /**
+     * Check whether the priority number can be accepted as a valid value
+     * @param input the string input to be validated
+     */
+    public isValidPriorityNum(input: string): boolean {
+        const re = /^[0-9]{1,5}$/;
+        return re.test(input);
+    }
+
+    /**
      * Check whether the phone number can be accepted as a valid value
      * @param input the string input to be validated
      */
@@ -87,7 +96,7 @@ export class InputValidator {
      * @param input the string input to be validated
      */
     public isValidPortNum(input: string): boolean {
-        if (this.isNum(input)) {
+        if (/^[0-9]{1,5}$/.test(input)) {
             const port = parseInt(input, 10);
             return (port >= 0 && port <= 65535) ? true : false;
         }
@@ -118,12 +127,8 @@ export class InputValidator {
      * @param input the string input to be validated
      */
     public isNum(input: string): boolean {
-        try {
-            const int = parseInt(input);
-            return !isNaN(int);
-        } catch (error) {
-            return false;
-        }
+        const re = /^[0-9]$/;
+        return re.test(input);
     }
 
     /**

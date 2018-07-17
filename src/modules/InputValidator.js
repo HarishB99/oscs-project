@@ -2,6 +2,10 @@ var InputValidator = function() {};
 InputValidator.isEmpty = function(input) {
     return input === "" || typeof input === "undefined" || input === null;
 };
+InputValidator.isValidPriorityNum = function(input) {
+    const re = /^[0-9]{1,5}$/;
+    return re.test(input);
+}
 InputValidator.isAReasonablyStrongPassword = function(input) {
     const re = new RegExp('^(?=.{2,}[a-z])(?=.{2,}[A-Z])(?=.{2,}[0-9])(?=.+[!@#$%^&*])(?=.{8,})', 'u');
     return re.test(input);
@@ -19,7 +23,7 @@ InputValidator.isValidPhoneNum = function(input) {
     return re.test(input);
 };
 InputValidator.isValidPortNum = function(input) {
-    if (InputValidator.isNum(input)) {
+    if (/^[0-9]{1,5}$/.test(input)) {
         var port = parseInt(input, 10);
         return (port >= 0 && port <= 65535) ? true : false;
     }
@@ -30,12 +34,8 @@ InputValidator.isValidRuleName = function(input) {
     return re.test(input);
 };
 InputValidator.isNum = function(input) {
-    try {
-        const int = parseInt(input);
-        return !isNaN(int);
-    } catch (error) {
-        return false;
-    }
+    const re = /^[0-9]$/;
+    return re.test(input);
 };
 InputValidator.isValidIp = function(input) {
     const re = /^(?=[\d\*]+\.[\d\*]\.[\d\*]\.[\d\*]$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9]|\*)\.?){4}$/;

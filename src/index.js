@@ -1,32 +1,79 @@
 require('babel-polyfill');
+
+// Firebase libraries
 const firebase = require('firebase/app');
 require('firebase/auth');
 require('firebase/firestore');
-const InputValidator = require('./modules/InputValidator').default;
-const UIUtils = require('./modules/UIUtils').default;
-const config = require('./modules/config').config;
 
+// Initialise firebase
+const config = require('./modules/config').config;
 firebase.initializeApp(config);
 
-const auth = firebase.auth();
-const db = firebase.firestore();
-db.settings({
-    timestampsInSnapshots: true
-});
+// Import other custom libraries
+const InputValidator = require('./modules/InputValidator').default;
+const UIUtils = require('./modules/UIUtils').default;
 
-auth.onAuthStateChanged(user => {
-    document.getElementById('firewall-rule__button--add')
-    .addEventListener('click', e => {
-        location.href = '/create_rule';
+firebase.auth().onAuthStateChanged(user => {
+    const mdl_spinner_holder = document.getElementById('mdl-spinner--holder');
+    const ruleRowsName = 'rules';
+
+    const profile_btn = document.getElementById('mdl-menu__item--profile');
+    const signout_btn = document.getElementById('mdl-menu__item--signout');
+    
+    profile_btn.addEventListener('click', () => {
+        location.href = '/profile';
+    });
+    
+    signout_btn.addEventListener('click', () => {
+        firebase.auth().signOut()
+        .then(() => {
+            location.replace('/login');
+        })
+        .catch(error => {
+            console.error('Error while signing out user: ', error);
+            UIUtils.showSnackbar('An unexpected error occurred. Please clear your browser cache, restart your browser and try again.');
+        });
     });
 
+    function clearTable(tbody) {
+        const ruleRows = document.querySelectorAll('.'.concat(ruleRowsName));
+        if (ruleRows.length !== 0) {
+            for (let i = 0; i < ruleRows.length; i++) {
+                tbody.removeChild(ruleRows[i]);
+            }
+        }
+    }
+
+    function hideLoader() {
+        mdl_spinner_holder.style.display = 'none';
+    }
+
+    function showLoader() {
+        mdl_spinner_holder.style.display = 'block';
+    }
+    
     if (!InputValidator.isEmpty(user)) {
+        document.getElementById('firewall-rule__button--add')
+        .addEventListener('click', e => {
+            location.href = '/create_rule';
+        });
+    
+        const db = firebase.firestore();
+        db.settings({
+            timestampsInSnapshots: true
+        });
+
         db.collection('users').doc(user.uid)
         .collection('rules').onSnapshot(rules => {
+            showLoader();
             const tbody = document.getElementById('firewall-rule__table--list');
             // Reset table body
-            tbody.innerHTML = '';
+            // tbody.innerHTML = '';
+
+            clearTable(tbody);
+
             if (rules.empty) {
+                hideLoader();
                 const tr = document.createElement('tr');
                     const noRules = document.createElement('td');
                         noRules.className = "mdl-data-table__cell--non-numeric rule";
@@ -35,10 +82,12 @@ auth.onAuthStateChanged(user => {
                     tr.appendChild(noRules);
                 tbody.appendChild(tr);
             } else {
+                hideLoader();
                 // Rules is not empty
                 rules.forEach(rule => {
                     const params = rule.data();
                     const {
+                        access,
                         name, 
                         priority, 
                         sourceip, 
@@ -47,17 +96,19 @@ auth.onAuthStateChanged(user => {
                         destport, 
                         protocol
                     } = params;
-                    const allow = params.allow ? "Allow" : "Deny";
+
+                    const allow = params.access ? "Allow" : "Deny";
 
                     const tr = document.createElement('tr');
+                    tr.className = ruleRowsName;
                         const ruleName = document.createElement("td");
-                            ruleName.className = "mdl-data-table__cell--non-numeric rule";
+                            ruleName.className = "rule";
                             ruleName.innerHTML = name;
-                        const access = document.createElement("td");
-                            access.className = "access";
-                            access.innerHTML = allow;
+                        const allowed = document.createElement("td");
+                            allowed.className = "access";
+                            allowed.innerHTML = allow;
                         const prior = document.createElement("td");
-                            prior.className = "priority";
+                            prior.className = "mdl-data-table__cell--non-numeric priority";
                             prior.innerHTML = priority;
                         const sip = document.createElement("td");
                             sip.className = "saddr";
@@ -90,9 +141,9 @@ auth.onAuthStateChanged(user => {
                             deleteBtn.innerHTML = "<i class=\"material-icons\">delete</i> Delete";
                             deleteBtn.style.width = "100%";
                             buttonsHolder.appendChild(deleteBtn);
-                        tr.appendChild(ruleName);
-                        tr.appendChild(access);
                         tr.appendChild(prior);
+                        tr.appendChild(ruleName);
+                        tr.appendChild(allowed);
                         tr.appendChild(sip);
                         tr.appendChild(sport);
                         tr.appendChild(dip);
@@ -103,7 +154,7 @@ auth.onAuthStateChanged(user => {
                 });
             }
             const options = {
-                valueNames: ['rule', 'access', 'priority', 
+                valueNames: ['priority', 'rule', 'access', 
                 'saddr','sport', 'daddr', 'dport', 'protocol']
             };
             const ruleList = new List('firewall-rule__table', options);

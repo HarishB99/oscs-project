@@ -8,3 +8,4 @@ public/scripts/**
 proxyclient/scripts/googleTest.py
 proxyclient/scripts/WOTtest.py
 **/extra/
+**/private

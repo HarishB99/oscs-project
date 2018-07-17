@@ -14,13 +14,8 @@ export class RuleInput {
     public readonly state: string = 'NEW,ESTABLISHED,RELATED';
 
     private parseBool(input: string): boolean {
-        try {
-            const binary = parseInt(input);
-            return binary === 1 ? true: false;
-        } catch (error) {
-            const input_lower = input.toLowerCase();
-            return (input_lower === 'true' || input_lower === 't') ? true : false;
-        }
+        const input_lower = input.toLowerCase();
+        return (input_lower === 'true' || input_lower === 't') ? true : false;
     }
 
     public constructor(name: string, access: string, priority: string, proto: string, sip: string, sport: string, dip: string, dport: string) {
