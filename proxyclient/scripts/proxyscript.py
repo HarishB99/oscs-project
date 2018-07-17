@@ -202,9 +202,11 @@ def response(flow):
         #flow.response.headers["content-type"] = "image/png"
 
     #check downloading files
-    elif flow.response.headers.get("content-disposition", "").startswith("attachment"):
+    elif flow.response.headers.get("content-type", "").startswith("video"): #video
+        () #Do nothing
+    elif flow.response.headers.get("content-type", "").startswith("application/octet-stream") or
+        flow.response.headers.get("content-disposition", "").startswith("attachment"): #downloaded files
         () #TODO::scan file for viruses
-
     else:
         #check text
         html = BeautifulSoup(flow.response.content, "html.parser")
