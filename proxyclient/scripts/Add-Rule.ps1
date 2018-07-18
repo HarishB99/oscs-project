@@ -76,7 +76,6 @@ Function Add-Rule {
 
 Set-NetFirewallProfile -All -DefaultInboundAction Block -DefaultOutboundAction Allow
 Remove-NetFirewallRule -All
-Write-Host $ruleList
 $rulesObj = ConvertFrom-Json -InputObject $ruleList
 ForEach ($rule in $rulesObj) {
   $args = "& Add-Rule -Name $($rule.name) -Protocol $($rule.protocol) -Action "

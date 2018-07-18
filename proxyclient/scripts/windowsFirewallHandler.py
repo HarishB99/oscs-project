@@ -11,6 +11,4 @@ class WindowsFirewallHandler:
     def setRules(ruleList):
         r = json.dumps(ruleList["firewallRules"])
         rs = r.replace("\"", "\"\"\"")
-        print(rs)
-        print(r)
         subprocess.run(["powershell", "-file", "Add-Rule.ps1", "-RuleList", "\'"+rs+"\'"])
