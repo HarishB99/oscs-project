@@ -35,22 +35,22 @@ app.post('/cors-allowed', cors, (request, response, next) => {
 });
 
 // Accounts
-app.post('/account', async (request, response) => {
-    try {
-        const { access, email } = request.body;
-        if (access === 'login' && 
-        iv.isValidEmail(email)) {
-            await authenticator
-                .checkAccess(request.get(TOKEN));
-            response.send(SuccessCode.ACCOUNT.ACCESS);
-        } else {
-            response.send(ErrorCode.ACCOUNT.BAD_DATA);
-        }
-    } catch (error) {
-        console.error('Error while serving /account: ', error);
-        response.send(ErrorCode.ACCOUNT.ACCESS);
-    }
-});
+// app.post('/account', async (request, response) => {
+//     try {
+//         const { access, email } = request.body;
+//         if (access === 'login' && 
+//         iv.isValidEmail(email)) {
+//             await authenticator
+//                 .checkAccess(request.get(TOKEN));
+//             response.send(SuccessCode.ACCOUNT.ACCESS);
+//         } else {
+//             response.send(ErrorCode.ACCOUNT.BAD_DATA);
+//         }
+//     } catch (error) {
+//         console.error('Error while serving /account: ', error);
+//         response.send(ErrorCode.ACCOUNT.ACCESS);
+//     }
+// });
 
 app.post('/account-create', async (request, response) => {
     try {
@@ -62,79 +62,31 @@ app.post('/account-create', async (request, response) => {
         if (!input) {
             response.send(ErrorCode.ACCOUNT.BAD_DATA);
         } else {
-            // TODO: Create user with password
-            // Send verification email and verification SMS
-            // using auth.user.onCreate method in admin SDK.
-            // After verified, user can proceed to the 
-            // system. Manage permissions with claims 
-            // and uid from firebase client on client-side.
+            const userExists = await authenticator.userAlreadyExists(input);
 
-            const { uid } = await auth.createUser({
-                email: input.email,
-                password: input.password,
-                photoURL: input.photoURL,
-                phoneNumber: input.phoneNumber,
-                displayName: input.displayName
-            });
+            if (userExists) {
 
-            await auth.setCustomUserClaims(uid, {
-                organisation: input.organisation,
-                phoneVerified: false
-            });
-
-            response.send(SuccessCode.ACCOUNT.CREATE);
+                response.send(ErrorCode.ACCOUNT.ALREADY_EXIST);
+            } else {
+                const { uid } = await auth.createUser({
+                    email: input.email,
+                    password: input.password,
+                    photoURL: input.photoURL,
+                    phoneNumber: input.phoneNumber,
+                    displayName: input.displayName
+                });
+    
+                await auth.setCustomUserClaims(uid, {
+                    organisation: input.organisation,
+                    phoneVerified: false
+                });
+    
+                response.send(SuccessCode.ACCOUNT.CREATE);
+            }
         }
     } catch (error) {
         console.error('Error while creating account request: ', error);
         response.send(ErrorCode.ACCOUNT.CREATE);
-    }
-});
-
-app.post('/account-retrieve-name', async (request, response) => {
-    // TODO: I might want to port over this implementation to 
-    // the client side, unless python sdk also needs this.
-    try {
-        const { displayName } = await authenticator.checkAccess(request.get(TOKEN));
-        response.send(Object.assign(SuccessCode.ACCOUNT.ACCESS, {
-            displayName: displayName
-        }));
-    } catch (error) {
-        console.error('Error while retrieving profile: ', error);
-        response.send(ErrorCode.ACCOUNT.ACCESS);
-    }
-});
-
-app.post('/account-retrieve-picture', async (request, response) => {
-    // TODO: I might want to port over this implementation to 
-    // the client side, unless python sdk also needs this.
-    try {
-        const { photoURL } = await authenticator.checkAccess(request.get(TOKEN));
-        response.send(Object.assign(SuccessCode.ACCOUNT.ACCESS, {
-            photoURL: photoURL
-        }));
-    } catch (error) {
-        console.error('Error while retrieving profile: ', error);
-        response.send(ErrorCode.ACCOUNT.ACCESS);
-    }
-});
-
-app.post('/account-retrieve-basic', async (request, response) => {
-    // TODO: I might want to port over this implementation to 
-    // the client side, unless python sdk also needs this.
-    try {
-        const {displayName, email, phoneNumber, customClaims} 
-            = await authenticator.checkAccess(request.get(TOKEN));
-        const { organisation } = customClaims as UserClaim;
-        response.send(Object.assign(SuccessCode.ACCOUNT.ACCESS, {
-            displayName: displayName,
-            email: email,
-            phoneNumber: phoneNumber.split("+65")[1],
-            organisation: organisation,
-            status: 'ok'
-        }));
-    } catch (error) {
-        console.error('Error while retrieving profile: ', error);
-        response.send(ErrorCode.ACCOUNT.ACCESS);
     }
 });
 
@@ -383,8 +335,6 @@ export const createNewUser = functions.auth.user().onCreate(user => {
     // The first two may have to be done 
     // on the client side. As for the python 
     // SDK, consider creating a node js client.
-    // TODO: Send verification email
-    // TODO: Send verification SMS
     // TODO: Set any other claims (account verified, etc)
 
     // auth.setCustomUserClaims(uid, {

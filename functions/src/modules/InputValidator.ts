@@ -11,7 +11,7 @@ export class InputValidator {
      * Check whether the input is empty
      * @param input the string input to be validated
      */
-    private isEmpty(input: string): boolean {
+    public isEmpty(input: string): boolean {
         return input === '' || input === null || typeof input === 'undefined';
     }
 
