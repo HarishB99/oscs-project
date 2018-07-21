@@ -22,7 +22,7 @@ export class RuleInput {
     public constructor(name: string, access: string, priority: string, proto: string, sip: string, sport: string, dip: string, dport: string, direction: string) {
         this.name = name;
         this.access = this.parseBool(access);
-        this.priority = parseInt(priority);
+        this.priority = parseInt(priority, 10);
         this.protocol = proto.toUpperCase();
         this.sourceip = sip;
         this.sourceport = sport;

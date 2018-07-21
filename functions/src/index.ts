@@ -1,13 +1,12 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as express from 'express';
-import { InputValidator } from './InputValidator';
-import { UserInput } from './UserInput';
-import { UserClaim } from './UserClaim';
-import { GlobalOptionsInput } from './GlobalOptionsInput';
-import { SuccessCode } from './SuccessCode';
-import { ErrorCode } from './ErrorCode';
-import { Authenticator } from './Authenticator';
+import { InputValidator } from './modules/InputValidator';
+import { Authenticator } from './modules/Authenticator';
+import { UserClaim } from './modules/types/UserClaim';
+import { UserInput } from './modules/types/UserInput';
+import { SuccessCode } from './modules/response_codes/SuccessCode';
+import { ErrorCode } from './modules/response_codes/ErrorCode';
 // import { h, render } from 'preact';
 const cors = require('cors')({ origin: true });
 
@@ -15,6 +14,9 @@ admin.initializeApp();
 
 const app = express();
 const db = admin.firestore();
+db.settings({
+    timestampsInSnapshots: true
+});
 const auth = admin.auth();
 const iv = new InputValidator();
 const authenticator = new Authenticator();
@@ -55,14 +57,7 @@ app.post('/account-create', async (request, response) => {
         const { email, org, 
             contact, pass } = request.body;
 
-        let input: UserInput = null;
-        if (iv.isValidEmail(email) && 
-            iv.isValidOrgName(org) && 
-            iv.isValidPhoneNum(contact) && 
-            iv.isAReasonablyStrongPassword(pass)) {
-            input = new UserInput(email, pass, 
-                contact, org, null);
-        }
+        const input = iv.isValidUserDetails(email, org, contact, pass, null);
 
         if (!input) {
             response.send(ErrorCode.ACCOUNT.BAD_DATA);
@@ -339,16 +334,7 @@ app.post('/global-update', async (request, response) => {
             blockMalicious
         } = request.body
     
-        let input: GlobalOptionsInput = null;
-    
-        console.log(`dpi: ${dpi}, virusScan: ${virusScan}, blockAds: ${blockAds}, blockMalicious: ${blockMalicious}`);
-
-        if (iv.isBoolean(dpi) && iv.isBoolean(virusScan)
-            && iv.isBoolean(blockAds) && iv.isBoolean(blockMalicious)) {
-            input = new GlobalOptionsInput(dpi, virusScan, blockAds, blockMalicious);
-        }
-
-        console.log(`Options parsed: ${input.toString()}`);
+        const input = iv.isValidOptions(dpi, virusScan, blockAds, blockMalicious)
 
         if (!input) {
             response.send(ErrorCode.GLOBAL_OPTIONS.BAD_DATA);
@@ -369,7 +355,7 @@ app.post('/global-update', async (request, response) => {
     }
 });
 
-app.post('/filter-create', (request, response) => {
+app.post('/filter-add', (request, response) => {
     response.status(503).send('Functionality not available yet.');
 });
 
