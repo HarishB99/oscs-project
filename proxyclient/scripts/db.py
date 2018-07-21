@@ -54,9 +54,9 @@ class LogDatabase:
 
     def securityEvent(ip, domain, eventType):
         u = LogDatabase.getUser(ip)
-        if u["events"][eventType] is None:
+        if eventType not in u["events"]:
             u["events"][eventType] = {}
-        if u["events"][eventType][domain] is None:
+        if domain not in u["events"][eventType]:
             u["events"][eventType][domain] = 1
         else:
             u["events"][eventType][domain] += 1

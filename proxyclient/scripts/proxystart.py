@@ -15,10 +15,10 @@ args = parser.parse_args()
 if not args.no_sync:
     if args.username is None:
         print("No username!")
-        sys.exit(status=None)
+        sys.exit()
     elif args.password is None:
         print("No password!")
-        sys.exit(status=None)
+        sys.exit()
 
 #configure iptables
 #initialze iptables
@@ -53,8 +53,6 @@ if sys.platform.startswith('linux'): #iptables for linux
 elif sys.platform == 'win32': #windows firewall for windows
     print("WINDOWS MACHINE")
     WindowsFirewallHandler.setRules(rules)
-
-
 
 #start mitmdump for web filter
 print("Proxy Server IP:")
