@@ -235,6 +235,8 @@ export class InputValidator {
             this.isValidPhoneNum(phoneNumber) && 
             this.isAReasonablyStrongPassword(password)) {
             return new UserInput(email, password, phoneNumber, organisation, null);
+        } else {
+            return null;
         }
     }
 }
