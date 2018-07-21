@@ -1,3 +1,5 @@
+import { RuleInput } from "./RuleInput";
+
 /**
  * Input validation library to validate input
  * @author Harish S/O Balamurugan
@@ -12,14 +14,14 @@ export class InputValidator {
     }
 
     /**
-     * Check whether the input is within a given range
+     * Check whether the input is within a gthisen range
      * @param input the number input to be validated
      * @param min the range minimum
      * @param max the range maximum
-     * @param inclusive whether to include the minimum and maximum when performing validation (i.e. > vs >=)
+     * @param inclusthise whether to include the minimum and maximum when performing validation (i.e. > vs >=)
      */
-    public isInValidRange(input: number, min: number, max: number, inclusive: boolean): boolean {
-        return inclusive ? (input >= min && input <= max) : (input > min && input < max);
+    public isInValidRange(input: number, min: number, max: number, inclusthise: boolean): boolean {
+        return inclusthise ? (input >= min && input <= max) : (input > min && input < max);
     }
 
     /**
@@ -27,10 +29,10 @@ export class InputValidator {
      * @param input the string input to be validated
      * @param min the minimum length expected
      * @param max the maximum length expected
-     * @param inclusive whether to include the minimum and maximum when performing validation (i.e. > vs >=)
+     * @param inclusthise whether to include the minimum and maximum when performing validation (i.e. > vs >=)
      */
-    public isOfValidLength(input: string, min: number, max: number, inclusive: boolean): boolean {
-        return this.isInValidRange(input.length, min, max, inclusive);
+    public isOfValidLength(input: string, min: number, max: number, inclusthise: boolean): boolean {
+        return this.isInValidRange(input.length, min, max, inclusthise);
     }
 
     /**
@@ -38,6 +40,7 @@ export class InputValidator {
      * @param input the string input to be validated
      */
     public isValidOrgName(input: string): boolean {
+        if (this.isEmpty(input)) return false;
         const re = /^[A-Za-z0-9 .,()]{3,30}$/;
         return re.test(input);
     }
@@ -47,6 +50,7 @@ export class InputValidator {
      * @param input the string input to be validated
      */
     public isValidEmail(input: string): boolean {
+        if (this.isEmpty(input)) return false;
         const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(input);
     }
@@ -56,6 +60,7 @@ export class InputValidator {
      * @param input the string input to be validated
      */
     public isValidPriorityNum(input: string): boolean {
+        if (this.isEmpty(input)) return false;
         const re = /^[0-9]{1,5}$/;
         return re.test(input);
     }
@@ -65,6 +70,7 @@ export class InputValidator {
      * @param input the string input to be validated
      */
     public isValidPhoneNum(input: string): boolean {
+        if (this.isEmpty(input)) return false;
         const re = /^[89]+\d{7}$/;
         return re.test(input);
     }
@@ -78,6 +84,7 @@ export class InputValidator {
      * @param password the password string to be validated
      */
     public isAReasonablyStrongPassword(password: string): boolean {
+        if (this.isEmpty(password)) return false;
         const re = new RegExp('^(?=.{2,}[a-z])(?=.{2,}[A-Z])(?=.{2,}[0-9])(?=.+[!@#$%^&*])(?=.{8,})', 'u');
         return re.test(password);
     }
@@ -87,6 +94,7 @@ export class InputValidator {
      * @param input the string input tp be validated
      */
     public isValidRuleName(input: string): boolean {
+        if (this.isEmpty(input)) return false;
         const re = /^[A-Za-z0-9]{3,10}$/;
         return re.test(input);
     }
@@ -96,6 +104,7 @@ export class InputValidator {
      * @param input the string input to be validated
      */
     public isValidPortNum(input: string): boolean {
+        if (this.isEmpty(input)) return false;
         if (/^[0-9]{1,5}$/.test(input)) {
             const port = parseInt(input, 10);
             return (port >= 0 && port <= 65535) ? true : false;
@@ -127,8 +136,9 @@ export class InputValidator {
      * @param input the string input to be validated
      */
     public isNum(input: string): boolean {
+        if (this.isEmpty(input)) return false;
         const re = /^[0-9]$/;
-        return re.test(input);
+        return this.isEmpty(input) ? false : re.test(input);
     }
 
     /**
@@ -136,6 +146,7 @@ export class InputValidator {
      * @param input the string input to be validated
      */
     public isValidProto(input: string): boolean {
+        if (this.isEmpty(input)) return false;
         // const re = /^[A-Z]{3,6}$/;
         // return re.test(input);
         const input_lower = input.toLowerCase();
@@ -147,7 +158,21 @@ export class InputValidator {
      * @param input the string input to be validated
      */
     public isValidIp(input: string): boolean {
+        if (this.isEmpty(input)) return false;
         const re = /^(?=[\d\*]+\.[\d\*]\.[\d\*]\.[\d\*]$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9]|\*)\.?){4}$/;
-        return re.test(input);
+        return this.isEmpty(input) ? false : re.test(input);
+    }
+
+    public isValidRule(name: string, access: string, priority: string, proto: string, sip: string, sport: string, dip: string, dport: string, direction: string): RuleInput {
+        if (this.isValidRuleName(name) && this.isBoolean(access)
+            && this.isValidPriorityNum(priority) && this.isValidProto(proto)
+            && this.isValidIp(sip) && this.isValidPortNum(sport)
+            && this.isValidIp(dip) && this.isValidPortNum(dport)
+            && this.isBoolean(direction)) {
+            return new RuleInput(name, access, priority, proto, sip, sport, dip, dport, direction);
+        } else {
+            console.log(`Received input: ${new RuleInput(name, access, priority, proto, sip, sport, dip, dport, direction).toString()}`);
+            return null;
+        }
     }
 }

@@ -23,33 +23,32 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Network Rules</title>
 
-    <!-- TODO: Set up PWA/AMP when possible -->
-    <!-- Add to homescreen for Chrome on Android -->
-    <!-- <meta name="mobile-web-app-capable" content="yes"> -->
-    <!-- <link rel="icon" sizes="192x192" href="/images/android-desktop.png"> -->
+    <!-- TODO: Set up PWA/AMP when possible
+    Add to homescreen for Chrome on Android
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="icon" sizes="192x192" href="/images/android-desktop.png">
 
-    <!-- Add to homescreen for Safari on iOS -->
-    <!-- <meta name="apple-mobile-web-app-capable" content="yes"> -->
-    <!-- <meta name="apple-mobile-web-app-status-bar-style" content="black"> -->
-    <!-- <meta name="apple-mobile-web-app-title" content="Material Design Lite"> -->
-    <!-- <link rel="apple-touch-icon-precomposed" href="/images/ios-desktop.png"> -->
+    Add to homescreen for Safari on iOS
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Material Design Lite">
+    <link rel="apple-touch-icon-precomposed" href="/images/ios-desktop.png">
 
-    <!-- Tile icon for Win8 (144x144 + tile color) -->
-    <!-- <meta name="msapplication-TileImage" content="/images/touch/ms-touch-icon-144x144-precomposed.png"> -->
-    <!-- <meta name="msapplication-TileColor" content="#3372DF"> -->
+    Tile icon for Win8 (144x144 + tile color)
+    <meta name="msapplication-TileImage" content="/images/touch/ms-touch-icon-144x144-precomposed.png">
+    <meta name="msapplication-TileColor" content="#3372DF">
 
-    <!-- <link rel="shortcut icon" href="/images/favicon.png"> -->
+    <link rel="shortcut icon" href="/images/favicon.png">
 
-    <!-- 
-        SEO: If your mobile URL is different from the desktop URL, 
-        add a canonical link to the desktop page 
-        https://developers.google.com/webmasters/smartphone-sites/feature-phones 
-    -->
-    <!--
+     
+    SEO: If your mobile URL is different from the desktop URL, 
+    add a canonical link to the desktop page 
+    https://developers.google.com/webmasters/smartphone-sites/feature-phones 
+    
+    
     <link rel="canonical" href="http://www.example.com/">
-    -->
 
-    <!-- <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=es6|always,Element.prototype.classList|always,default|always"></script> -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=es6|always,Element.prototype.classList|always,default|always"></script> -->
     
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.cyan-light_blue.min.css" />
@@ -399,6 +398,7 @@
             <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
                 <a href="#firewall-rule__table" class="mdl-layout__tab is-active">Network Rules</a>
                 <a href="#web-filter" class="mdl-layout__tab">Web Filter</a>
+                <a href="#global" class="mdl-layout__tab">Global</a>
             </div>
         </header>
         <div class="drawer mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50">
@@ -457,12 +457,13 @@
                                     <th class="sort" data-sort="daddr">Destination Address Range</th>
                                     <th class="sort" data-sort="dport">Destination Port Range</th>
                                     <th class="sort" data-sort="protocol">Protocol</th>
+                                    <th class="sort" data-sort="direction">Direction</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody id="firewall-rule__table--list" class="list firewall-rule__table--list">
                                 <tr id="mdl-spinner--holder">
-                                    <td colspan="9"><div id="mdl-spinner" class="mdl-spinner mdl-js-spinner is-active"></div></td>
+                                    <td colspan="10"><div id="mdl-spinner" class="mdl-spinner mdl-js-spinner is-active"></div></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -472,12 +473,16 @@
                     </div>
                 </div>
             </section>
-            <section class="mdl-layout__tab-panel" id="web-filter">
+            <section id="web-filter" class="mdl-layout__tab-panel">
                 <div class="page-content mdl-grid">
                     <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="web-filter__mode">
                         <input type="checkbox" id="web-filter__mode" class="mdl-switch__input web-filter__mode" checked>
                         <span class="mdl-switch__label">Filter Using Whitelist</span>
                     </label>
+                </div>
+            </section>
+            <section id="global" class="mdl-layout__tab-panel">
+                <div class="page-content">
                     <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="web-filter__block-ads">
                         <input type="checkbox" id="web-filter__block-ads" class="mdl-switch__input web-filter__block-ads" checked>
                         <span class="mdl-switch__label">Block Ads</span>
@@ -486,6 +491,19 @@
                         <input type="checkbox" id="web-filter__block-malicious" class="mdl-switch__input web-filter__block-malicious" checked>
                         <span class="mdl-switch__label">Block Malicious Domains</span>
                     </label>
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="firewall-rule__dpi">
+                        <input type="checkbox" id="firewall-rule__dpi" class="mdl-switch__input web-filter__mode" checked>
+                        <span class="mdl-switch__label">Enable Deep Packet Inspection</span>
+                    </label>
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="firewall-rule__vs">
+                        <input type="checkbox" id="firewall-rule__vs" class="mdl-switch__input firewall-rule__vs" checked>
+                        <span class="mdl-switch__label">Scan Packets using Virus Scanner</span>
+                    </label>
+                    <div class="mdl-cell mdl-cell--4-col">
+                        <button id="global--btn-submit" class="global--btn-submit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+                            <i class="material-icons">check</i> Save Options
+                        </button>
+                    </div>
                 </div>
             </section>
             

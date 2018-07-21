@@ -1,16 +1,11 @@
-// ,
-//     optimization: {
-//         splitChunks: {
-//             chunks: 'all'
-//         }
-//     }
 module.exports = [{
     entry: {
         index: './src/index.js',
         login: './src/login.js',
         rule: './src/rule.js',
         profile: './src/profile.js',
-        otp: './src/otp.js'
+        otp: './src/otp.js',
+        account: './src/account.js'
     },
     module: {
         rules: [

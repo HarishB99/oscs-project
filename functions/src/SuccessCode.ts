@@ -51,4 +51,11 @@ export class SuccessCode {
             message: 'The delete operation was completed successfully.'
         }
     };
+
+    public static readonly GLOBAL_OPTIONS = {
+        UPDATE: {
+            code: 'options/update-success',
+            message: 'The update operation was completed successfully.'
+        }
+    };
 }

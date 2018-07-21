@@ -4,7 +4,7 @@ import * as express from 'express';
 import { InputValidator } from './InputValidator';
 import { UserInput } from './UserInput';
 import { UserClaim } from './UserClaim';
-import { RuleInput } from './RuleInput';
+import { GlobalOptionsInput } from './GlobalOptionsInput';
 import { SuccessCode } from './SuccessCode';
 import { ErrorCode } from './ErrorCode';
 import { Authenticator } from './Authenticator';
@@ -52,16 +52,16 @@ app.post('/account', async (request, response) => {
 
 app.post('/account-create', async (request, response) => {
     try {
-        const { email, organisation, 
-            phoneNumber, password } = request.body;
+        const { email, org, 
+            contact, pass } = request.body;
 
         let input: UserInput = null;
         if (iv.isValidEmail(email) && 
-            iv.isValidOrgName(organisation) && 
-            iv.isValidPhoneNum(phoneNumber) && 
-            iv.isAReasonablyStrongPassword(password)) {
-            input = new UserInput(email, password, 
-                phoneNumber, organisation, null);
+            iv.isValidOrgName(org) && 
+            iv.isValidPhoneNum(contact) && 
+            iv.isAReasonablyStrongPassword(pass)) {
+            input = new UserInput(email, pass, 
+                contact, org, null);
         }
 
         if (!input) {
@@ -206,17 +206,10 @@ app.post('/account-pass-update', (request, response) => {
 app.post('/rule-create', async (request, response) => {
     try {
         const { uid } = await authenticator.checkAccess(request.get(TOKEN));
-        const {name, access, priority, proto, sip, sport, dip, dport}
+        const {name, access, priority, proto, sip, sport, dip, dport, direction}
             = request.body;
         
-        let input: RuleInput = null;
-    
-        if (iv.isValidRuleName(name) && iv.isBoolean(access)
-            && iv.isValidPriorityNum(priority) && iv.isValidProto(proto)
-            && iv.isValidIp(sip) && iv.isValidPortNum(sport)
-            && iv.isValidIp(dip) && iv.isValidPortNum(dport)) {
-            input = new RuleInput(name, access, priority, proto, sip, sport, dip, dport);
-        }
+        const input = iv.isValidRule(name, access, priority, proto, sip, sport, dip, dport, direction);
 
         if (!input) {
             response.send(ErrorCode.RULE.BAD_DATA);
@@ -226,17 +219,20 @@ app.post('/rule-create', async (request, response) => {
             const ruleWithSameParameters = await db
                 .collection('users').doc(uid)
                 .collection('rules')
+                .where('name', '==', input.name)
                 .where('access', '==', input.access)
                 .where('priority', '==', input.priority)
-                .where('protocol', '==', input.proto.toUpperCase())
-                .where('sourceip', '==', input.sip)
-                .where('sourceport', '==', input.sport)
-                .where('destip', '==', input.dip)
-                .where('destport', '==', input.dport)
+                .where('protocol', '==', input.protocol)
+                .where('sourceip', '==', input.sourceip)
+                .where('sourceport', '==', input.sourceport)
+                .where('destip', '==', input.destip)
+                .where('destport', '==', input.destport)
+                .where('direction', '==', input.direction)
             .get();
             
             if (!ruleWithSameParameters.empty) {
-                throw new Error(`Rule ${input.name} was already created`);
+                // throw new Error(`Rule ${input.name} was already created`);
+                response.send(ErrorCode.RULE.ALREADY_EXIST);
             } else {
                 const ruleRef = db.collection('users')
                 .doc(uid).collection('rules').doc();
@@ -244,12 +240,13 @@ app.post('/rule-create', async (request, response) => {
                     name: input.name,
                     access: input.access,
                     priority: input.priority,
-                    protocol: input.proto.toUpperCase(),
+                    protocol: input.protocol,
                     sourceip: sip,
-                    sourceport: input.sport,
-                    destip: input.dip,
-                    destport: input.dport,
+                    sourceport: input.sourceport,
+                    destip: input.destip,
+                    destport: input.destport,
                     state: input.state,
+                    direction: input.direction,
                     created: admin.firestore.FieldValue.serverTimestamp()
                 });
                 response.send(SuccessCode.RULE.CREATE);
@@ -264,18 +261,11 @@ app.post('/rule-create', async (request, response) => {
 app.post('/rule-update', async (request, response) => {
     try {
         const { uid } = await authenticator.checkAccess(request.get(TOKEN));
-        const {name, access, priority, proto, sip, sport, dip, dport}
+        const {name, access, priority, proto, sip, sport, dip, dport, direction}
             = request.body;
         
-        let input: RuleInput = null;
+        const input = iv.isValidRule(name, access, priority, proto, sip, sport, dip, dport, direction);
     
-        if (iv.isValidRuleName(name) && iv.isBoolean(access)
-            && iv.isValidPriorityNum(priority) && iv.isValidProto(proto)
-            && iv.isValidIp(sip) && iv.isValidPortNum(sport)
-            && iv.isValidIp(dip) && iv.isValidPortNum(dport)) {
-            input = new RuleInput(name, access, priority, proto, sip, sport, dip, dport);
-        }
-
         if (!input) {
             response.send(ErrorCode.RULE.BAD_DATA);
         } else {
@@ -285,24 +275,98 @@ app.post('/rule-update', async (request, response) => {
                 name: input.name,
                 access: input.access,
                 priority: input.priority,
-                protocol: input.proto,
+                protocol: input.protocol,
                 sourceip: sip,
-                sourceport: input.sport,
-                destip: input.dip,
-                destport: input.dport,
+                sourceport: input.sourceport,
+                destip: input.destip,
+                destport: input.destport,
                 state: input.state,
+                direction: input.direction,
                 lastUpdate: admin.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
             response.send(SuccessCode.RULE.UPDATE);
         }
     } catch (error) {
-        console.error(`Error while creating firewall rule: ${error}`);
+        console.error(`Error while updating firewall rule: ${error}`);
         response.send(ErrorCode.RULE.UPDATE);
     }
 });
 
-app.post('/rule-delete', (request, response) => {
-    response.status(503).send('Functionality not available yet.');
+app.post('/rule-delete', async (request, response) => {
+    try {
+        const { uid } = await authenticator.checkAccess(request.get(TOKEN));
+        const {name, access, priority, proto, sip, sport, dip, dport, direction}
+            = request.body;
+        
+        const input = iv.isValidRule(name, access, priority, proto, sip, sport, dip, dport, direction);
+
+        const ruleToDelete = await db
+                .collection('users').doc(uid)
+                .collection('rules')
+                .where('name', '==', input.name)
+                .where('access', '==', input.access)
+                .where('priority', '==', input.priority)
+                .where('protocol', '==', input.protocol)
+                .where('sourceip', '==', input.sourceip)
+                .where('sourceport', '==', input.sourceport)
+                .where('destip', '==', input.destip)
+                .where('destport', '==', input.destport)
+                .where('direction', '==', input.direction)
+            .get();
+        
+        if (ruleToDelete.empty) {
+            response.send(ErrorCode.RULE.NOT_FOUND);
+        } else if (ruleToDelete.docs.length !== 1) {
+            throw new Error(`There exists more that one rule with the same name in the database: ${input.toString()}`);
+        } else {
+            // TODO: Log the deletion of rule
+            const writeResult = await db.doc(`/users/${uid}/rules/${ruleToDelete.docs[0].id}`).delete();
+            response.send(SuccessCode.RULE.DELETE);
+        }
+    } catch (error) {
+        console.log(`Error while deleting rule: ${error}`);
+        response.send(ErrorCode.RULE.DELETE);
+    }
+});
+
+app.post('/global-update', async (request, response) => {
+    try {
+        const { uid } = await authenticator.checkAccess(request.get(TOKEN));
+        const {
+            dpi,
+            virusScan,
+            blockAds, 
+            blockMalicious
+        } = request.body
+    
+        let input: GlobalOptionsInput = null;
+    
+        console.log(`dpi: ${dpi}, virusScan: ${virusScan}, blockAds: ${blockAds}, blockMalicious: ${blockMalicious}`);
+
+        if (iv.isBoolean(dpi) && iv.isBoolean(virusScan)
+            && iv.isBoolean(blockAds) && iv.isBoolean(blockMalicious)) {
+            input = new GlobalOptionsInput(dpi, virusScan, blockAds, blockMalicious);
+        }
+
+        console.log(`Options parsed: ${input.toString()}`);
+
+        if (!input) {
+            response.send(ErrorCode.GLOBAL_OPTIONS.BAD_DATA);
+        } else {
+            await db.doc(`/users/${uid}/options/global`).set({
+                dpi: input.dpi,
+                virusScan: input.virusScan,
+                blockAds: input.blockAds, 
+                blockMalicious: input.blockMalicious,
+                lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            response.send(SuccessCode.GLOBAL_OPTIONS.UPDATE);
+        }
+    } catch (error) {
+        console.error(`Error while updating global options: ${error}`);
+        response.send(ErrorCode.GLOBAL_OPTIONS.UPDATE);
+    }
 });
 
 app.post('/filter-create', (request, response) => {
@@ -342,7 +406,16 @@ export const createNewUser = functions.auth.user().onCreate(user => {
     //     accountVerified: false
     // });
 
-    return db.doc(`/users/${uid}`).set({
-        created: admin.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
+    return Promise.all([
+        db.doc(`/users/${uid}/options/global`).set({
+            dpi: true,
+            virusScan: true,
+            blockAds: true, 
+            blockMalicious: true,
+            created: admin.firestore.FieldValue.serverTimestamp()
+        }), 
+        db.doc(`/users/${uid}`).set({
+            created: admin.firestore.FieldValue.serverTimestamp()
+        }, { merge: true })
+    ]);
 });

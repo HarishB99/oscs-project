@@ -35,9 +35,17 @@ export class ErrorCode {
             code: 'rule/creation-failure',
             message: 'The rule creation was unsuccessful.'
         },
+        ALREADY_EXIST: {
+            code: 'rule/creation-failure',
+            message: 'This rule has been created before'
+        },
         UPDATE: {
             code: 'rule/update-failure',
             message: 'The update operation was unsuccessful.'
+        },
+        NOT_FOUND: {
+            code: 'rule/delete-failure',
+            message: 'The rule does not exist.'
         },
         DELETE: {
             code: 'rule/delete-failure',
@@ -69,6 +77,17 @@ export class ErrorCode {
         ACCESS_DENIED: {
             code: 'filter/access-denied',
             message: 'Credentials received were invalid.'
+        }
+    };
+
+    public static readonly GLOBAL_OPTIONS = {
+        BAD_DATA: {
+            code: 'options/bad-data',
+            message: 'Data received were not valid.'
+        },
+        UPDATE: {
+            code: 'options/update-failure',
+            message: 'The update operation was unsuccessful.'
         }
     };
 }

@@ -52,25 +52,259 @@
     <!-- For Online Use -->
     <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"> -->
     <!-- For Offline Use -->
-    <link rel="stylesheet" href="/fonts/css.css">
-    <link rel="stylesheet" href="/fonts/icon.css">
-    <link rel="stylesheet" href="/mdl/material.cyan-light_blue.min.css">
-    <script async src="/mdl/material.min.js"></script>
-    <link rel="stylesheet" href="/styles/styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.cyan-light_blue.min.css" />
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
     <style>
-        .demo-card-wide.mdl-card {
+        /**
+        * Copyright 2015 Google Inc. All Rights Reserved.
+        *
+        * Licensed under the Apache License, Version 2.0 (the "License");
+        * you may not use this file except in compliance with the License.
+        * You may obtain a copy of the License at
+        *
+        *      http://www.apache.org/licenses/LICENSE-2.0
+        *
+        * Unless required by applicable law or agreed to in writing, software
+        * distributed under the License is distributed on an "AS IS" BASIS,
+        * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        * See the License for the specific language governing permissions and
+        * limitations under the License.
+        */
+
+        html, body {
+        font-family: 'Roboto', 'Helvetica', sans-serif;
+        }
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 24px;
+            margin-bottom: 5%;
+        }
+        .layout .mdl-layout__header .mdl-layout__drawer-button {
+            color: rgba(0, 0, 0, 0.54);
+        }
+        .mdl-layout__drawer .avatar {
+            margin-bottom: 16px;
+        }
+        .drawer {
+            border: none;
+        }
+        .page-content {
+            padding: 2.5%;
+        }
+        .mdl-data-table__holder {
+            width: 100%;
+            overflow-x: auto;
+        }
+        .action-bar {
+            margin-top: 2.5%;
+        }
+        .action-bar.mdl-layout__header-row {
+            padding: 0% !important;
+        }
+        .action-bar button {
+            margin: 0% 0.25%;
+        }
+        /* .mdl-navigation__link {
+            cursor: pointer;
+        } */
+        /* iOS Safari specific workaround */
+        .drawer .mdl-menu__container {
+            z-index: -1;
+        }
+        .drawer .navigation {
+            z-index: -2;
+        }
+        /* END iOS Safari specific workaround */
+        .drawer .mdl-menu .mdl-menu__item {
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-align-items: center;
+            -ms-flex-align: center;
+            align-items: center;
+        }
+        .drawer-header {
+            box-sizing: border-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            -webkit-justify-content: flex-end;
+            -ms-flex-pack: end;
+            justify-content: flex-end;
+            padding: 16px;
+            height: 151px;
+        }
+        .avatar-dropdown {
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            position: relative;
+            -webkit-flex-direction: row;
+            -ms-flex-direction: row;
+            flex-direction: row;
+            -webkit-align-items: center;
+            -ms-flex-align: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .navigation {
+            -webkit-flex-grow: 1;
+            -ms-flex-positive: 1;
+            flex-grow: 1;
+        }
+        .layout .navigation .mdl-navigation__link {
+            display: -webkit-flex !important;
+            display: -ms-flexbox !important;
+            display: flex !important;
+            -webkit-flex-direction: row;
+            -ms-flex-direction: row;
+            flex-direction: row;
+            -webkit-align-items: center;
+            -ms-flex-align: center;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.56);
+            font-weight: 500;
+        }
+        .layout .navigation .mdl-navigation__link:hover {
+            background-color: #00BCD4;
+            color: #37474F;
+        }
+        .navigation .mdl-navigation__link .material-icons {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.56);
+            margin-right: 32px;
+        }
+
+        .content {
+            max-width: 1080px;
+        }
+
+        .charts {
+            -webkit-align-items: center;
+            -ms-flex-align: center;
+            align-items: center;
+        }
+        .chart:nth-child(1) {
+            color: #ACEC00;
+        }
+        .chart:nth-child(2) {
+            color: #00BBD6;
+        }
+        .chart:nth-child(3) {
+            color: #BA65C9;
+        }
+        .chart:nth-child(4) {
+            color: #EF3C79;
+        }
+        .graphs {
+            padding: 16px 32px;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            -webkit-align-items: stretch;
+            -ms-flex-align: stretch;
+            align-items: stretch;
+        }
+        /* TODO: Find a proper solution to have the graphs
+        * not float around outside their container in IE10/11.
+        * Using a browserhacks.com solution for now.
+        */
+        _:-ms-input-placeholder, :root .graphs {
+            min-height: 664px;
+        }
+        _:-ms-input-placeholder, :root .graph {
+            max-height: 300px;
+        }
+        /* TODO end */
+        .graph:nth-child(1) {
+            color: #00b9d8;
+        }
+        .graph:nth-child(2) {
+            color: #d9006e;
+        }
+
+        .cards {
+            -webkit-align-items: flex-start;
+            -ms-flex-align: start;
+            align-items: flex-start;
+            -webkit-align-content: flex-start;
+            -ms-flex-line-pack: start;
+            align-content: flex-start;
+        }
+        .cards .separator {
+            height: 32px;
+        }
+        .cards .mdl-card__title.mdl-card__title {
+            color: white;
+            font-size: 24px;
+            font-weight: 400;
+        }
+        .cards ul {
+            padding: 0;
+        }
+        .cards h3 {
+            font-size: 1em;
+        }
+        .updates .mdl-card__title {
+            min-height: 200px;
+            background-image: url('../images/dog.png');
+            background-position: 90% 100%;
+            background-repeat: no-repeat;
+        }
+        .cards .mdl-card__actions a {
+            color: #00BCD4;
+            text-decoration: none;
+        }
+
+        .options h3 {
+            margin: 0;
+        }
+        .options .mdl-checkbox__box-outline {
+            border-color: rgba(255, 255, 255, 0.89);
+        }
+        .options ul {
+            margin: 0;
+            list-style-type: none;
+        }
+        .options li {
+            margin: 4px 0;
+        }
+        .options .material-icons {
+            color: rgba(255, 255, 255, 0.89);
+        }
+        .options .mdl-card__actions {
+            height: 64px;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            box-sizing: border-box;
+            -webkit-align-items: center;
+                -ms-flex-align: center;
+                    align-items: center;
+        }
+
+        .card-wide.mdl-card {
             /* width: 60%; */
             margin: auto;
             /* padding: 2.5%; */
         }
-        .demo-card-wide > .mdl-card__title {
+        .card-wide > .mdl-card__title {
             color: rgb(0, 0, 0);
             /* height: 176px; */
         }
-        .demo-card-wide .form-holder {
+        .card-wide .form-holder {
             padding: 2.5%;
         }
-        /* .demo-card-wide {
+        /* .card-wide {
             margin: auto;
         } */
     </style>
@@ -95,14 +329,14 @@
         <main class="mdl-layout__content">
             <div class="page-content">
                 <!-- Wide card with share menu button -->
-                <div class="demo-card-wide mdl-card mdl-shadow--2dp">
+                <div class="card-wide mdl-card mdl-shadow--2dp">
                     <div class="form-holder">
                         <div class="mdl-card__title">
                             <h2 class="mdl-card__title-text">Create Account</h2>
                         </div>
                         <div class="mdl-card__supporting-text">
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input id="account-create--input-org" class="account-create--input-org mdl-textfield__input" type="text" pattern="^[A-Za-z0-9 ,\.\(\)]{3,30}$" maxlength="30" autofocus>
+                                <input id="account-create--input-org" class="account-create--input-org mdl-textfield__input" type="text" maxlength="30" autofocus>
                                 <label class="mdl-textfield__label" for="account-create--input-org">Organisation...</label>
                                 <span class="mdl-textfield__error">Please enter a valid organisation name.</span>
                             </div>
@@ -114,7 +348,7 @@
                             </div>
                             <br/>
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input id="account-create--input-phone" class="account-create--input-phone mdl-textfield__input" type="text" pattern="^[89]+[0-9]{7}$" maxlength="8">
+                                <input id="account-create--input-phone" class="account-create--input-phone mdl-textfield__input" type="text" maxlength="8">
                                 <label class="mdl-textfield__label" for="account-create--input-phone">Contact number...</label>
                                 <span class="mdl-textfield__error">Please enter a valid contact number.</span>
                             </div>
@@ -138,7 +372,7 @@
                     <div class="mdl-layout__header-row mdl-card__actions mdl-card--border">
                         <div class="mdl-layout-spacer"></div>
                         <button id="account-create--button-submit" class="account-create--button-submit mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-                            Request for New Account
+                            Create Account
                         </button>
                     </div>
                 </div>
@@ -149,106 +383,6 @@
             </div>
         </main>
     </div>
-    <!-- TODO: Use the online version of stylesheets and javascripts -->
-    <script async defer src="/scripts/es6-promise.auto.min.js"></script>
-    <script async defer src="/scripts/axios.min.js"></script>
-    <script async defer src="/scripts/app.js"></script>
-    <script>
-        var acc_req_email = document.getElementById("account-create--input-email");
-        var acc_req_org = document.getElementById("account-create--input-org");
-        var acc_req_phone = document.getElementById("account-create--input-phone");
-        var acc_req_pass = document.getElementById("account-create--input-password");
-        var acc_req_pass2 = document.getElementById("account-create--input-password2");
-        var acc_req_btn = document.getElementById("account-create--button-submit");
-
-        function checkAllInputs() {
-            update_text_field_ui(acc_req_email, 
-                InputValidator.isValidEmail(acc_req_email.value));
-            update_text_field_ui(acc_req_org, 
-                InputValidator.isValidOrgName(acc_req_org.value));
-            update_text_field_ui(acc_req_phone, 
-                InputValidator.isValidPhoneNum(acc_req_phone.value));
-            update_text_field_ui(acc_req_pass, 
-                InputValidator.isAReasonablyStrongPassword(acc_req_pass.value));
-            update_text_field_ui(acc_req_pass2, 
-                (acc_req_pass.value === acc_req_pass2.value && acc_req_pass2.value !== ''));
-        }
-
-        checkAllInputs();
-
-        /* ::Add keyboard event listeners to validate text fields:: */
-        acc_req_email.addEventListener('focus', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isValidEmail(e.target.value));
-        }); acc_req_email.addEventListener('keyup', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isValidEmail(e.target.value));
-        });
-
-        acc_req_org.addEventListener('focus', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isValidOrgName(e.target.value));
-        }); acc_req_org.addEventListener('keyup', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isValidOrgName(e.target.value));
-        });
-
-        acc_req_phone.addEventListener('focus', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isValidPhoneNum(e.target.value));
-        }); acc_req_phone.addEventListener('keyup', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isValidPhoneNum(e.target.value));
-        });
-
-        acc_req_pass.addEventListener('focus', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isAReasonablyStrongPassword(e.target.value));
-        }); acc_req_pass.addEventListener('keyup', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isAReasonablyStrongPassword(e.target.value));
-        });
-
-        acc_req_pass2.addEventListener('focus', function(e) {
-            update_text_field_ui(e.target, 
-                (acc_req_pass.value === e.target.value && e.target.value !== ''));
-        }); acc_req_pass2.addEventListener('keyup', function(e) {
-            update_text_field_ui(e.target, 
-                (acc_req_pass.value === e.target.value && e.target.value !== ''));
-        });
-        /* ::Add keyboard event listeners to validate text fields:: */
-
-        document.addEventListener('keyup', function(e) {
-            if (e.keyCode === 13) acc_req_btn.click();
-        });
-
-        acc_req_btn.addEventListener("click", function(e) {
-            checkAllInputs();
-            
-            if (stillAnyInvalid()) return;
-            
-            axios.post("/account-create", {
-                email: acc_req_email.value,
-                org: acc_req_org.value,
-                contact: acc_req_phone.value,
-                pass: acc_req_pass.value
-            }).then(function(response) {
-                if (response.data.code === 'account/creation-success') {
-                    location.replace('/login');
-                } else {
-                    showSnackbar(response.data.message);
-                }
-            })['catch'](function(error) {
-                console.error("Error while performing account creation request: ", error);
-                if (error.message === "Network Error") {
-                    showSnackbar("Please check your network connection and try again.");
-                } else if (error.message.search('404') >= 0) {
-                    showSnackbar("Sorry. The functionality has not been enabled.");
-                } else {
-                    showSnackbar("An unexpected error occurred. Please try again later.");
-                }
-            });
-        });
-    </script>
+    <script src="/scripts/account.js"></script>
 </body>
 </html>
