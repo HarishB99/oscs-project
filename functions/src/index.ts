@@ -1,11 +1,11 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as express from 'express';
-import { InputValidator } from './modules/InputValidator';
-import { Authenticator } from './modules/Authenticator';
-import { UserInput } from './modules/types/UserInput';
-import { SuccessCode } from './modules/response_codes/SuccessCode';
-import { ErrorCode } from './modules/response_codes/ErrorCode';
+import { InputValidator } from './InputValidator';
+import { Authenticator } from './Authenticator';
+import { UserInput } from './UserInput';
+import { SuccessCode } from './SuccessCode';
+import { ErrorCode } from './ErrorCode';
 // import { h, render } from 'preact';
 const cors = require('cors')({ origin: true });
 

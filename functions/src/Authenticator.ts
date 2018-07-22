@@ -1,7 +1,5 @@
 import { InputValidator } from './InputValidator';
 import { auth } from 'firebase-admin';
-import { UserInput } from './types/UserInput';
-import { UserClaim } from './types/UserClaim';
 /**
  * Authentication library containing utilities 
  * to facilitate authentication.

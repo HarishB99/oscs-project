@@ -1,6 +1,6 @@
-import { RuleInput } from "./types/RuleInput";
-import { GlobalOptionsInput } from "./types/GlobalOptionsInput";
-import { UserInput } from "./types/UserInput";
+import { RuleInput } from "./RuleInput";
+import { GlobalOptionsInput } from "./GlobalOptionsInput";
+import { UserInput } from "./UserInput";
 
 /**
  * Input validation library to validate input
