@@ -347,3 +347,26 @@ export const createNewUser = functions.auth.user().onCreate(user => {
         }, { merge: true })
     ]);
 });
+
+export const deleteUser = functions.auth.user().onDelete(async user => {
+    const userDoc = db.doc(`/users/${user.uid}`);
+    const userRuleDocs = await userDoc.collection('rules').get();
+    const userFiltersDocs = await userDoc.collection('filter').get();
+    const userOptionsDoc = userDoc.collection('options').doc('global');
+
+    const deleteDocs = [];
+    
+    userRuleDocs.forEach(ruleDoc => {
+        deleteDocs.push(ruleDoc.ref.delete());
+    });
+
+    userFiltersDocs.forEach(filterDoc => {
+        deleteDocs.push(filterDoc.ref.delete());
+    });
+
+    deleteDocs.push(userOptionsDoc.delete());
+
+    deleteDocs.push(userDoc.delete());
+
+    return Promise.all(deleteDocs);
+});
