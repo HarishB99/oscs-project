@@ -3,7 +3,6 @@ import * as admin from 'firebase-admin';
 import * as express from 'express';
 import { InputValidator } from './modules/InputValidator';
 import { Authenticator } from './modules/Authenticator';
-import { UserClaim } from './modules/types/UserClaim';
 import { UserInput } from './modules/types/UserInput';
 import { SuccessCode } from './modules/response_codes/SuccessCode';
 import { ErrorCode } from './modules/response_codes/ErrorCode';
@@ -62,27 +61,20 @@ app.post('/account-create', async (request, response) => {
         if (!input) {
             response.send(ErrorCode.ACCOUNT.BAD_DATA);
         } else {
-            const userExists = await authenticator.userAlreadyExists(input);
+            const { uid } = await auth.createUser({
+                email: input.email,
+                password: input.password,
+                photoURL: input.photoURL,
+                phoneNumber: input.phoneNumber,
+                displayName: input.displayName
+            });
 
-            if (userExists) {
+            await auth.setCustomUserClaims(uid, {
+                organisation: input.organisation,
+                phoneVerified: false
+            });
 
-                response.send(ErrorCode.ACCOUNT.ALREADY_EXIST);
-            } else {
-                const { uid } = await auth.createUser({
-                    email: input.email,
-                    password: input.password,
-                    photoURL: input.photoURL,
-                    phoneNumber: input.phoneNumber,
-                    displayName: input.displayName
-                });
-    
-                await auth.setCustomUserClaims(uid, {
-                    organisation: input.organisation,
-                    phoneVerified: false
-                });
-    
-                response.send(SuccessCode.ACCOUNT.CREATE);
-            }
+            response.send(SuccessCode.ACCOUNT.CREATE);
         }
     } catch (error) {
         console.error('Error while creating account request: ', error);
