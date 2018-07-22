@@ -60,7 +60,12 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
 
             firebase.auth().signInWithEmailAndPassword(
                 acc_login_email.value, acc_login_pass.value)
-            .then(() => {
+            .then(result => {
+                if (!result.user.emailVerified)
+                    return result.user.sendEmailVerification();
+                else
+                    return null;
+            }).then(() => {
                 location.replace('/otp');
             }).catch(error => {
                 console.error(error);
