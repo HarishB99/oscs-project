@@ -15,8 +15,11 @@ const UIUtils = require('./modules/UIUtils').default;
 
 firebase.auth().onAuthStateChanged(user => {
     if (!InputValidator.isEmpty(user)) {
+        const email_display = document.getElementById('mdl-drawer--email');
         const profile_btn = document.getElementById('mdl-menu__item--profile');
         const signout_btn = document.getElementById('mdl-menu__item--signout');
+        
+        email_display.innerHTML = user.email;
         
         profile_btn.addEventListener('click', () => {
             location.href = '/profile';

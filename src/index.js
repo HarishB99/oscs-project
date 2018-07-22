@@ -25,9 +25,12 @@ firebase.auth().onAuthStateChanged(user => {
         const mdl_spinner_holder = document.getElementById('mdl-spinner--holder');
         const ruleRowsName = 'rules';
     
+        const email_display = document.getElementById('mdl-drawer--email');
         const profile_btn = document.getElementById('mdl-menu__item--profile');
         const signout_btn = document.getElementById('mdl-menu__item--signout');
         
+        email_display.innerHTML = user.email;
+
         profile_btn.addEventListener('click', () => {
             location.href = '/profile';
         });
