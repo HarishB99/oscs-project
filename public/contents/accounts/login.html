@@ -333,11 +333,11 @@
                         </div>
                         <div class="mdl-card__supporting-text">
                             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                <input class="mdl-textfield__input" type="email" id="account-login--email" autofocus autocomplete="off">
+                                <input class="mdl-textfield__input" type="email" id="account-login--email" autofocus autocomplete="off" tabindex="1">
                                 <label class="mdl-textfield__label" for="account-login--email">Email Address...</label>
                                 <span class="mdl-textfield__error">Please enter a valid email</span>
                             </div>
-                            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" autocomplete="off">
+                            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" autocomplete="off" tabindex="2">
                                 <input class="mdl-textfield__input" type="password" id="account-login--pass">
                                 <label class="mdl-textfield__label" for="account-login--pass">Password...</label>
                                 <span class="mdl-textfield__error">Please enter a valid password</span>
@@ -345,18 +345,18 @@
                             <br/>
                             <br/>
                             <span>
-                                New here? <a href="/create_account">Click here</a>
+                                New here? <a href="/create_account" tabindex="3">Click here</a>
                             </span>
                             <br/>
                             <br/>
                             <span>
-                                Forgot password? <a href="/reset_password">Click here</a>
+                                Forgot password? <a href="/reset_password" tabindex="4">Click here</a>
                             </span>
                         </div>
                     </div>
                     <div class="mdl-layout__header-row mdl-card__actions mdl-card--border">
                         <div class="mdl-layout-spacer"></div>
-                        <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect account-login--button" id="account-login--button">
+                        <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect account-login--button" id="account-login--button" tabindex="5">
                             Next
                         </button>
                     </div>

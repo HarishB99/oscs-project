@@ -346,53 +346,53 @@
                         </div>
                         <div class="mdl-card__supporting-text">
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input class="mdl-textfield__input" type="text" maxlength="30" autofocus id="rule--name">
+                                <input class="mdl-textfield__input" type="text" maxlength="30" autofocus id="rule--name" tabindex="1">
                                 <label class="mdl-textfield__label" for="rule--name">Name...</label>
                                 <span class="mdl-textfield__error">Only alphanumeric characters are allowed.</span>
                             </div>
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input class="mdl-textfield__input" type="text" maxlength="5" id="rule--priority">
+                                <input class="mdl-textfield__input" type="text" maxlength="5" id="rule--priority" tabindex="2">
                                 <label class="mdl-textfield__label" for="rule--priority">Priority...</label>
                                 <span class="mdl-textfield__error">Only digits are allowed.</span>
                             </div>
                             <br/>
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input class="mdl-textfield__input" type="text" id="rule--source-ip">
+                                <input class="mdl-textfield__input" type="text" id="rule--source-ip" tabindex="3">
                                 <label class="mdl-textfield__label" for="rule--source-ip">Source Address Range...</label>
                                 <span class="mdl-textfield__error">Please enter a valid IP address</span>
                             </div>
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input class="rule__ports mdl-textfield__input" maxlength="5" type="text" id="rule--source-port">
+                                <input class="rule__ports mdl-textfield__input" maxlength="5" type="text" id="rule--source-port" tabindex="4">
                                 <label class="mdl-textfield__label" for="rule--source-port">Source Port Range...</label>
                                 <span class="mdl-textfield__error">Please enter a port number between 0 and 65,535</span>
                             </div>
                             <br/>
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input class="mdl-textfield__input" type="text" id="rule--dest-ip">
+                                <input class="mdl-textfield__input" type="text" id="rule--dest-ip" tabindex="5">
                                 <label class="mdl-textfield__label" for="rule--dest-ip">Destination Address Range...</label>
                                 <span class="mdl-textfield__error">Please enter a valid IP address</span>
                             </div>
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input class="rule__ports mdl-textfield__input" maxlength="5" type="text" id="rule--dest-port">
+                                <input class="rule__ports mdl-textfield__input" maxlength="5" type="text" id="rule--dest-port" tabindex="6">
                                 <label class="mdl-textfield__label" for="rule--dest-port">Destination Port Range...</label>
                                 <span class="mdl-textfield__error">Please enter a port number between 0 and 65,535</span>
                             </div>
                             <div class="mdl-grid">
-                                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule--access">
+                                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule--access" tabindex="7">
                                     <input type="checkbox" id="rule--access" class="mdl-switch__input" checked>
                                     <span class="mdl-switch__label">Allowed</span>
                                 </label>
                                 <div class="mdl-cell mdl-cell--4-col">
-                                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect mdl-cell mdl-cell--2-col" for="rule--protocol-tcp">
+                                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect mdl-cell mdl-cell--2-col" for="rule--protocol-tcp" tabindex="8">
                                         <input type="radio" id="rule--protocol-tcp" class="mdl-radio__button" name="proto" value="tcp" checked>
                                         <span class="mdl-radio__label">TCP</span>
                                     </label>
-                                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect mdl-cell mdl-cell--2-col" for="rule--protocol-udp">
+                                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect mdl-cell mdl-cell--2-col" for="rule--protocol-udp" tabindex="9">
                                         <input type="radio" id="rule--protocol-udp" class="mdl-radio__button" name="proto" value="udp">
                                         <span class="mdl-radio__label">UDP</span>
                                     </label>
                                 </div>
-                                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule--direction">
+                                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule--direction" tabindex="10">
                                     <input type="checkbox" id="rule--direction" class="mdl-radio__button" name="proto" value="udp">
                                     <span class="mdl-switch__label">Incoming</span>
                                 </label>
@@ -400,7 +400,7 @@
                         </div>
                     </div>
                     <div class="mdl-card__actions mdl-card--border">
-                        <button id="rule-button--update" class="rule-button--update mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                        <button id="rule-button--update" class="rule-button--update mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" tabindex="11">
                             <i class="material-icons">edit</i> Add/Update
                         </button>
                     </div>
