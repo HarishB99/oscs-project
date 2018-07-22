@@ -1,5 +1,5 @@
 /**
- * Interface to store user input (rules) for processing
+ * Interface to store user input (options) for processing
  * @author Harish S/O Balamurugan
  */
 export class GlobalOptionsInput {
