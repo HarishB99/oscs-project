@@ -304,6 +304,9 @@
             width: 95%;
             overflow-y: auto;
         }
+        .rule-protocol--holder {
+            padding-left: 1.5%;
+        }
     </style>
 </head>
 <body>
@@ -318,7 +321,7 @@
             <header class="demo-drawer-header">
                 <img src="/images/user.jpg" class="demo-avatar">
                 <div class="demo-avatar-dropdown">
-                    <span>hello@example.com</span>
+                    <span id="mdl-drawer--email"></span>
                     <div class="mdl-layout-spacer"></div>
                     <button id="accbtn" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
                         <i class="material-icons" role="presentation">arrow_drop_down</i>
@@ -378,23 +381,23 @@
                                 <span class="mdl-textfield__error">Please enter a port number between 0 and 65,535</span>
                             </div>
                             <div class="mdl-grid">
-                                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule--access" tabindex="7">
+                                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule--access">
                                     <input type="checkbox" id="rule--access" class="mdl-switch__input" checked>
                                     <span class="mdl-switch__label">Allowed</span>
                                 </label>
-                                <div class="mdl-cell mdl-cell--4-col">
-                                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect mdl-cell mdl-cell--2-col" for="rule--protocol-tcp" tabindex="8">
-                                        <input type="radio" id="rule--protocol-tcp" class="mdl-radio__button" name="proto" value="tcp" checked>
-                                        <span class="mdl-radio__label">TCP</span>
-                                    </label>
-                                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect mdl-cell mdl-cell--2-col" for="rule--protocol-udp" tabindex="9">
-                                        <input type="radio" id="rule--protocol-udp" class="mdl-radio__button" name="proto" value="udp">
-                                        <span class="mdl-radio__label">UDP</span>
-                                    </label>
-                                </div>
-                                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule--direction" tabindex="10">
-                                    <input type="checkbox" id="rule--direction" class="mdl-radio__button" name="proto" value="udp">
+                                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule--direction">
+                                    <input type="checkbox" id="rule--direction" class="mdl-switch__input" checked>
                                     <span class="mdl-switch__label">Incoming</span>
+                                </label>
+                            </div>
+                            <div class="rule-protocol--holder">
+                                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="rule--protocol-tcp">
+                                    <input type="radio" id="rule--protocol-tcp" class="mdl-radio__button" name="proto" value="tcp" checked>
+                                    <span class="mdl-radio__label">TCP</span>
+                                </label>
+                                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="rule--protocol-udp">
+                                    <input type="radio" id="rule--protocol-udp" class="mdl-radio__button" name="proto" value="udp">
+                                    <span class="mdl-radio__label">UDP</span>
                                 </label>
                             </div>
                         </div>
