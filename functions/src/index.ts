@@ -56,7 +56,7 @@ app.post('/account-create', async (request, response) => {
         const { email, org, 
             contact, pass } = request.body;
 
-        const input = iv.isValidUserDetails(email, org, contact, pass, null);
+        const input = iv.isValidUserDetails(email, pass, contact, org, null);
 
         if (!input) {
             response.send(ErrorCode.ACCOUNT.BAD_DATA);
