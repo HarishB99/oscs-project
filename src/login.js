@@ -66,7 +66,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                 else
                     return null;
             }).then(() => {
-                location.replace('/otp');
+                location.replace('/');
             }).catch(error => {
                 console.error(error);
                 if (error.code === 'auth/user-not-found') {
