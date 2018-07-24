@@ -23,10 +23,6 @@
         "destination": "/index.html"
       },
       {
-        "source": "/edit_rule",
-        "destination": "/contents/rules/edit_rule.html"
-      },
-      {
         "source": "/create_rule",
         "destination": "/contents/rules/rule.html"
       },

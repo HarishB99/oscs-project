@@ -6,6 +6,9 @@ import { Authenticator } from './Authenticator';
 import { UserInput } from './UserInput';
 import { SuccessCode } from './SuccessCode';
 import { ErrorCode } from './ErrorCode';
+import * as fs from 'fs';
+import * as path from 'path';
+import { RuleInput } from './RuleInput';
 // import { h, render } from 'preact';
 const cors = require('cors')({ origin: true });
 
@@ -21,6 +24,53 @@ const iv = new InputValidator();
 const authenticator = new Authenticator();
 
 const TOKEN = Authenticator.TOKEN_HEADER;
+
+app.get('/edit_rule/:token', async (request, response) => {
+    try {
+        const { uid } = await authenticator.checkAccess(request.params.token);
+
+        const id = request.query.rule;
+        const rule_ref = db.doc(`/users/${uid}/rules/${id}`);
+        const rule_snapshot = await rule_ref.get();
+        const rule = rule_snapshot.data() as RuleInput;
+
+        fs.readFile(path.resolve(__dirname, '../edit_rule.html'), 'utf8', (error, data) => {
+            if (error) {
+                response.status(404).send(fs.readFileSync(path.resolve('../404.html')));
+            } else {
+                const html = data;
+
+                const name_filled = html.replace('::NAME::', rule.name);
+                const priority_filled = name_filled.replace('::PRIORITY::', rule.priority.toString());
+                const sip_filled = priority_filled.replace('::SIP::', rule.sourceip);
+                const sport_filled = sip_filled.replace('::SPORT::', rule.sourceport);
+                const dip_filled = sport_filled.replace('::DIP::', rule.destip);
+                const dport_filled = dip_filled.replace('::DPORT::', rule.destport);
+
+                const access = rule.access ? ' checked' : '';
+                const access_filled = dport_filled.replace('::ACCESS::', access)
+                
+                let protocol_filled = '';
+                if (rule.protocol.toLowerCase() === 'tcp') {
+                    const removedUdp = access_filled.replace('::PROTOCOL_UDP::', '');
+                    protocol_filled = removedUdp.replace('::PROTOCOL_TCP::', ' checked');
+                } else {
+                    const removedUdp = access_filled.replace('::PROTOCOL_TCP::', '');
+                    protocol_filled = removedUdp.replace('::PROTOCOL_UDP::', ' checked');
+                }
+                
+                const direction = rule.direction ? ' checked' : '';
+                const edit_rule = protocol_filled.replace('::DIRECTION::', direction);
+
+                response.set('Content-Type', 'text/html');
+                response.send(edit_rule);
+            }
+        });
+    } catch (error) {
+        console.error(`Error while serving GET request for /edit_rule: ${error}`);
+        response.send(ErrorCode.RULE.ACCESS_DENIED);
+    }
+});
 
 /**
  * The following is a test app to test CORS
