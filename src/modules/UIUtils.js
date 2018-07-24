@@ -68,4 +68,13 @@ UIUtils.toggleLoader = function(show, mdl_spinner_holder) {
     }
 };
 
+UIUtils.clearTable = function(tbody, classToRemove) {
+    var rows = document.querySelectorAll('.'.concat(classToRemove));
+    if (rows.length !== 0) {
+        for (let i = 0; i < rows.length; i++) {
+            tbody.removeChild(rows[i]);
+        }
+    }
+};
+
 export default UIUtils;

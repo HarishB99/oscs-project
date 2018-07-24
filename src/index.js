@@ -41,15 +41,6 @@ firebase.auth().onAuthStateChanged(user => {
         const mdl_spinner_holder = document.getElementById('mdl-spinner--holder');
         const ruleRowsName = 'rules';
         
-        var clearTable = function(tbody) {
-            const ruleRows = document.querySelectorAll('.'.concat(ruleRowsName));
-            if (ruleRows.length !== 0) {
-                for (let i = 0; i < ruleRows.length; i++) {
-                    tbody.removeChild(ruleRows[i]);
-                }
-            }
-        };
-        
         document.getElementById('firewall-rule__button--add')
         .addEventListener('click', () => {
             location.href = '/create_rule';
@@ -91,9 +82,7 @@ firebase.auth().onAuthStateChanged(user => {
                 console.error('Error while sending options update request to server: ', error);
                 UIUtils.showSnackbar('An unexpected error occurred. Please try again.');
             });
-        });
-    
-        
+        });      
 
         db.doc(`/users/${user.uid}/options/global`)
         .onSnapshot(options => {
@@ -109,7 +98,7 @@ firebase.auth().onAuthStateChanged(user => {
             UIUtils.toggleLoader(true, mdl_spinner_holder);
             const tbody = document.getElementById('firewall-rule__table--list');
 
-            clearTable(tbody);
+            UIUtils.clearTable(tbody, ruleRowsName);
 
             if (rules.empty) {
                 UIUtils.toggleLoader(false, mdl_spinner_holder);
