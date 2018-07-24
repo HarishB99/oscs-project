@@ -163,8 +163,6 @@ firebase.auth().onAuthStateChanged(user => {
                 console.error("Error while performing rule creation request: ", error);
                 if (error.message === "Network Error") {
                     UIUtils.showSnackbar("Please check your network connection and try again.");
-                } else if (error.message.search('404') >= 0) {
-                    UIUtils.showSnackbar("Sorry. The functionality has not been enabled.");
                 } else {
                     UIUtils.showSnackbar("An unexpected error occurred. Please try again later.");
                 }
