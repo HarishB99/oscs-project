@@ -178,6 +178,14 @@ firebase.auth().onAuthStateChanged(user => {
                             editBtn.className = "firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect";
                             editBtn.innerHTML = "<i class=\"material-icons\">edit</i> Edit";
                             editBtn.style.width = "100%";
+                            editBtn.addEventListener('click', e => {
+                                user.getIdToken(true)
+                                .then(token => location.href = `/edit_rule/${token}`)
+                                .catch(error => {
+                                    console.error(`Error while sending request to edit rule: ${error}`);
+                                });
+                                
+                            });
                             buttonsHolder.appendChild(editBtn);
                                 // Insert line breaks
                                 buttonsHolder.appendChild(
