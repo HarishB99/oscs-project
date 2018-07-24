@@ -49,24 +49,6 @@ firebase.auth().onAuthStateChanged(user => {
                 }
             }
         };
-
-        var toggleLoader = function (show, mdl_spinner_holder) {
-            if (show) {
-                if (mdl_spinner_holder.style.display === 'none')
-                    mdl_spinner_holder.style.display = 'block';
-            } else {
-                if (mdl_spinner_holder.style.display === 'block')
-                    mdl_spinner_holder.style.display = 'none';
-            }
-        };
-    
-        // function hideLoader() {
-        //     mdl_spinner_holder.style.display = 'none';
-        // }
-    
-        // function showLoader() {
-        //     mdl_spinner_holder.style.display = 'block';
-        // }
         
         document.getElementById('firewall-rule__button--add')
         .addEventListener('click', () => {
@@ -78,6 +60,7 @@ firebase.auth().onAuthStateChanged(user => {
             timestampsInSnapshots: true
         });
         // #web-filter
+
         // #global
         const block_ads = document.getElementById('web-filter__block-ads');
         const block_malicious = document.getElementById('web-filter__block-malicious');
@@ -123,13 +106,13 @@ firebase.auth().onAuthStateChanged(user => {
 
         db.collection('users').doc(user.uid)
         .collection('rules').onSnapshot(rules => {
-            toggleLoader(true, mdl_spinner_holder);
+            UIUtils.toggleLoader(true, mdl_spinner_holder);
             const tbody = document.getElementById('firewall-rule__table--list');
 
             clearTable(tbody);
 
             if (rules.empty) {
-                toggleLoader(false, mdl_spinner_holder);
+                UIUtils.toggleLoader(false, mdl_spinner_holder);
                 const tr = document.createElement('tr');
                 tr.className = ruleRowsName;
                     const noRules = document.createElement('td');
@@ -139,7 +122,7 @@ firebase.auth().onAuthStateChanged(user => {
                     tr.appendChild(noRules);
                 tbody.appendChild(tr);
             } else {
-                toggleLoader(false, mdl_spinner_holder);
+                UIUtils.toggleLoader(false, mdl_spinner_holder);
                 // Rules is not empty
                 rules.forEach(rule => {
                     const params = rule.data();

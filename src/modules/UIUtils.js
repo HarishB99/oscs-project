@@ -56,6 +56,16 @@ UIUtils.toggleSwitch = function(condition, el) {
         if (el.parentElement.classList.contains('is-checked'))
             el.parentElement.classList.remove('is-checked')
     }
-}
+};
+
+UIUtils.toggleLoader = function(show, mdl_spinner_holder) {
+    if (show) {
+        if (mdl_spinner_holder.style.display === 'none')
+            mdl_spinner_holder.style.display = 'block';
+    } else {
+        if (mdl_spinner_holder.style.display === 'block')
+            mdl_spinner_holder.style.display = 'none';
+    }
+};
 
 export default UIUtils;
