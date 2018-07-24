@@ -16,15 +16,6 @@ const UIUtils = require('./modules/UIUtils').default;
 
 firebase.auth().onAuthStateChanged(user => {
     if (!InputValidator.isEmpty(user)) {
-        const block_ads = document.getElementById('web-filter__block-ads');
-        const block_malicious = document.getElementById('web-filter__block-malicious');
-        const dpi = document.getElementById('firewall-rule__dpi');
-        const vs = document.getElementById('firewall-rule__vs');
-        const global_submit_btn = document.getElementById('global--btn-submit');
-    
-        const mdl_spinner_holder = document.getElementById('mdl-spinner--holder');
-        const ruleRowsName = 'rules';
-    
         const email_display = document.getElementById('mdl-drawer--email');
         const profile_btn = document.getElementById('mdl-menu__item--profile');
         const signout_btn = document.getElementById('mdl-menu__item--signout');
@@ -46,7 +37,55 @@ firebase.auth().onAuthStateChanged(user => {
             });
         });
 
-        global_submit_btn.addEventListener('click', e => {
+        // #firewall-rule__table
+        const mdl_spinner_holder = document.getElementById('mdl-spinner--holder');
+        const ruleRowsName = 'rules';
+        
+        var clearTable = function(tbody) {
+            const ruleRows = document.querySelectorAll('.'.concat(ruleRowsName));
+            if (ruleRows.length !== 0) {
+                for (let i = 0; i < ruleRows.length; i++) {
+                    tbody.removeChild(ruleRows[i]);
+                }
+            }
+        };
+
+        var toggleLoader = function (show, mdl_spinner_holder) {
+            if (show) {
+                if (mdl_spinner_holder.style.display === 'none')
+                    mdl_spinner_holder.style.display = 'block';
+            } else {
+                if (mdl_spinner_holder.style.display === 'block')
+                    mdl_spinner_holder.style.display = 'none';
+            }
+        };
+    
+        // function hideLoader() {
+        //     mdl_spinner_holder.style.display = 'none';
+        // }
+    
+        // function showLoader() {
+        //     mdl_spinner_holder.style.display = 'block';
+        // }
+        
+        document.getElementById('firewall-rule__button--add')
+        .addEventListener('click', () => {
+            location.href = '/create_rule';
+        });
+    
+        const db = firebase.firestore();
+        db.settings({
+            timestampsInSnapshots: true
+        });
+        // #web-filter
+        // #global
+        const block_ads = document.getElementById('web-filter__block-ads');
+        const block_malicious = document.getElementById('web-filter__block-malicious');
+        const dpi = document.getElementById('firewall-rule__dpi');
+        const vs = document.getElementById('firewall-rule__vs');
+        const global_submit_btn = document.getElementById('global--btn-submit');
+
+        global_submit_btn.addEventListener('click', () => {
             user.getIdToken(true)
             .then(token => {
                 return axios({
@@ -71,32 +110,7 @@ firebase.auth().onAuthStateChanged(user => {
             });
         });
     
-        function clearTable(tbody) {
-            const ruleRows = document.querySelectorAll('.'.concat(ruleRowsName));
-            if (ruleRows.length !== 0) {
-                for (let i = 0; i < ruleRows.length; i++) {
-                    tbody.removeChild(ruleRows[i]);
-                }
-            }
-        }
-    
-        function hideLoader() {
-            mdl_spinner_holder.style.display = 'none';
-        }
-    
-        function showLoader() {
-            mdl_spinner_holder.style.display = 'block';
-        }
         
-        document.getElementById('firewall-rule__button--add')
-        .addEventListener('click', e => {
-            location.href = '/create_rule';
-        });
-    
-        const db = firebase.firestore();
-        db.settings({
-            timestampsInSnapshots: true
-        });
 
         db.doc(`/users/${user.uid}/options/global`)
         .onSnapshot(options => {
@@ -109,13 +123,13 @@ firebase.auth().onAuthStateChanged(user => {
 
         db.collection('users').doc(user.uid)
         .collection('rules').onSnapshot(rules => {
-            showLoader();
+            toggleLoader(true, mdl_spinner_holder);
             const tbody = document.getElementById('firewall-rule__table--list');
 
             clearTable(tbody);
 
             if (rules.empty) {
-                hideLoader();
+                toggleLoader(false, mdl_spinner_holder);
                 const tr = document.createElement('tr');
                 tr.className = ruleRowsName;
                     const noRules = document.createElement('td');
@@ -125,7 +139,7 @@ firebase.auth().onAuthStateChanged(user => {
                     tr.appendChild(noRules);
                 tbody.appendChild(tr);
             } else {
-                hideLoader();
+                toggleLoader(false, mdl_spinner_holder);
                 // Rules is not empty
                 rules.forEach(rule => {
                     const params = rule.data();
@@ -178,7 +192,7 @@ firebase.auth().onAuthStateChanged(user => {
                             editBtn.className = "firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect";
                             editBtn.innerHTML = "<i class=\"material-icons\">edit</i> Edit";
                             editBtn.style.width = "100%";
-                            editBtn.addEventListener('click', e => {
+                            editBtn.addEventListener('click', () => {
                                 user.getIdToken(true)
                                 .then(token => location.href = `/edit_rule/${token}`)
                                 .catch(error => {

@@ -48,12 +48,12 @@ firebase.auth().onAuthStateChanged(user => {
         const acc_prof_phone = document.getElementById("account-profile--input-phone");
         const acc_prof_btn = document.getElementById("account-update--button");
         
-        function checkAllInputs() {
+        var checkAllInputs = function() {
             UIUtils.update_text_field_ui(acc_prof_email, 
                 InputValidator.isValidEmail(acc_prof_email.value));
             UIUtils.update_text_field_ui(acc_prof_phone, 
                 InputValidator.isValidPhoneNum(acc_prof_phone.value));
-        }
+        };
         
         /* ::Add keyboard event listeners to validate text fields:: */
         acc_prof_email.addEventListener('focus', e => {
@@ -83,7 +83,7 @@ firebase.auth().onAuthStateChanged(user => {
             if (e.keyCode === 13) acc_prof_btn.click();
         });
         
-        acc_prof_btn.addEventListener('click', e => {
+        acc_prof_btn.addEventListener('click', () => {
             checkAllInputs();
             
             if (UIUtils.stillAnyInvalid()) return;
@@ -115,7 +115,7 @@ firebase.auth().onAuthStateChanged(user => {
             });
         })
         
-        function displayProfile(user, tokenResult) {
+        var displayProfile = function(user, tokenResult) {
             acc_prof_name.innerHTML = user.displayName;
             acc_prof_org.innerHTML = tokenResult.claims.organisation;
             acc_prof_email.value = user.email;
@@ -123,7 +123,7 @@ firebase.auth().onAuthStateChanged(user => {
             checkAllInputs();
             mdlSpinner.style.display = "none";
             formHolder.style.display = "block";
-        }
+        };
 
         user.getIdTokenResult(true)
         .then(tokenResult => {

@@ -31,19 +31,20 @@ UIUtils.update_text_field_ui = function(el, valid) {
 };
 
 UIUtils.logoutUI = function() {
-    window.alert('You are not logged in.');
     location.replace('/login');
 };
 
 UIUtils.stillAnyInvalid = function() {
     var anyFieldIsInvalid = false;
+
     document.querySelectorAll('.mdl-textfield')
     .forEach(function(input) {
         if (input.classList.contains('is-invalid')) {
-            showSnackbar("Please check your input and try again.");
+            UIUtils.showSnackbar("Please check your input and try again.");
             anyFieldIsInvalid = true;
         }
     });
+
     return anyFieldIsInvalid;
 };
 

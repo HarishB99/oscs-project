@@ -47,7 +47,7 @@ firebase.auth().onAuthStateChanged(user => {
         const rule_create_direction = document.getElementById('rule--direction');
         const rule_create_btn = document.getElementById('rule-button--update');
         
-        function checkAllInputs() {
+        var checkAllInputs = function () {
             UIUtils.update_text_field_ui(rule_create_name, 
                 InputValidator.isValidRuleName(rule_create_name.value));
             UIUtils.update_text_field_ui(rule_create_priority, 
@@ -60,7 +60,7 @@ firebase.auth().onAuthStateChanged(user => {
                 InputValidator.isValidIp(rule_create_dip.value));
             UIUtils.update_text_field_ui(rule_create_dport, 
                 InputValidator.isValidPortNum(rule_create_dport.value));
-        }
+        };
         
         checkAllInputs();
         
@@ -118,7 +118,7 @@ firebase.auth().onAuthStateChanged(user => {
             if (e.keyCode === 13) rule_create_btn.click();
         });
         
-        rule_create_btn.addEventListener('click', e => {
+        rule_create_btn.addEventListener('click', () => {
             checkAllInputs();
             
             if (UIUtils.stillAnyInvalid()) return;
