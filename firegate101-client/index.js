@@ -31,12 +31,13 @@ const dateString = new Date().toString();
 console.log(`Timezone: ${dateString.substring(dateString.indexOf("GMT"))}`);
 
 app.post('/login', (request, response) => {
-    // TODO: Check if user has verified phone number 
-    // and email. If no, can do nothing. Else, can 
+    // TODO: Check if user has verified phone number
+    // and email. If no, can do nothing. Else, can
     // do something.
     response.set('Accept', 'application/json');
 
-    // For POST
+    // For POST'
+    console.log(request.body)
     const { email, password } = request.body;
 
     // For GET
