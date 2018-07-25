@@ -10,49 +10,84 @@ const config = require('./modules/config').config;
 firebase.initializeApp(config);
 
 // Import other custom libraries
+const axios = require('axios').default;
 const InputValidator = require('./modules/InputValidator').default;
 const UIUtils = require('./modules/UIUtils').default;
 
 firebase.auth().onAuthStateChanged(user => {
-    const mdl_spinner_holder = document.getElementById('mdl-spinner--holder');
-    const ruleRowsName = 'rules';
+    if (!InputValidator.isEmpty(user)) {
+        const block_ads = document.getElementById('web-filter__block-ads');
+        const block_malicious = document.getElementById('web-filter__block-malicious');
+        const dpi = document.getElementById('firewall-rule__dpi');
+        const vs = document.getElementById('firewall-rule__vs');
+        const global_submit_btn = document.getElementById('global--btn-submit');
+    
+        const mdl_spinner_holder = document.getElementById('mdl-spinner--holder');
+        const ruleRowsName = 'rules';
+    
+        const email_display = document.getElementById('mdl-drawer--email');
+        const profile_btn = document.getElementById('mdl-menu__item--profile');
+        const signout_btn = document.getElementById('mdl-menu__item--signout');
+        
+        email_display.innerHTML = user.email;
 
-    const profile_btn = document.getElementById('mdl-menu__item--profile');
-    const signout_btn = document.getElementById('mdl-menu__item--signout');
-    
-    profile_btn.addEventListener('click', () => {
-        location.href = '/profile';
-    });
-    
-    signout_btn.addEventListener('click', () => {
-        firebase.auth().signOut()
-        .then(() => {
-            location.replace('/login');
-        })
-        .catch(error => {
-            console.error('Error while signing out user: ', error);
-            UIUtils.showSnackbar('An unexpected error occurred. Please clear your browser cache, restart your browser and try again.');
+        profile_btn.addEventListener('click', () => {
+            location.href = '/profile';
         });
-    });
+        
+        signout_btn.addEventListener('click', () => {
+            firebase.auth().signOut()
+            .then(() => {
+                location.replace('/login');
+            })
+            .catch(error => {
+                console.error('Error while signing out user: ', error);
+                UIUtils.showSnackbar('An unexpected error occurred. Please clear your browser cache, restart your browser and try again.');
+            });
+        });
 
-    function clearTable(tbody) {
-        const ruleRows = document.querySelectorAll('.'.concat(ruleRowsName));
-        if (ruleRows.length !== 0) {
-            for (let i = 0; i < ruleRows.length; i++) {
-                tbody.removeChild(ruleRows[i]);
+        global_submit_btn.addEventListener('click', e => {
+            user.getIdToken(true)
+            .then(token => {
+                return axios({
+                    url: '/global-update',
+                    method: 'POST',
+                    headers: {
+                        'Authorisation': 'Bearer ' + token
+                    },
+                    data: {
+                        dpi: dpi.parentElement.classList.contains('is-checked').toString(),
+                        virusScan: vs.parentElement.classList.contains('is-checked').toString(),
+                        blockAds: block_ads.parentElement.classList.contains('is-checked').toString(),
+                        blockMalicious: block_malicious.parentElement.classList.contains('is-checked').toString()
+                    }
+                })
+            }).then(response => {
+                const payload = response.data;
+                UIUtils.showSnackbar(payload.message);
+            }).catch(error => {
+                console.error('Error while sending options update request to server: ', error);
+                UIUtils.showSnackbar('An unexpected error occurred. Please try again.');
+            });
+        });
+    
+        function clearTable(tbody) {
+            const ruleRows = document.querySelectorAll('.'.concat(ruleRowsName));
+            if (ruleRows.length !== 0) {
+                for (let i = 0; i < ruleRows.length; i++) {
+                    tbody.removeChild(ruleRows[i]);
+                }
             }
         }
-    }
-
-    function hideLoader() {
-        mdl_spinner_holder.style.display = 'none';
-    }
-
-    function showLoader() {
-        mdl_spinner_holder.style.display = 'block';
-    }
     
-    if (!InputValidator.isEmpty(user)) {
+        function hideLoader() {
+            mdl_spinner_holder.style.display = 'none';
+        }
+    
+        function showLoader() {
+            mdl_spinner_holder.style.display = 'block';
+        }
+        
         document.getElementById('firewall-rule__button--add')
         .addEventListener('click', e => {
             location.href = '/create_rule';
@@ -63,18 +98,26 @@ firebase.auth().onAuthStateChanged(user => {
             timestampsInSnapshots: true
         });
 
+        db.doc(`/users/${user.uid}/options/global`)
+        .onSnapshot(options => {
+            const opts = options.data();
+            UIUtils.toggleSwitch(opts.dpi, dpi);
+            UIUtils.toggleSwitch(opts.virusScan, vs);
+            UIUtils.toggleSwitch(opts.blockAds, block_ads);
+            UIUtils.toggleSwitch(opts.blockMalicious, block_malicious);
+        });
+
         db.collection('users').doc(user.uid)
         .collection('rules').onSnapshot(rules => {
             showLoader();
             const tbody = document.getElementById('firewall-rule__table--list');
-            // Reset table body
-            // tbody.innerHTML = '';
 
             clearTable(tbody);
 
             if (rules.empty) {
                 hideLoader();
                 const tr = document.createElement('tr');
+                tr.className = ruleRowsName;
                     const noRules = document.createElement('td');
                         noRules.className = "mdl-data-table__cell--non-numeric rule";
                         noRules.colSpan = 9;
@@ -94,10 +137,12 @@ firebase.auth().onAuthStateChanged(user => {
                         sourceport, 
                         destip, 
                         destport, 
-                        protocol
+                        protocol, 
+                        direction
                     } = params;
 
-                    const allow = params.access ? "Allow" : "Deny";
+                    const allow = access ? "Allow" : "Deny";
+                    const trafficflow = direction ? "Incoming" : "Outgoing";
 
                     const tr = document.createElement('tr');
                     tr.className = ruleRowsName;
@@ -125,6 +170,9 @@ firebase.auth().onAuthStateChanged(user => {
                         const proto = document.createElement("td");
                             proto.className = "protocol";
                             proto.innerHTML = protocol;
+                        const incoming = document.createElement("td");
+                            incoming.className = "direction";
+                            incoming.innerHTML = trafficflow;
                         const buttonsHolder = document.createElement("td");
                             const editBtn = document.createElement("button");
                             editBtn.className = "firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect";
@@ -149,13 +197,14 @@ firebase.auth().onAuthStateChanged(user => {
                         tr.appendChild(dip);
                         tr.appendChild(dport);
                         tr.appendChild(proto);
+                        tr.appendChild(incoming);
                         tr.appendChild(buttonsHolder);
                     tbody.appendChild(tr);
                 });
             }
             const options = {
                 valueNames: ['priority', 'rule', 'access', 
-                'saddr','sport', 'daddr', 'dport', 'protocol']
+                'saddr','sport', 'daddr', 'dport', 'protocol', 'direction']
             };
             const ruleList = new List('firewall-rule__table', options);
             $(function() {

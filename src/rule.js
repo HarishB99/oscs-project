@@ -14,25 +14,28 @@ const InputValidator = require('./modules/InputValidator').default;
 const UIUtils = require('./modules/UIUtils').default;
 
 firebase.auth().onAuthStateChanged(user => {
-    const profile_btn = document.getElementById('mdl-menu__item--profile');
-    const signout_btn = document.getElementById('mdl-menu__item--signout');
-    
-    profile_btn.addEventListener('click', () => {
-        location.href = '/profile';
-    });
-    
-    signout_btn.addEventListener('click', () => {
-        firebase.auth().signOut()
-        .then(() => {
-            location.replace('/login');
-        })
-        .catch(error => {
-            console.error('Error while signing out user: ', error);
-            UIUtils.showSnackbar('An unexpected error occurred. Please clear your browser cache, restart your browser and try again.');
-        });
-    });
-    
     if (!InputValidator.isEmpty(user)) {
+        const email_display = document.getElementById('mdl-drawer--email');
+        const profile_btn = document.getElementById('mdl-menu__item--profile');
+        const signout_btn = document.getElementById('mdl-menu__item--signout');
+        
+        email_display.innerHTML = user.email;
+        
+        profile_btn.addEventListener('click', () => {
+            location.href = '/profile';
+        });
+        
+        signout_btn.addEventListener('click', () => {
+            firebase.auth().signOut()
+            .then(() => {
+                location.replace('/login');
+            })
+            .catch(error => {
+                console.error('Error while signing out user: ', error);
+                UIUtils.showSnackbar('An unexpected error occurred. Please clear your browser cache, restart your browser and try again.');
+            });
+        });
+        
         const rule_create_name = document.getElementById('rule--name');
         const rule_create_access = document.getElementById('rule--access');
         const rule_create_proto_inputs = document.querySelectorAll('input[name="proto"]');
@@ -41,6 +44,7 @@ firebase.auth().onAuthStateChanged(user => {
         const rule_create_sport = document.getElementById('rule--source-port');
         const rule_create_dip = document.getElementById('rule--dest-ip');
         const rule_create_dport = document.getElementById('rule--dest-port');
+        const rule_create_direction = document.getElementById('rule--direction');
         const rule_create_btn = document.getElementById('rule-button--update');
         
         function checkAllInputs() {
@@ -144,7 +148,8 @@ firebase.auth().onAuthStateChanged(user => {
                         sip: rule_create_sip.value,
                         sport: rule_create_sport.value,
                         dip: rule_create_dip.value,
-                        dport: rule_create_dport.value
+                        dport: rule_create_dport.value,
+                        direction: rule_create_direction.checked.toString()
                     }
                 });
             }).then(response => {

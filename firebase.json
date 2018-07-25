@@ -39,10 +39,6 @@
         "destination": "/contents/accounts/login.html"
       },
       {
-        "source": "/otp",
-        "destination": "/contents/accounts/otp.html"
-      },
-      {
         "source": "/reset_password",
         "destination": "/contents/accounts/pass_rst.html"
       },

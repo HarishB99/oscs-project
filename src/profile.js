@@ -14,25 +14,28 @@ const InputValidator = require('./modules/InputValidator').default;
 const UIUtils = require('./modules/UIUtils').default;
 
 firebase.auth().onAuthStateChanged(user => {
-    const profile_btn = document.getElementById('mdl-menu__item--profile');
-    const signout_btn = document.getElementById('mdl-menu__item--signout');
-    
-    profile_btn.addEventListener('click', () => {
-        location.href = '/profile';
-    });
-    
-    signout_btn.addEventListener('click', () => {
-        firebase.auth().signOut()
-        .then(() => {
-            location.replace('/login');
-        })
-        .catch(error => {
-            console.error('Error while signing out user: ', error);
-            UIUtils.showSnackbar('An unexpected error occurred. Please clear your browser cache, restart your browser and try again.');
-        });
-    });
-    
     if (!InputValidator.isEmpty(user)) {
+        const email_display = document.getElementById('mdl-drawer--email');
+        const profile_btn = document.getElementById('mdl-menu__item--profile');
+        const signout_btn = document.getElementById('mdl-menu__item--signout');
+        
+        email_display.innerHTML = user.email;
+        
+        profile_btn.addEventListener('click', () => {
+            location.href = '/profile';
+        });
+        
+        signout_btn.addEventListener('click', () => {
+            firebase.auth().signOut()
+            .then(() => {
+                location.replace('/login');
+            })
+            .catch(error => {
+                console.error('Error while signing out user: ', error);
+                UIUtils.showSnackbar('An unexpected error occurred. Please clear your browser cache, restart your browser and try again.');
+            });
+        });
+        
         const mdlSpinner = document.querySelector('.mdl-spinner');
         const formHolder = document.getElementById('form-holder');
         

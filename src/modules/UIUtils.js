@@ -6,11 +6,13 @@ UIUtils.showSnackbar = function (message, actionText, actionHandler) {
         message: message,
         timeout: 10000
     };
-    if (!InputValidator.isEmpty(actionText)) {
-        data.actionText = actionText;
-        data.actionHandler = actionHandler;
+    if (typeof actionText !== "undefined") {
+        if (actionText) {
+            data.actionText = actionText;
+            data.actionHandler = actionHandler;
+        }
     }
-    console.log(data);
+    // console.log(data);
     if (notification.getAttribute('aria-hidden') !== "false")
         notification.MaterialSnackbar.showSnackbar(data);
 };
@@ -44,5 +46,15 @@ UIUtils.stillAnyInvalid = function() {
     });
     return anyFieldIsInvalid;
 };
+
+UIUtils.toggleSwitch = function(condition, el) {
+    if (condition) {
+        if (!el.parentElement.classList.contains('is-checked'))
+            el.parentElement.classList.add('is-checked');
+    } else {
+        if (el.parentElement.classList.contains('is-checked'))
+            el.parentElement.classList.remove('is-checked')
+    }
+}
 
 export default UIUtils;

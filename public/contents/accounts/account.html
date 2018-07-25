@@ -52,27 +52,25 @@
     <!-- For Online Use -->
     <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"> -->
     <!-- For Offline Use -->
-    <link rel="stylesheet" href="/fonts/css.css">
-    <link rel="stylesheet" href="/fonts/icon.css">
-    <link rel="stylesheet" href="/mdl/material.cyan-light_blue.min.css">
-    <script async src="/mdl/material.min.js"></script>
-    <link rel="stylesheet" href="/styles/styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.cyan-light_blue.min.css" />
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
     <style>
-        .demo-card-wide.mdl-card {
-            /* width: 60%; */
-            margin: auto;
-            /* padding: 2.5%; */
+        html, body {
+            font-family: 'Roboto', 'Helvetica', sans-serif;
         }
-        .demo-card-wide > .mdl-card__title {
-            color: rgb(0, 0, 0);
-            /* height: 176px; */
-        }
-        .demo-card-wide .form-holder {
+        .page-content {
             padding: 2.5%;
         }
-        /* .demo-card-wide {
+        .card-wide.mdl-card {
             margin: auto;
-        } */
+        }
+        .card-wide > .mdl-card__title {
+            color: rgb(0, 0, 0);
+        }
+        .card-wide .form-holder {
+            padding: 2.5%;
+        }
     </style>
 </head>
 <body>
@@ -81,11 +79,11 @@
         <header class="mdl-layout__header">
             <div class="mdl-layout__header-row">
                 <!-- Title -->
-                <span class="mdl-layout-title">Firegate Create Account</span>
+                <span class="mdl-layout-title">Firegate-101 Create Account</span>
             </div>
         </header>
         <div class="mdl-layout__drawer">
-            <span class="mdl-layout-title">Firegate</span>
+            <span class="mdl-layout-title">Firegate-101</span>
             <nav class="mdl-navigation">
                 <a class="mdl-navigation__link" href="">About</a>
                 <a class="mdl-navigation__link" href="">Terms &amp; conditions</a>
@@ -95,32 +93,32 @@
         <main class="mdl-layout__content">
             <div class="page-content">
                 <!-- Wide card with share menu button -->
-                <div class="demo-card-wide mdl-card mdl-shadow--2dp">
+                <div class="card-wide mdl-card mdl-shadow--2dp">
                     <div class="form-holder">
                         <div class="mdl-card__title">
                             <h2 class="mdl-card__title-text">Create Account</h2>
                         </div>
                         <div class="mdl-card__supporting-text">
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input id="account-create--input-org" class="account-create--input-org mdl-textfield__input" type="text" pattern="^[A-Za-z0-9 ,\.\(\)]{3,30}$" maxlength="30" autofocus>
+                                <input id="account-create--input-org" class="account-create--input-org mdl-textfield__input" type="text" maxlength="30" autofocus tabindex="1">
                                 <label class="mdl-textfield__label" for="account-create--input-org">Organisation...</label>
                                 <span class="mdl-textfield__error">Please enter a valid organisation name.</span>
                             </div>
                             <br/>
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input id="account-create--input-email" class="account-create--input-email mdl-textfield__input" type="email">
+                                <input id="account-create--input-email" class="account-create--input-email mdl-textfield__input" type="email" tabindex="2">
                                 <label class="mdl-textfield__label" for="account-create--input-email">Email Address...</label>
                                 <span class="mdl-textfield__error">Please enter a valid email address.</span>
                             </div>
                             <br/>
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input id="account-create--input-phone" class="account-create--input-phone mdl-textfield__input" type="text" pattern="^[89]+[0-9]{7}$" maxlength="8">
+                                <input id="account-create--input-phone" class="account-create--input-phone mdl-textfield__input" type="text" maxlength="8" tabindex="3">
                                 <label class="mdl-textfield__label" for="account-create--input-phone">Contact number...</label>
                                 <span class="mdl-textfield__error">Please enter a valid contact number.</span>
                             </div>
                             <br/>
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input id="account-create--input-password" class="account-create--input-password mdl-textfield__input" type="password" maxlength="30" >
+                                <input id="account-create--input-password" class="account-create--input-password mdl-textfield__input" type="password" maxlength="30" tabindex="4">
                                 <label class="mdl-textfield__label" for="account-create--input-password">Password...</label>
                                 <span class="mdl-textfield__error">Please enter a valid strong password (Hover over input field to learn about password strength)</span>
                                 <div class="mdl-tooltip mdl-tooltip--large" for="account-create--input-password">
@@ -129,7 +127,7 @@
                             </div>
                             <br/>
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input id="account-create--input-password2" class="account-create--input-password2 mdl-textfield__input" type="password" maxlength="30" >
+                                <input id="account-create--input-password2" class="account-create--input-password2 mdl-textfield__input" type="password" maxlength="30" tabindex="5">
                                 <label class="mdl-textfield__label" for="account-create--input-password2">Confirm Password...</label>
                                 <span class="mdl-textfield__error">Please enter the password you entered above, which should not be empty.</span>
                             </div>
@@ -137,8 +135,8 @@
                     </div>
                     <div class="mdl-layout__header-row mdl-card__actions mdl-card--border">
                         <div class="mdl-layout-spacer"></div>
-                        <button id="account-create--button-submit" class="account-create--button-submit mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-                            Request for New Account
+                        <button id="account-create--button-submit" class="account-create--button-submit mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" tabindex="6">
+                            Create Account
                         </button>
                     </div>
                 </div>
@@ -149,106 +147,6 @@
             </div>
         </main>
     </div>
-    <!-- TODO: Use the online version of stylesheets and javascripts -->
-    <script async defer src="/scripts/es6-promise.auto.min.js"></script>
-    <script async defer src="/scripts/axios.min.js"></script>
-    <script async defer src="/scripts/app.js"></script>
-    <script>
-        var acc_req_email = document.getElementById("account-create--input-email");
-        var acc_req_org = document.getElementById("account-create--input-org");
-        var acc_req_phone = document.getElementById("account-create--input-phone");
-        var acc_req_pass = document.getElementById("account-create--input-password");
-        var acc_req_pass2 = document.getElementById("account-create--input-password2");
-        var acc_req_btn = document.getElementById("account-create--button-submit");
-
-        function checkAllInputs() {
-            update_text_field_ui(acc_req_email, 
-                InputValidator.isValidEmail(acc_req_email.value));
-            update_text_field_ui(acc_req_org, 
-                InputValidator.isValidOrgName(acc_req_org.value));
-            update_text_field_ui(acc_req_phone, 
-                InputValidator.isValidPhoneNum(acc_req_phone.value));
-            update_text_field_ui(acc_req_pass, 
-                InputValidator.isAReasonablyStrongPassword(acc_req_pass.value));
-            update_text_field_ui(acc_req_pass2, 
-                (acc_req_pass.value === acc_req_pass2.value && acc_req_pass2.value !== ''));
-        }
-
-        checkAllInputs();
-
-        /* ::Add keyboard event listeners to validate text fields:: */
-        acc_req_email.addEventListener('focus', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isValidEmail(e.target.value));
-        }); acc_req_email.addEventListener('keyup', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isValidEmail(e.target.value));
-        });
-
-        acc_req_org.addEventListener('focus', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isValidOrgName(e.target.value));
-        }); acc_req_org.addEventListener('keyup', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isValidOrgName(e.target.value));
-        });
-
-        acc_req_phone.addEventListener('focus', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isValidPhoneNum(e.target.value));
-        }); acc_req_phone.addEventListener('keyup', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isValidPhoneNum(e.target.value));
-        });
-
-        acc_req_pass.addEventListener('focus', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isAReasonablyStrongPassword(e.target.value));
-        }); acc_req_pass.addEventListener('keyup', function(e) {
-            update_text_field_ui(e.target, 
-                InputValidator.isAReasonablyStrongPassword(e.target.value));
-        });
-
-        acc_req_pass2.addEventListener('focus', function(e) {
-            update_text_field_ui(e.target, 
-                (acc_req_pass.value === e.target.value && e.target.value !== ''));
-        }); acc_req_pass2.addEventListener('keyup', function(e) {
-            update_text_field_ui(e.target, 
-                (acc_req_pass.value === e.target.value && e.target.value !== ''));
-        });
-        /* ::Add keyboard event listeners to validate text fields:: */
-
-        document.addEventListener('keyup', function(e) {
-            if (e.keyCode === 13) acc_req_btn.click();
-        });
-
-        acc_req_btn.addEventListener("click", function(e) {
-            checkAllInputs();
-            
-            if (stillAnyInvalid()) return;
-            
-            axios.post("/account-create", {
-                email: acc_req_email.value,
-                org: acc_req_org.value,
-                contact: acc_req_phone.value,
-                pass: acc_req_pass.value
-            }).then(function(response) {
-                if (response.data.code === 'account/creation-success') {
-                    location.replace('/login');
-                } else {
-                    showSnackbar(response.data.message);
-                }
-            })['catch'](function(error) {
-                console.error("Error while performing account creation request: ", error);
-                if (error.message === "Network Error") {
-                    showSnackbar("Please check your network connection and try again.");
-                } else if (error.message.search('404') >= 0) {
-                    showSnackbar("Sorry. The functionality has not been enabled.");
-                } else {
-                    showSnackbar("An unexpected error occurred. Please try again later.");
-                }
-            });
-        });
-    </script>
+    <script src="/scripts/account.js"></script>
 </body>
 </html>
