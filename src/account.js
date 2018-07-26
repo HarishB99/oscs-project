@@ -37,45 +37,34 @@ firebase.auth().onAuthStateChanged(user => {
                 (acc_req_pass.value === pass2.value && pass2.value !== ''));
         };
 
-        checkAllInputs();
+        // checkAllInputs();
 
         /* ::Add keyboard event listeners to validate text fields:: */
-        acc_req_email.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidEmail(e.target.value));
-        }); acc_req_email.addEventListener('keyup', e => {
+        // acc_req_email.addEventListener('focus', e => {
+        //     UIUtils.update_text_field_ui(e.target, 
+        //         InputValidator.isValidEmail(e.target.value));
+        // }); 
+        acc_req_email.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidEmail(e.target.value));
         });
 
-        acc_req_org.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidOrgName(e.target.value));
-        }); acc_req_org.addEventListener('keyup', e => {
+        acc_req_org.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidOrgName(e.target.value));
         });
 
-        acc_req_phone.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidPhoneNum(e.target.value));
-        }); acc_req_phone.addEventListener('keyup', e => {
+        acc_req_phone.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidPhoneNum(e.target.value));
         });
 
-        acc_req_pass.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isAReasonablyStrongPassword(e.target.value));
-        }); acc_req_pass.addEventListener('keyup', e => {
+        acc_req_pass.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isAReasonablyStrongPassword(e.target.value));
         });
 
-        pass2.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                (acc_req_pass.value === e.target.value && e.target.value !== ''));
-        }); pass2.addEventListener('keyup', e => {
+        pass2.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 (acc_req_pass.value === e.target.value && e.target.value !== ''));
         });

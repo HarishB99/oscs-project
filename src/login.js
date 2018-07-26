@@ -27,21 +27,13 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                 InputValidator.isAReasonablyStrongPassword(acc_login_pass.value));
         };
         
-        checkAllInputs();
-        
         /* ::Add keyboard event listeners to validate text fields:: */
-        acc_login_email.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidEmail(e.target.value));
-        }); acc_login_email.addEventListener('keyup', e => {
+        acc_login_email.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidEmail(e.target.value));
         });
         
-        acc_login_pass.addEventListener('focus', () => {
-            UIUtils.update_text_field_ui(acc_login_pass, 
-                InputValidator.isAReasonablyStrongPassword(acc_login_pass.value));
-        }); acc_login_pass.addEventListener('keyup', () => {
+        acc_login_pass.addEventListener('keyup', () => {
             UIUtils.update_text_field_ui(acc_login_pass, 
                 InputValidator.isAReasonablyStrongPassword(acc_login_pass.value));
         });

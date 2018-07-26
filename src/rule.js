@@ -62,53 +62,33 @@ firebase.auth().onAuthStateChanged(user => {
                 InputValidator.isValidPortNum(rule_create_dport.value));
         };
         
-        checkAllInputs();
-        
         /* ::Add keyboard event listeners to validate text fields:: */
-        rule_create_name.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidRuleName(e.target.value));
-        }); rule_create_name.addEventListener('keyup', e => {
+        rule_create_name.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidRuleName(e.target.value));
         });
         
-        rule_create_priority.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidPriorityNum(e.target.value));
-        }); rule_create_priority.addEventListener('keyup', e => {
+        rule_create_priority.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidPriorityNum(e.target.value));
         });
         
-        rule_create_sip.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidIp(e.target.value));
-        }); rule_create_sip.addEventListener('keyup', e => {
+        rule_create_sip.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidIp(e.target.value));
         });
         
-        rule_create_sport.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidPortNum(e.target.value));
-        }); rule_create_sport.addEventListener('keyup', e => {
+        rule_create_sport.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidPortNum(e.target.value));
         });
         
-        rule_create_dip.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidIp(e.target.value));
-        }); rule_create_dip.addEventListener('keyup', e => {
+        rule_create_dip.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidIp(e.target.value));
         });
         
-        rule_create_dport.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidPortNum(e.target.value));
-        }); rule_create_dport.addEventListener('keyup', e => {
+        rule_create_dport.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidPortNum(e.target.value));
         });
