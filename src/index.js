@@ -46,7 +46,7 @@ firebase.auth().onAuthStateChanged(user => {
         const mdl_spinner_holder = document.getElementById('mdl-spinner--holder');
         const ruleRowsName = 'rules';
 
-        document.getElementById('.firewall-rule__button--add')
+        document.getElementById('firewall-rule__button--add')
         .addEventListener('click', e => {
             e.target.disabled = true;
             location.href = '/create_rule';
@@ -132,7 +132,7 @@ firebase.auth().onAuthStateChanged(user => {
                             editBtn.addEventListener('click', e => {
                                 e.target.disabled = true;
                                 user.getIdToken(true)
-                                .then(token => location.href = `/edit_rule/${token}`)
+                                .then(token => location.href = `/edit_rule/${token}?rule=${rule.id}`)
                                 .catch(error => {
                                     console.error(`Error while sending request to edit rule: ${error}`);
                                 });
@@ -149,6 +149,16 @@ firebase.auth().onAuthStateChanged(user => {
                             deleteBtn.className = "firewall-rule__button--delete mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect";
                             deleteBtn.innerHTML = "<i class=\"material-icons\">delete</i> Delete";
                             deleteBtn.style.width = "100%";
+                            deleteBtn.addEventListener('click', e => {
+                                e.target.disabled = true;
+                                user.getIdToken(true)
+                                .then(token => location.href = `/delete_rule/${token}?rule=${rule.id}`)
+                                .catch(error => {
+                                    console.error(`Error while sending request to edit rule: ${error}`);
+                                });
+                                e.target.disabled = false;
+                                
+                            });
                             buttonsHolder.appendChild(deleteBtn);
                         tr.appendChild(prior);
                         tr.appendChild(ruleName);

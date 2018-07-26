@@ -304,6 +304,9 @@
             width: 95%;
             overflow-y: auto;
         }
+        .rule-protocol--holder {
+            padding-left: 1.5%;
+        }
     </style>
 </head>
 <body>
@@ -331,7 +334,6 @@
                 </div>
             </header>
             <nav class="navigation mdl-navigation mdl-color--blue-grey-800">
-                <!-- <a id="mdl-navigation__link--home" class="mdl-navigation__link mdl-navigation__link--home"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dashboard</i>Dashboard</a> -->
                 <a href="/" id="mdl-navigation__link--rules" class="mdl-navigation__link mdl-navigation__link--rules"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">flag</i>Rules & Policies</a>
                 <div class="mdl-layout-spacer"></div>
                 <a id="mdl-navigation__link--help" class="mdl-navigation__link mdl-navigation__link--help"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">help_outline</i><span class="visuallyhidden">Help</span></a>
@@ -345,63 +347,18 @@
                             <h2 class="mdl-card__title-text">New Rule</h2>
                         </div>
                         <div class="mdl-card__supporting-text">
+                            <div class="id" id="::ID::"></div>
+                            <div>Please type in the name of the rule ("<span id="rule--name-original">::NAME::</span>") to confirm the deletion of this rule.</div>
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input class="mdl-textfield__input" type="text" maxlength="30" autofocus id="rule--name" tabindex="1">
-                                <label class="mdl-textfield__label" for="rule--name">Name...</label>
-                                <span class="mdl-textfield__error">Only alphanumeric characters are allowed.</span>
-                            </div>
-                            <div class="mdl-textfield mdl-js-textfield">
-                                <input class="mdl-textfield__input" type="text" maxlength="5" id="rule--priority" tabindex="2">
-                                <label class="mdl-textfield__label" for="rule--priority">Priority...</label>
-                                <span class="mdl-textfield__error">Only digits are allowed.</span>
-                            </div>
-                            <br/>
-                            <div class="mdl-textfield mdl-js-textfield">
-                                <input class="mdl-textfield__input" type="text" id="rule--source-ip" tabindex="3">
-                                <label class="mdl-textfield__label" for="rule--source-ip">Source Address Range...</label>
-                                <span class="mdl-textfield__error">Please enter a valid IP address</span>
-                            </div>
-                            <div class="mdl-textfield mdl-js-textfield">
-                                <input class="rule__ports mdl-textfield__input" maxlength="5" type="text" id="rule--source-port" tabindex="4">
-                                <label class="mdl-textfield__label" for="rule--source-port">Source Port Range...</label>
-                                <span class="mdl-textfield__error">Please enter a port number between 0 and 65,535</span>
-                            </div>
-                            <br/>
-                            <div class="mdl-textfield mdl-js-textfield">
-                                <input class="mdl-textfield__input" type="text" id="rule--dest-ip" tabindex="5">
-                                <label class="mdl-textfield__label" for="rule--dest-ip">Destination Address Range...</label>
-                                <span class="mdl-textfield__error">Please enter a valid IP address</span>
-                            </div>
-                            <div class="mdl-textfield mdl-js-textfield">
-                                <input class="rule__ports mdl-textfield__input" maxlength="5" type="text" id="rule--dest-port" tabindex="6">
-                                <label class="mdl-textfield__label" for="rule--dest-port">Destination Port Range...</label>
-                                <span class="mdl-textfield__error">Please enter a port number between 0 and 65,535</span>
-                            </div>
-                            <div class="mdl-grid">
-                                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule--access">
-                                    <input type="checkbox" id="rule--access" class="mdl-switch__input">
-                                    <span class="mdl-switch__label">Allowed</span>
-                                </label>
-                                <div class="mdl-cell mdl-cell--4-col">
-                                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect mdl-cell mdl-cell--2-col" for="rule--protocol-tcp">
-                                        <input type="radio" id="rule--protocol-tcp" class="mdl-radio__button" name="proto" value="tcp">
-                                        <span class="mdl-radio__label">TCP</span>
-                                    </label>
-                                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect mdl-cell mdl-cell--2-col" for="rule--protocol-udp">
-                                        <input type="radio" id="rule--protocol-udp" class="mdl-radio__button" name="proto" value="udp">
-                                        <span class="mdl-radio__label">UDP</span>
-                                    </label>
-                                </div>
-                                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--4-col" for="rule--direction">
-                                    <input type="checkbox" id="rule--direction" class="mdl-switch__input">
-                                    <span class="mdl-switch__label">Incoming</span>
-                                </label>
+                                <input class="mdl-textfield__input" type="text" minlength="3" maxlength="10" autofocus id="rule--name" tabindex="1">
+                                <label class="mdl-textfield__label" for="rule--name">Rule Name...</label>
+                                <span class="mdl-textfield__error">Rule name does not match the selected value.</span>
                             </div>
                         </div>
                     </div>
                     <div class="mdl-card__actions mdl-card--border">
-                        <button id="rule-button--update" class="rule-button--update mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" tabindex="11">
-                            <i class="material-icons">edit</i> Add/Update
+                        <button id="rule-button--delete" class="rule-button--delete mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                            <i class="material-icons">edit</i> Delete
                         </button>
                     </div>
                 </div>
@@ -412,6 +369,6 @@
             </div>
         </main>
     </div>
-    <script async src="/scripts/rule.js"></script>
+    <script src="/scripts/delete_rule.js"></script>
 </body>
 </html>

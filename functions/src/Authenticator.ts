@@ -27,10 +27,31 @@ export class Authenticator {
      * Function to check whether the received token is 
      * valid and, if yes, return the user's uid for 
      * other processes (e.g. Read user data from database)
+     * 
+     * NOTE: This method has been coded to verify id tokens 
+     * received in a POST request
+     * 
      * @param header The request header, 'Authorisation'
      */
-    public async checkAccess(header: string): Promise<auth.UserRecord> {
+    public async checkPostAccess(header: string): Promise<auth.UserRecord> {
         const { uid } = await auth().verifyIdToken(this.getAccessToken(header));
+        const userRecord = await auth().getUser(uid);
+        return userRecord;
+    }
+
+    /**
+     * Function to check whether the received token is 
+     * valid and, if yes, return the user's uid for 
+     * other processes (e.g. Read user data from database)
+     * 
+     * NOTE: This method has been coded to verify id tokens 
+     * received in a GET request
+     * 
+     * @param token The id token in the get request
+     * checkGetAccess
+     */
+    public async checkGetAccess(token: string): Promise<auth.UserRecord> {
+        const { uid } = await auth().verifyIdToken(token);
         const userRecord = await auth().getUser(uid);
         return userRecord;
     }

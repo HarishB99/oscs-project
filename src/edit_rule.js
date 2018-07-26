@@ -65,50 +65,32 @@ firebase.auth().onAuthStateChanged(user => {
         checkAllInputs();
         
         /* ::Add keyboard event listeners to validate text fields:: */
-        rule_edit_name.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidRuleName(e.target.value));
-        }); rule_edit_name.addEventListener('keyup', e => {
+        rule_edit_name.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidRuleName(e.target.value));
         });
         
-        rule_edit_priority.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidPriorityNum(e.target.value));
-        }); rule_edit_priority.addEventListener('keyup', e => {
+        rule_edit_priority.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidPriorityNum(e.target.value));
         });
         
-        rule_edit_sip.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidIp(e.target.value));
-        }); rule_edit_sip.addEventListener('keyup', e => {
+        rule_edit_sip.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidIp(e.target.value));
         });
         
-        rule_edit_sport.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidPortNum(e.target.value));
-        }); rule_edit_sport.addEventListener('keyup', e => {
+        rule_edit_sport.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidPortNum(e.target.value));
         });
         
-        rule_edit_dip.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidIp(e.target.value));
-        }); rule_edit_dip.addEventListener('keyup', e => {
+        rule_edit_dip.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidIp(e.target.value));
         });
         
-        rule_edit_dport.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidPortNum(e.target.value));
-        }); rule_edit_dport.addEventListener('keyup', e => {
+        rule_edit_dport.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidPortNum(e.target.value));
         });
@@ -149,7 +131,8 @@ firebase.auth().onAuthStateChanged(user => {
                         sport: rule_edit_sport.value,
                         dip: rule_edit_dip.value,
                         dport: rule_edit_dport.value,
-                        direction: rule_edit_direction.checked.toString()
+                        direction: rule_edit_direction.checked.toString(),
+                        id: document.querySelector('.id').id
                     }
                 });
             }).then(response => {

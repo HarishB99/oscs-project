@@ -345,11 +345,12 @@
                 <div class="card-wide mdl-card mdl-shadow--2dp">
                     <div class="form-holder">
                         <div class="mdl-card__title">
-                            <h2 class="mdl-card__title-text">New Rule</h2>
+                            <h2 class="mdl-card__title-text">Edit Rule</h2>
                         </div>
                         <div class="mdl-card__supporting-text">
+                            <div class="id" id="::ID::"></div>
                             <div class="mdl-textfield mdl-js-textfield">
-                                <input class="mdl-textfield__input" type="text" maxlength="30" autofocus id="rule--name" value="::NAME::" tabindex="1">
+                                <input class="mdl-textfield__input" type="text" minlength="3" maxlength="10" autofocus id="rule--name" value="::NAME::" tabindex="1">
                                 <label class="mdl-textfield__label" for="rule--name">Name...</label>
                                 <span class="mdl-textfield__error">Only alphanumeric characters are allowed.</span>
                             </div>
@@ -404,7 +405,7 @@
                     </div>
                     <div class="mdl-card__actions mdl-card--border">
                         <button id="rule-button--update" class="rule-button--update mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" tabindex="11">
-                            <i class="material-icons">edit</i> Add/Update
+                            <i class="material-icons">edit</i> Update
                         </button>
                     </div>
                 </div>
@@ -415,6 +416,6 @@
             </div>
         </main>
     </div>
-    <script async src="/scripts/rule.js"></script>
+    <script async src="/scripts/edit_rule.js"></script>
 </body>
 </html>
