@@ -4,7 +4,7 @@ UIUtils.showSnackbar = function (message, actionText, actionHandler) {
     var notification = document.querySelector('.mdl-js-snackbar');
     var data = {
         message: message,
-        timeout: 10000
+        timeout: 5000
     };
     if (typeof actionText !== "undefined") {
         if (actionText) {
@@ -60,11 +60,9 @@ UIUtils.toggleSwitch = function(condition, el) {
 
 UIUtils.toggleLoader = function(show, mdl_spinner_holder) {
     if (show) {
-        if (mdl_spinner_holder.style.display === 'none')
-            mdl_spinner_holder.style.display = 'block';
+        mdl_spinner_holder.style.display = 'block';
     } else {
-        if (mdl_spinner_holder.style.display === 'block')
-            mdl_spinner_holder.style.display = 'none';
+        mdl_spinner_holder.style.display = 'none';
     }
 };
 
