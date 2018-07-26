@@ -20,7 +20,7 @@ firebase.auth().onAuthStateChanged(user => {
         const profile_btn = document.getElementById('mdl-menu__item--profile');
         const signout_btn = document.getElementById('mdl-menu__item--signout');
         
-        email_display.innerHTML = user.email;
+        email_display.innerHTML = user.displayName;
 
         profile_btn.addEventListener('click', e => {
             e.target.disabled = true;
@@ -198,6 +198,7 @@ firebase.auth().onAuthStateChanged(user => {
         });
 
         // #web-filter
+        
 
         // #global
         const block_ads = document.getElementById('web-filter__block-ads');
@@ -225,7 +226,7 @@ firebase.auth().onAuthStateChanged(user => {
                 })
             }).then(response => {
                 const payload = response.data;
-                UIUtils.showSnackbar(payload.message);
+                UIUtils.showSnackbar('<i class="material-icons">check</i>' + payload.message);
                 e.target.disabled = false;
             }).catch(error => {
                 console.error('Error while sending options update request to server: ', error);

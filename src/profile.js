@@ -19,7 +19,7 @@ firebase.auth().onAuthStateChanged(user => {
         const profile_btn = document.getElementById('mdl-menu__item--profile');
         const signout_btn = document.getElementById('mdl-menu__item--signout');
         
-        email_display.innerHTML = user.email;
+        email_display.innerHTML = user.displayName;
         
         profile_btn.addEventListener('click', () => {
             location.href = '/profile';
