@@ -87,8 +87,18 @@ export class InputValidator {
      */
     private isAReasonablyStrongPassword(password: string): boolean {
         if (this.isEmpty(password)) return false;
-        const re = new RegExp('^(?=.{2,}[a-z])(?=.{2,}[A-Z])(?=.{2,}[0-9])(?=.+[!@#$%^&*])(?=.{8,})', 'u');
-        return re.test(password);
+        const has2Caps = password.match(/[A-Z]/g) ? password.match(/[A-Z]/g).length >= 2 : false;
+        const has2Smalls = password.match(/[a-z]/g) ? password.match(/[a-z]/g).length >= 2 : false;
+        const has2Digits = password.match(/[0-9]/g) ? password.match(/[0-9]/g).length >= 2 : false;
+        const has1Symbol = password.match(/[!@#$%^&*]/g) ? password.match(/[!@#$%^&*]/g).length >= 1 : false;
+        const is8CharsLong = password ? password.length >= 8 : false;
+        return has2Caps && 
+                has2Smalls && 
+                has2Digits && 
+                has1Symbol && 
+                is8CharsLong;
+        // const re = new RegExp('^(?=.{2,}[a-z])(?=.{2,}[A-Z])(?=.{2,}[0-9])(?=.+[!@#$%^&*])(?=.{8,})', 'u');
+        // return re.test(password);
     }
 
     /**
