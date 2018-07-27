@@ -58,8 +58,8 @@ firebase.auth().onAuthStateChanged(user => {
             timestampsInSnapshots: true
         });
 
-        db.collection('users').doc(user.uid)
-        .collection('rules').onSnapshot(rules => {
+        db.collection(`/users/${user.uid}/rules`)
+        .onSnapshot(rules => {
             UIUtils.toggleLoader(true, mdl_spinner_holder);
             const tbody = document.getElementById('firewall-rule__table--list');
 
@@ -226,7 +226,7 @@ firebase.auth().onAuthStateChanged(user => {
                 })
             }).then(response => {
                 const payload = response.data;
-                UIUtils.showSnackbar('<i class="material-icons">check</i>' + payload.message);
+                UIUtils.showSnackbar(payload.message);
                 e.target.disabled = false;
             }).catch(error => {
                 console.error('Error while sending options update request to server: ', error);
