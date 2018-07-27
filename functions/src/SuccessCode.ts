@@ -55,7 +55,7 @@ export class SuccessCode {
     public static readonly GLOBAL_OPTIONS = {
         UPDATE: {
             code: 'options/update-success',
-            message: 'The update operation was completed successfully'
+            message: 'Success!'
         }
     };
 }
