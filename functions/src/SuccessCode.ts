@@ -38,18 +38,18 @@ export class SuccessCode {
     };
 
     public static readonly FILTER = {
-        CREATE: {
-            code: 'filter/creation-success',
-            message: 'The filter was created successfully'
-        },
+        // CREATE: {
+        //     code: 'filter/creation-success',
+        //     message: 'The filter was created successfully'
+        // },
         UPDATE: {
             code: 'filter/update-success',
-            message: 'The update operation was completed successfully'
+            message: 'Success!'
         },
-        DELETE: {
-            code: 'filter/delete-success',
-            message: 'The delete operation was completed successfully'
-        }
+        // DELETE: {
+        //     code: 'filter/delete-success',
+        //     message: 'The delete operation was completed successfully'
+        // }
     };
 
     public static readonly GLOBAL_OPTIONS = {

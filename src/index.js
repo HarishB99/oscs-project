@@ -22,23 +22,18 @@ firebase.auth().onAuthStateChanged(user => {
         
         email_display.innerHTML = user.displayName;
 
-        profile_btn.addEventListener('click', e => {
-            e.target.disabled = true;
+        profile_btn.addEventListener('click', () => {
             location.href = '/profile';
-            e.target.disabled = false;
         });
         
-        signout_btn.addEventListener('click', e => {
-            e.target.disabled = true;
+        signout_btn.addEventListener('click', () => {
             firebase.auth().signOut()
             .then(() => {
                 UIUtils.logoutUI();
-                e.target.disabled = false;
             })
             .catch(error => {
                 console.error('Error while signing out user: ', error);
                 UIUtils.showSnackbar('For some reason, we could not log you out. Please clear your browser cache, restart your browser and try again.');
-                e.target.disabled = false;
             });
         });
 
@@ -47,10 +42,8 @@ firebase.auth().onAuthStateChanged(user => {
         const ruleRowsName = 'rules';
 
         document.getElementById('firewall-rule__button--add')
-        .addEventListener('click', e => {
-            e.target.disabled = true;
+        .addEventListener('click', () => {
             location.href = '/create_rule';
-            e.target.disabled = false;
         });
 
         const db = firebase.firestore();
@@ -129,14 +122,14 @@ firebase.auth().onAuthStateChanged(user => {
                             editBtn.className = "firewall-rule__button--edit mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect";
                             editBtn.innerHTML = "<i class=\"material-icons\">edit</i> Edit";
                             editBtn.style.width = "100%";
-                            editBtn.addEventListener('click', e => {
-                                e.target.disabled = true;
+                            editBtn.addEventListener('click', () => {
+                                
                                 user.getIdToken(true)
                                 .then(token => location.href = `/edit_rule/${token}?rule=${rule.id}`)
                                 .catch(error => {
                                     console.error(`Error while sending request to edit rule: ${error}`);
                                 });
-                                e.target.disabled = false;
+                                
                                 
                             });
                             buttonsHolder.appendChild(editBtn);
@@ -149,14 +142,14 @@ firebase.auth().onAuthStateChanged(user => {
                             deleteBtn.className = "firewall-rule__button--delete mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect";
                             deleteBtn.innerHTML = "<i class=\"material-icons\">delete</i> Delete";
                             deleteBtn.style.width = "100%";
-                            deleteBtn.addEventListener('click', e => {
-                                e.target.disabled = true;
+                            deleteBtn.addEventListener('click', () => {
+                                
                                 user.getIdToken(true)
                                 .then(token => location.href = `/delete_rule/${token}?rule=${rule.id}`)
                                 .catch(error => {
                                     console.error(`Error while sending request to edit rule: ${error}`);
                                 });
-                                e.target.disabled = false;
+                                
                                 
                             });
                             buttonsHolder.appendChild(deleteBtn);
@@ -198,7 +191,132 @@ firebase.auth().onAuthStateChanged(user => {
         });
 
         // #web-filter
+        let filters = '';
+        const web_filter_list = document.getElementById('web-filter__table--list');
+        const web_filter_domain = document.getElementById('web-filter__domain');
+        const web_filter_btn_add = document.getElementById('web-filter__btn-add');
+        const web_filter_mode_label = document.querySelector('label[for=\'web-filter__mode\']');
+        const web_filter_btn_publish = document.getElementById('web-filter__btn-submit');
+        const web_filter_btn_cancel = document.getElementById('web-filter__btn-cancel');
+
+        const checkAllInputs = function() {
+            UIUtils.update_text_field_ui(web_filter_domain, 
+                InputValidator.isValidUrl(web_filter_domain.value));
+        };
+
+        const allDomainsAreValid = function(domains) {
+            for (let i = 0; i < domains.length; i++) {
+                let filter = domains[i].innerHTML;
+                filter = filter.trim();
+                if (!(/^(?:(?:(?:https?):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:[/?#]\S*)?$/.test(filter))) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        const resetFiltersList = function () {
+            if (filters.mode) {
+                web_filter_mode_label.classList.add('is-checked');
+            } else {
+                web_filter_mode_label.classList.remove('is-checked');
+            }
+
+            // Reset web_filter_list
+            web_filter_list.innerHTML = '';
+
+            filters.domains.forEach(domain => {
+                const tr = document.createElement('tr');
+                    const domain_holder = document.createElement('td');
+                        // domain.id = 'domain';
+                        domain_holder.className = 'domain mdl-data-table__cell--non-numeric';
+                        domain_holder.innerHTML = domain;
+                    tr.appendChild(domain_holder);
+                    const filter_del_btn_holder = document.createElement('td');
+                        const filter_del_btn = document.createElement('button');
+                            filter_del_btn.className = 'mdl-button mdl-js-button mdl-button--icon';
+                            filter_del_btn.innerHTML = '<i class=\"material-icons\">cancel</i>';
+                            filter_del_btn.addEventListener('click', () => {
+                                web_filter_list.removeChild(tr);
+                            });
+                        filter_del_btn_holder.appendChild(filter_del_btn);
+                    tr.appendChild(filter_del_btn_holder)
+                web_filter_list.appendChild(tr);
+            });
+        }
+
+        web_filter_domain.addEventListener('keyup', e => {
+            UIUtils.update_text_field_ui(e.target, 
+                InputValidator.isValidUrl(e.target.value));
+        });
+
+        web_filter_btn_add.addEventListener('click', () => {
+            checkAllInputs();
         
+            if (UIUtils.stillAnyInvalid()) return;
+
+            const tr = document.createElement('tr');
+                const domain = document.createElement('td');
+                    // domain.id = 'domain';
+                    domain.className = 'domain mdl-data-table__cell--non-numeric';
+                    domain.innerHTML = web_filter_domain.value;
+                tr.appendChild(domain);
+                const filter_del_btn_holder = document.createElement('td');
+                    const filter_del_btn = document.createElement('button');
+                        filter_del_btn.className = 'mdl-button mdl-js-button mdl-button--icon';
+                        filter_del_btn.innerHTML = '<i class=\"material-icons\">cancel</i>';
+                        filter_del_btn.addEventListener('click', () => {
+                            web_filter_list.removeChild(tr);
+                        });
+                    filter_del_btn_holder.appendChild(filter_del_btn);
+                tr.appendChild(filter_del_btn_holder)
+            web_filter_list.appendChild(tr);
+        });
+
+
+        web_filter_btn_publish.addEventListener('click', () => {
+            const domains = document.querySelectorAll('.domain');
+
+            if (!allDomainsAreValid(domains)) {
+                UIUtils.showSnackbar('Please check your URLs and try again.');
+                return;
+            }
+
+            const finalFilters = [];
+
+            domains.forEach(domain => {
+                const filter = domain.innerHTML.trim();
+                finalFilters.push(filter);
+            });
+
+            user.getIdToken(true)
+            .then(token => {
+                return axios.post('/filter-update', {
+                    filters: finalFilters,
+                    mode: web_filter_mode_label.classList.contains('is-checked').toString()
+                }, {
+                    headers: {
+                        'Authorisation': 'Bearer ' + token
+                    }
+                });
+            }).then(response => {
+                const payload = response.data;
+                resetFiltersList();
+                UIUtils.showSnackbar(payload.message);
+            }).catch(error => {
+                console.log(`Error while sending update filter request: ${error}`);
+                UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+            });
+        });
+
+        web_filter_btn_cancel.addEventListener('click', resetFiltersList);
+
+        db.doc(`/users/${user.uid}/filters/filter`)
+        .onSnapshot(snapshot => {
+            filters = snapshot.data();
+
+            resetFiltersList();
+        });
 
         // #global
         const block_ads = document.getElementById('web-filter__block-ads');
@@ -207,8 +325,8 @@ firebase.auth().onAuthStateChanged(user => {
         const vs = document.getElementById('firewall-rule__vs');
         const global_submit_btn = document.getElementById('global--btn-submit');
 
-        global_submit_btn.addEventListener('click', e => {
-            e.target.disabled = true;
+        global_submit_btn.addEventListener('click', () => {
+            
             user.getIdToken(true)
             .then(token => {
                 return axios({
@@ -227,11 +345,11 @@ firebase.auth().onAuthStateChanged(user => {
             }).then(response => {
                 const payload = response.data;
                 UIUtils.showSnackbar(payload.message);
-                e.target.disabled = false;
+                
             }).catch(error => {
                 console.error('Error while sending options update request to server: ', error);
                 UIUtils.showSnackbar('An unexpected error occurred while trying to update your firewall settings.');
-                e.target.disabled = false;
+                
             });
         });      
 

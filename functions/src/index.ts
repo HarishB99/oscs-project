@@ -390,17 +390,39 @@ app.post('/global-update', async (request, response) => {
     }
 });
 
-app.post('/filter-add', (request, response) => {
-    response.status(503).send('Functionality not available yet.');
+// app.post('/filter-add', (request, response) => {
+    // response.status(503).send('Functionality not available yet.');
+// });
+
+app.post('/filter-update', async (request, response) => {
+    try {
+        const { uid } = await authenticator.checkPostAccess(request.get(TOKEN));
+
+        const { filters, mode } = request.body;
+
+        const input = iv.isValidFilter(filters, mode);
+
+        if (!input) {
+            response.send(ErrorCode.FILTER.BAD_DATA);
+        } else {
+            // TODO: Log the creation of filters
+            const writeResult = await db.doc(`/users/${uid}/filters/filter`)
+            .set({
+                domains: input.domains,
+                mode: input.mode
+            }, { merge: true });
+    
+            response.send(SuccessCode.FILTER.UPDATE);
+        }
+    } catch (error) {
+        console.error(`Error while updating filters: ${error}`);
+        response.send(ErrorCode.FILTER.UPDATE);
+    }
 });
 
-app.post('/filter-update', (request, response) => {
-    response.status(503).send('Functionality not available yet.');
-});
-
-app.post('/filter-delete', (request, response) => {
-    response.status(503).send('Functionality not available yet.');
-});
+// app.post('/filter-delete', (request, response) => {
+    // response.status(503).send('Functionality not available yet.');
+// });
 
 // app.all('*', (request, response) => {
 //     response.status(404).send('Sorry, we can\'t find that ');
