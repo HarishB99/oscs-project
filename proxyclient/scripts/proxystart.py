@@ -29,32 +29,17 @@ if args.no_sync:
     with open('../data/testrules.json', 'r') as ruleJson:
         rules = json.loads(ruleJson.read())
 else:
-    print(args.user)
     data = {
         'email' : args.user,
         'password': args.password
     }
-    print(data)
     r = requests.post('http://localhost:3000/login', json=data);
-    print(r.text)
+    if r.text == "Login failure":
+        print("Login failure")
+        sys.exit()
     if r.status_code == 200:
         #parse the json containing data
         rules = json.loads(r.text)
-
-#configuring firewall according to rules
-if sys.platform.startswith('linux'): #iptables for linux
-    print("LINUX MACHINE")
-    IptablesHandler.initialize(port)
-    for r in rules["firewallRules"]:
-        if r["direction"] == "incoming":
-            IptablesHandler.createRule(r, True)
-        elif r["direction"] == "outgoing":
-            IptablesHandler.createRule(r, False)
-        else:
-            print("Error: Unrecognized firewall rule direction")
-elif sys.platform == 'win32': #windows firewall for windows
-    print("WINDOWS MACHINE")
-    WindowsFirewallHandler.setRules(rules)
 
 #start mitmdump for web filter
 print("Proxy Server IP:")

@@ -6,7 +6,7 @@ class CheckedDomains:
             if domain in CheckedDomains.list:
                 if not safe:
                     CheckedDomains.list[domain]["isSafe"] = False
-                    reason.append(reason)
+                    CheckedDomains.list[domain]["reason"].append(reason)
             else:
                 CheckedDomains.list[domain] = {
                     "isSafe" : safe,

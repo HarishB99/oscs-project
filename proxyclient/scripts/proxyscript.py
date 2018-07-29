@@ -2,7 +2,9 @@ from mitmproxy import ctx, http
 from bs4 import BeautifulSoup
 from db import LogDatabase
 from checkedDomains import CheckedDomains
-import subprocess, json, requests
+from iptableSetup import IptablesHandler
+from windowsFirewallHandler import WindowsFirewallHandler
+import subprocess, json, requests, atexit, sys, time
 
 text_clf = None
 options = {
@@ -14,9 +16,10 @@ options = {
 }
 
 blockedDomains = {
-    "ad": {},
-    "malicious" : {},
-    "user" : {}
+    "ad": set(),
+    "malicious" : set(),
+    "user" : set(),
+    "exclude" : set()
 }
 
 categories = {
@@ -43,6 +46,14 @@ categories = {
     '501': 'Positive: Good site'
 }
 
+#spin up mongo server
+mongoServerP = subprocess.Popen(["C:\\Program Files\\MongoDB\\Server\\3.6\\bin\\mongod.exe"],
+    creationflags=subprocess.CREATE_NEW_CONSOLE)
+#close mongo server on exit
+import atexit
+atexit.register(mongoServerP.terminate)
+
+
 checkedDomains = {}
 apiKeys = None
 log = None
@@ -53,7 +64,8 @@ def addDomainsF(fileName, category):
     with open(fileName, "r") as f:
         domains = f.readlines()
         for d in domains:
-            blockedDomains[category][d] = True
+            d2 = d.replace("\n", "")
+            blockedDomains[category].add(d2)
 
 def addDomainGroup(groupNames):
     with open('../data/domaingroups.json', 'r') as dg:
@@ -61,42 +73,94 @@ def addDomainGroup(groupNames):
 
         for dgName in groupNames:
             for dgDomain in domainGroups[dgName]:
-                blockedDomains["user"][dgDomain] = True
+                blockedDomains["user"].add(dgDomain)
 
+test_rules = False
 def load(l):
     #build hash table of domains to block
     addDomainsF("../data/ad-domains-list.txt", "ad")
     addDomainsF("../data/malicious-domains-list.txt", "malicious")
-    #load user defined domains
-    with open('../data/testrules.json', 'r') as rules:
-        rules = json.loads(rules.read())
-        r = rules["webfilter"]
-        #set options
-        #mode
-        if r["mode"] == "blacklist": options["isBlacklist"] = True
-        else: options["isBlacklist"] = False
-        #blocking of ads and malicious sites
-        if r["blockAds"]: options["block-ads"] = True
-        else: options["block-ads"] = False
-        if r["blockMalicious"]: options["block-malicious"] = True
-        else: options["block-malicious"] = False
 
-        #get domain groups
-        addDomainGroup(r["domainGroups"])
-        #add user-defined domains
+    #load user defined domains
+    if test_rules:
+        with open('../data/testrules.json', 'r') as rulesFile:
+            rules = json.loads(rulesFile.read())
+    else:
+        #retrive policy
+        time.sleep(3) #wait a while for node client
+        policyRequest = requests.get('http://localhost:3000/rules.json')
+        policyJson = policyRequest.json()
+
+        #firewall rules formatting
+        policyJson["firewallRules"] = policyJson.pop("rules")
+        firewallRules = policyJson["firewallRules"]
+        for firewallRule in firewallRules:
+            firewallRule["allow"] = firewallRule.pop("access")
+
+        rules = policyJson
+
+    print(json.dumps(rules, indent=4))
+    #configuring firewall according to rules
+    if sys.platform.startswith('linux'): #iptables for linux
+        print("LINUX MACHINE")
+        IptablesHandler.initialize(port)
+        for r in rules["firewallRules"]:
+            if r["direction"] == "incoming":
+                IptablesHandler.createRule(r, True)
+            elif r["direction"] == "outgoing":
+                IptablesHandler.createRule(r, False)
+            else:
+                print("Error: Unrecognized firewall rule direction")
+    elif sys.platform == 'win32': #windows firewall for windows
+        print("WINDOWS MACHINE")
+        WindowsFirewallHandler.setRules(rules)
+
+    #webfilter setup
+    r = rules["webfilter"]
+    #set options
+    #mode
+    if "mode" not in r or r["mode"] == "blacklist":
+        options["isBlacklist"] = True
+    else:
+        options["isBlacklist"] = False
+    #blocking of ads and malicious sites
+    if "blockAds" not in r or r["blockAds"]:
+        options["block-ads"] = True
+    else:
+        options["block-ads"] = False
+    if "blockMalicious" not in r or r["blockMalicious"]:
+        options["block-malicious"] = True
+    else:
+        options["block-malicious"] = False
+
+    #get domain groups
+    if "domainGroups" in r: addDomainGroup(r["domainGroups"])
+    #add user-defined domains
+    if "domains" in r:
         for domain in r["domains"]:
-            blockedDomains["user"][domain] = True
+            blockedDomains["user"].add(domain)
+    if "exclude" in r:
+        for domain2 in r["exclude"]:
+            if "www." not in domain2:
+                blockedDomains["exclude"].add('www.'+domain2)
+            blockedDomains["exclude"].add(domain2)
 
 def request(flow):
     d = flow.request.pretty_host
     if (d == 'api.mywot.com' or d == 'safebrowsing.googleapis.com'):
         return
 
+    #get ip of requester
     ip = flow.client_conn.ip_address[0][7:]
     LogDatabase.request(ip, d)
+
+    #handle exclusions
+    if d in blockedDomains["exclude"]:
+        return
+
     apiSkip = False
+    #check domain if not checked already, and log it into CheckedDomains
     if CheckedDomains.search(d) is None:
-        print("UNCHECKED DOMAIN-----------------" + d)
         #ignore ads
         if options["block-ads"]:
             if d in blockedDomains["ad"]:
@@ -110,13 +174,11 @@ def request(flow):
         #block user defined sites
         #blacklist
         if options["isBlacklist"]:
-            for key, value in blockedDomains["user"].items():
-                if d in key:
-                    print("USER DEFINED BLOCKED DOMAIN--------------" +d)
-                    apiSkip = True
-                    LogDatabase.blockedDomain(ip, d)
-                    CheckedDomains.add(d, False, "Blocked by policy (user blacklist)", False)
-                    break
+            if d in blockedDomains["user"]:
+                print("USER DEFINED BLOCKED DOMAIN--------------" +d)
+                apiSkip = True
+                LogDatabase.blockedDomain(ip, d)
+                CheckedDomains.add(d, False, "Blocked by policy (user blacklist)", False)
         else: #whitelist
             if flow.request.pretty_host not in blockedDomains["user"]:
                 apiSkip = True
@@ -127,7 +189,7 @@ def request(flow):
             #lookup stuff in the apis
             wotResults = webOfTrustLookup(d)
             gResults = googleSafeBrowsingLookup(d)
-            #check results
+            #getting api results
             results = {}
             #google safe browsing
             if gResults != 0 and gResults != 1:
@@ -142,8 +204,13 @@ def request(flow):
             #web of trust
             print("WOTRESULTS---------------------:")
             print(wotResults)
-            results["trustworthiness"] = wotResults["reputation"]["trustworthiness"][0]
-            results["childSafety"] = wotResults["reputation"]["childSafety"][0]
+            wotR = wotResults["reputation"]
+            if wotR["trustworthiness"] is not None:
+                results["trustworthiness"] = wotR["trustworthiness"][0]
+                results["trustworthiness-confidence"] =wotR["trustworthiness"][1]
+            if wotR["childSafety"] is not None:
+                results["childSafety"] = wotR["childSafety"][0]
+                results["childSafety-confidence"] = wotR["childSafety"][1]
             results["categories"] = []
             results["categoryTypes"] = []
             for value in wotResults["categories"]:
@@ -153,12 +220,16 @@ def request(flow):
 
 
             #check api call results
-            if results["childSafety"] < options["block-child-unsafe-level"]:
-                CheckedDomains.add(d, False, "Blocked by policy (child safety)", False)
-                LogDatabase.securityEvent(ip, d, "childUnsafe")
-            if results["trustworthiness"] < options["block-suspicious-level"]:
-                CheckedDomains.add(d, False, "Blocked by policy (suspicious)", False)
-                LogDatabase.securityEvent(ip, d, "suspiciousDomain")
+            if "childSafety" in results:
+                if results["childSafety"] < options["block-child-unsafe-level"] and \
+                 results["childSafety-confidence"] > 30:
+                    CheckedDomains.add(d, False, "Blocked by policy (child safety)", False)
+                    LogDatabase.securityEvent(ip, d, "childUnsafe")
+            if "trustworthiness" in results:
+                if results["trustworthiness"] < options["block-suspicious-level"] and \
+                 results["trustworthiness-confidence"] > 30:
+                    CheckedDomains.add(d, False, "Blocked by policy (suspicious)", False)
+                    LogDatabase.securityEvent(ip, d, "suspiciousDomain")
             for cat in results["categories"]:
                 if cat[0][0] == "1" and int(cat[1]) > 90:
                     CheckedDomains.add(d, False, "Blocked by policy (" + category[cat[0]])
@@ -169,13 +240,15 @@ def request(flow):
                 if cat[0][0] == "3" and int(cat[1]) > 40:
                     () #TODO: Add filters for certain topics
 
+        #passed all the above checks -> safe domain
         if CheckedDomains.search(d) is None:
             CheckedDomains.add(d, True, None, False)
 
+    #lookup domain and decide course of action
     sc = CheckedDomains.search(d)
     if not sc["isSafe"]: #previously logged as unsafe
         if sc["kill"]:
-            flow.kill()
+            flow.response = ""
         else:
             #list all reasons the domain is bad
             r = ""
@@ -207,9 +280,8 @@ def response(flow):
     elif flow.response.headers.get("content-type", "").startswith("application/octet-stream") or flow.response.headers.get("content-disposition", "").startswith("attachment"): #downloaded files
         () #TODO::scan file for viruses
     else:
-        #check text
-        html = BeautifulSoup(flow.response.content, "html.parser")
-        text = html.get_text()
+        #html text
+        () #do nothing
 
 #Query Web of Trust for site reputation and category
 def webOfTrustLookup(domain):
