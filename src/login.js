@@ -20,28 +20,20 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
         const acc_login_email = document.getElementById("account-login--email");
         const acc_login_pass = document.getElementById("account-login--pass");
         
-        function checkAllInputs() {
+        var checkAllInputs = function() {
             UIUtils.update_text_field_ui(acc_login_email, 
                 InputValidator.isValidEmail(acc_login_email.value));
             UIUtils.update_text_field_ui(acc_login_pass, 
                 InputValidator.isAReasonablyStrongPassword(acc_login_pass.value));
-        }
-        
-        checkAllInputs();
+        };
         
         /* ::Add keyboard event listeners to validate text fields:: */
-        acc_login_email.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidEmail(e.target.value));
-        }); acc_login_email.addEventListener('keyup', e => {
+        acc_login_email.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidEmail(e.target.value));
         });
         
-        acc_login_pass.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(acc_login_pass, 
-                InputValidator.isAReasonablyStrongPassword(acc_login_pass.value));
-        }); acc_login_pass.addEventListener('keyup', e => {
+        acc_login_pass.addEventListener('keyup', () => {
             UIUtils.update_text_field_ui(acc_login_pass, 
                 InputValidator.isAReasonablyStrongPassword(acc_login_pass.value));
         });
@@ -51,7 +43,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
             if (e.keyCode === 13) acc_login_btn.click();
         });
         
-        acc_login_btn.addEventListener('click', e => {
+        acc_login_btn.addEventListener('click', () => {
             checkAllInputs();
         
             if (UIUtils.stillAnyInvalid()) return;
@@ -70,7 +62,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
             }).catch(error => {
                 console.error(error);
                 if (error.code === 'auth/user-not-found') {
-                    UIUtils.showSnackbar("Your email does not match our records.", "Create Account", function(e) {
+                    UIUtils.showSnackbar("Your email does not match our records.", "Create Account", () => {
                         location.href = '/create_account';
                     });
                 } else if (error.code === "auth/user-disabled") {

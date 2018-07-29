@@ -4,8 +4,9 @@ module.exports = [{
         login: './src/login.js',
         rule: './src/rule.js',
         profile: './src/profile.js',
-        otp: './src/otp.js',
-        account: './src/account.js'
+        edit_rule: './src/edit_rule.js',
+        account: './src/account.js',
+        delete_rule: './src/delete_rule.js'
     },
     module: {
         rules: [

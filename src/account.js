@@ -24,7 +24,7 @@ firebase.auth().onAuthStateChanged(user => {
         const pass2 = document.getElementById("account-create--input-password2");
         const acc_req_btn = document.getElementById("account-create--button-submit");
 
-        function checkAllInputs() {
+        var checkAllInputs = function () {
             UIUtils.update_text_field_ui(acc_req_email, 
                 InputValidator.isValidEmail(acc_req_email.value));
             UIUtils.update_text_field_ui(acc_req_org, 
@@ -35,47 +35,36 @@ firebase.auth().onAuthStateChanged(user => {
                 InputValidator.isAReasonablyStrongPassword(acc_req_pass.value));
             UIUtils.update_text_field_ui(pass2, 
                 (acc_req_pass.value === pass2.value && pass2.value !== ''));
-        }
+        };
 
-        checkAllInputs();
+        // checkAllInputs();
 
         /* ::Add keyboard event listeners to validate text fields:: */
-        acc_req_email.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidEmail(e.target.value));
-        }); acc_req_email.addEventListener('keyup', e => {
+        // acc_req_email.addEventListener('focus', e => {
+        //     UIUtils.update_text_field_ui(e.target, 
+        //         InputValidator.isValidEmail(e.target.value));
+        // }); 
+        acc_req_email.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidEmail(e.target.value));
         });
 
-        acc_req_org.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidOrgName(e.target.value));
-        }); acc_req_org.addEventListener('keyup', e => {
+        acc_req_org.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidOrgName(e.target.value));
         });
 
-        acc_req_phone.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidPhoneNum(e.target.value));
-        }); acc_req_phone.addEventListener('keyup', e => {
+        acc_req_phone.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidPhoneNum(e.target.value));
         });
 
-        acc_req_pass.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isAReasonablyStrongPassword(e.target.value));
-        }); acc_req_pass.addEventListener('keyup', e => {
+        acc_req_pass.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isAReasonablyStrongPassword(e.target.value));
         });
 
-        pass2.addEventListener('focus', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                (acc_req_pass.value === e.target.value && e.target.value !== ''));
-        }); pass2.addEventListener('keyup', e => {
+        pass2.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 (acc_req_pass.value === e.target.value && e.target.value !== ''));
         });
@@ -85,7 +74,7 @@ firebase.auth().onAuthStateChanged(user => {
             if (e.keyCode === 13) acc_req_btn.click();
         });
 
-        acc_req_btn.addEventListener("click", e => {
+        acc_req_btn.addEventListener("click", () => {
             checkAllInputs();
             
             if (UIUtils.stillAnyInvalid()) return;

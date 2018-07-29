@@ -6,6 +6,9 @@ import { Authenticator } from './Authenticator';
 import { UserInput } from './UserInput';
 import { SuccessCode } from './SuccessCode';
 import { ErrorCode } from './ErrorCode';
+import * as fs from 'fs';
+import * as path from 'path';
+import { RuleInput } from './RuleInput';
 // import { h, render } from 'preact';
 const cors = require('cors')({ origin: true });
 
@@ -21,6 +24,91 @@ const iv = new InputValidator();
 const authenticator = new Authenticator();
 
 const TOKEN = Authenticator.TOKEN_HEADER;
+
+app.get('/edit_rule/:token', async (request, response) => {
+    try {
+        const { uid } = await authenticator.checkGetAccess(request.params.token);
+
+        const id = request.query.rule;
+        const rule_ref = db.doc(`/users/${uid}/rules/${id}`);
+        const rule_snapshot = await rule_ref.get();
+
+        if (!rule_snapshot.exists) {
+            response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
+        } else {
+            const rule = rule_snapshot.data() as RuleInput;
+
+            fs.readFile(path.resolve(__dirname, '../edit_rule.html'), 'utf8', (error, data) => {
+                if (error) {
+                    response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
+                } else {
+                    const html = data;
+    
+                    const id_filled = html.replace('::ID::', rule_snapshot.id);
+                    const name_filled = id_filled.replace('::NAME::', rule.name);
+                    const priority_filled = name_filled.replace('::PRIORITY::', rule.priority.toString());
+                    const sip_filled = priority_filled.replace('::SIP::', rule.sourceip);
+                    const sport_filled = sip_filled.replace('::SPORT::', rule.sourceport);
+                    const dip_filled = sport_filled.replace('::DIP::', rule.destip);
+                    const dport_filled = dip_filled.replace('::DPORT::', rule.destport);
+    
+                    const access = rule.access ? ' checked' : '';
+                    const access_filled = dport_filled.replace('::ACCESS::', access)
+                    
+                    let protocol_filled = '';
+                    if (rule.protocol.toLowerCase() === 'tcp') {
+                        const removedUdp = access_filled.replace('::PROTOCOL_UDP::', '');
+                        protocol_filled = removedUdp.replace('::PROTOCOL_TCP::', ' checked');
+                    } else {
+                        const removedUdp = access_filled.replace('::PROTOCOL_TCP::', '');
+                        protocol_filled = removedUdp.replace('::PROTOCOL_UDP::', ' checked');
+                    }
+                    
+                    const direction = rule.direction ? ' checked' : '';
+                    const edit_rule = protocol_filled.replace('::DIRECTION::', direction);
+    
+                    // response.set('Content-Type', 'text/html');
+                    response.send(edit_rule);
+                }
+            });
+        }
+    } catch (error) {
+        console.error(`Error while serving GET request for /edit_rule: ${error}`);
+        response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
+    }
+});
+
+app.get('/delete_rule/:token', async (request, response) => {
+    try {
+        const { uid } = await authenticator.checkGetAccess(request.params.token);
+
+        const id = request.query.rule;
+        const rule_ref = db.doc(`/users/${uid}/rules/${id}`);
+        const rule_snapshot = await rule_ref.get();
+
+        if (!rule_snapshot.exists) {
+            response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
+        } else {
+            const { name } = rule_snapshot.data() as RuleInput;
+    
+            fs.readFile(path.resolve(__dirname, '../delete_rule.html'), 'utf8', (error, data) => {
+                if (error) {
+                    response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
+                } else {
+                    const html = data;
+    
+                    const id_filled = html.replace('::ID::', rule_snapshot.id);
+                    const name_filled = id_filled.replace('::NAME::', name);
+    
+                    response.send(name_filled);
+                }
+            });
+        }
+    } catch (error) {
+        console.error(`Error while serving GET request for /delete_rule: ${error}`);
+        response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
+    }
+});
 
 /**
  * The following is a test app to test CORS
@@ -59,6 +147,7 @@ app.post('/account-create', async (request, response) => {
         const input = iv.isValidUserDetails(email, pass, contact, org, null);
 
         if (!input) {
+            // TODO: Log failure of account creation
             response.send(ErrorCode.ACCOUNT.BAD_DATA);
         } else {
             const { uid } = await auth.createUser({
@@ -69,6 +158,7 @@ app.post('/account-create', async (request, response) => {
                 displayName: input.displayName
             });
 
+            // TODO: Log account creation
             await auth.setCustomUserClaims(uid, {
                 organisation: input.organisation,
                 phoneVerified: false
@@ -77,6 +167,7 @@ app.post('/account-create', async (request, response) => {
             response.send(SuccessCode.ACCOUNT.CREATE);
         }
     } catch (error) {
+        // TODO: Log failure of account creation
         console.error('Error while creating account request: ', error);
         response.send(ErrorCode.ACCOUNT.CREATE);
     }
@@ -84,7 +175,7 @@ app.post('/account-create', async (request, response) => {
 
 app.post('/account-update', async (request, response) => {
     try {
-        const { email, phoneNumber, uid } = await authenticator.checkAccess(request.get(TOKEN));
+        const { email, phoneNumber, uid } = await authenticator.checkPostAccess(request.get(TOKEN));
 
         const body = request.body;
 
@@ -96,6 +187,7 @@ app.post('/account-update', async (request, response) => {
         }
 
         if (!input) {
+            // TODO: Log failure of account update
             response.send(ErrorCode.ACCOUNT.BAD_DATA);
         } else {
             // TODO: Send verification email and verification SMS
@@ -113,22 +205,24 @@ app.post('/account-update', async (request, response) => {
                 phoneVerified = true;
             }
 
-            await auth.updateUser(uid, {
-                email: input.email,
-                phoneNumber: input.phoneNumber
-            });
-
-            await auth.setCustomUserClaims(uid, {
-                phoneVerified: phoneVerified
-            });
-
-            await db.doc(`/users/${uid}`).set({
-                lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+            // TODO: Log account update
+            const [,,writeResult] = await Promise.all([
+                auth.updateUser(uid, {
+                    email: input.email,
+                    phoneNumber: input.phoneNumber
+                }),
+                auth.setCustomUserClaims(uid, {
+                    phoneVerified: phoneVerified
+                }),
+                db.doc(`/users/${uid}`).set({
+                    lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+                }, { merge: true })
+            ]);
 
             response.send(SuccessCode.ACCOUNT.UPDATE);
         }
     } catch (error) {
+        // TODO: Log failure of account update
         console.error('Error while updating account details: ', error);
         response.send(ErrorCode.ACCOUNT.UPDATE);
     }
@@ -144,38 +238,34 @@ app.post('/account-pass-update', (request, response) => {
 
 app.post('/rule-create', async (request, response) => {
     try {
-        const { uid } = await authenticator.checkAccess(request.get(TOKEN));
+        const { uid } = await authenticator.checkPostAccess(request.get(TOKEN));
         const {name, access, priority, proto, sip, sport, dip, dport, direction}
             = request.body;
         
         const input = iv.isValidRule(name, access, priority, proto, sip, sport, dip, dport, direction);
 
         if (!input) {
+            // TODO: Log failure of creation of rule
             response.send(ErrorCode.RULE.BAD_DATA);
         } else {
             // Check whether user has already created 
             // a similar rule
-            const ruleWithSameParameters = await db
-                .collection('users').doc(uid)
-                .collection('rules')
-                .where('name', '==', input.name)
-                .where('access', '==', input.access)
-                .where('priority', '==', input.priority)
-                .where('protocol', '==', input.protocol)
-                .where('sourceip', '==', input.sourceip)
-                .where('sourceport', '==', input.sourceport)
-                .where('destip', '==', input.destip)
-                .where('destport', '==', input.destport)
-                .where('direction', '==', input.direction)
-            .get();
+            const [ ruleWithSamePriority, ruleWithSameName ] = await Promise.all([
+                db.collection(`/users/${uid}/rules`)
+                    .where('priority', '==', input.priority)
+                .get(), 
+                db.collection(`/users/${uid}/rules`)
+                    .where('name', '==', input.name)
+                .get()
+            ]);
             
-            if (!ruleWithSameParameters.empty) {
-                // throw new Error(`Rule ${input.name} was already created`);
+            if (!ruleWithSameName.empty || !ruleWithSamePriority.empty) {
+                // TODO: Log failure of creation of rule
                 response.send(ErrorCode.RULE.ALREADY_EXIST);
             } else {
-                const ruleRef = db.collection('users')
-                .doc(uid).collection('rules').doc();
-                await ruleRef.set({
+                // TODO: Log failure of creation of rule
+                const ruleRef = db.collection(`/users/${uid}/rules`).doc();
+                const writeResult = await ruleRef.set({
                     name: input.name,
                     access: input.access,
                     priority: input.priority,
@@ -192,6 +282,7 @@ app.post('/rule-create', async (request, response) => {
             }
         }
     } catch (error) {
+        // TODO: Log failure of creation of rule
         console.error(`Error while creating firewall rule: ${error}`);
         response.send(ErrorCode.RULE.CREATE);
     }
@@ -199,33 +290,44 @@ app.post('/rule-create', async (request, response) => {
 
 app.post('/rule-update', async (request, response) => {
     try {
-        const { uid } = await authenticator.checkAccess(request.get(TOKEN));
-        const {name, access, priority, proto, sip, sport, dip, dport, direction}
+        const { uid } = await authenticator.checkPostAccess(request.get(TOKEN));
+        const {name, access, priority, proto, sip, sport, dip, dport, direction, id}
             = request.body;
+
+        console.log(`id received: ${id}`);
         
         const input = iv.isValidRule(name, access, priority, proto, sip, sport, dip, dport, direction);
     
         if (!input) {
+            // TODO: Log failure of update of rule
             response.send(ErrorCode.RULE.BAD_DATA);
         } else {
-            const ruleRef = db.collection('users')
-            .doc(uid).collection('rules').doc();
-            await ruleRef.set({
-                name: input.name,
-                access: input.access,
-                priority: input.priority,
-                protocol: input.protocol,
-                sourceip: sip,
-                sourceport: input.sourceport,
-                destip: input.destip,
-                destport: input.destport,
-                state: input.state,
-                direction: input.direction,
-                lastUpdate: admin.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-            response.send(SuccessCode.RULE.UPDATE);
+            const ruleRef = db.doc(`/users/${uid}/rules/${id}`);
+            const rule = await ruleRef.get();
+
+            if (!rule.exists) {
+                // TODO: Log failure of update of rule
+                response.send(ErrorCode.RULE.NOT_FOUND);
+            } else {
+                // TODO: Log update of rule
+                const writeResult = await ruleRef.set({
+                    name: input.name,
+                    access: input.access,
+                    priority: input.priority,
+                    protocol: input.protocol,
+                    sourceip: sip,
+                    sourceport: input.sourceport,
+                    destip: input.destip,
+                    destport: input.destport,
+                    state: input.state,
+                    direction: input.direction,
+                    lastUpdate: admin.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                response.send(SuccessCode.RULE.UPDATE);
+            }
         }
     } catch (error) {
+        // TODO: Log failure of update of rule
         console.error(`Error while updating firewall rule: ${error}`);
         response.send(ErrorCode.RULE.UPDATE);
     }
@@ -233,36 +335,22 @@ app.post('/rule-update', async (request, response) => {
 
 app.post('/rule-delete', async (request, response) => {
     try {
-        const { uid } = await authenticator.checkAccess(request.get(TOKEN));
-        const {name, access, priority, proto, sip, sport, dip, dport, direction}
-            = request.body;
-        
-        const input = iv.isValidRule(name, access, priority, proto, sip, sport, dip, dport, direction);
+        const { uid } = await authenticator.checkPostAccess(request.get(TOKEN));
+        const { id } = request.body;
 
-        const ruleToDelete = await db
-                .collection('users').doc(uid)
-                .collection('rules')
-                .where('name', '==', input.name)
-                .where('access', '==', input.access)
-                .where('priority', '==', input.priority)
-                .where('protocol', '==', input.protocol)
-                .where('sourceip', '==', input.sourceip)
-                .where('sourceport', '==', input.sourceport)
-                .where('destip', '==', input.destip)
-                .where('destport', '==', input.destport)
-                .where('direction', '==', input.direction)
-            .get();
-        
-        if (ruleToDelete.empty) {
+        const ruleRef = db.doc(`/users/${uid}/rules/${id}`);
+        const rule = await ruleRef.get();
+
+        if (!rule.exists) {
+            // TODO: Log failure of deletion of rule
             response.send(ErrorCode.RULE.NOT_FOUND);
-        } else if (ruleToDelete.docs.length !== 1) {
-            throw new Error(`There exists more that one rule with the same name in the database: ${input.toString()}`);
         } else {
             // TODO: Log the deletion of rule
-            const writeResult = await db.doc(`/users/${uid}/rules/${ruleToDelete.docs[0].id}`).delete();
+            const writeResult = await ruleRef.delete();
             response.send(SuccessCode.RULE.DELETE);
         }
     } catch (error) {
+        // TODO: Log failure of deletion of rule
         console.log(`Error while deleting rule: ${error}`);
         response.send(ErrorCode.RULE.DELETE);
     }
@@ -270,7 +358,7 @@ app.post('/rule-delete', async (request, response) => {
 
 app.post('/global-update', async (request, response) => {
     try {
-        const { uid } = await authenticator.checkAccess(request.get(TOKEN));
+        const { uid } = await authenticator.checkPostAccess(request.get(TOKEN));
         const {
             dpi,
             virusScan,
@@ -281,9 +369,11 @@ app.post('/global-update', async (request, response) => {
         const input = iv.isValidOptions(dpi, virusScan, blockAds, blockMalicious)
 
         if (!input) {
+            // TODO: Log failure of update of options
             response.send(ErrorCode.GLOBAL_OPTIONS.BAD_DATA);
         } else {
-            await db.doc(`/users/${uid}/options/global`).set({
+            // TODO: Log update of options
+            const writeResult = await db.doc(`/users/${uid}/options/global`).set({
                 dpi: input.dpi,
                 virusScan: input.virusScan,
                 blockAds: input.blockAds, 
@@ -294,6 +384,7 @@ app.post('/global-update', async (request, response) => {
             response.send(SuccessCode.GLOBAL_OPTIONS.UPDATE);
         }
     } catch (error) {
+        // TODO: Log failure of update of options
         console.error(`Error while updating global options: ${error}`);
         response.send(ErrorCode.GLOBAL_OPTIONS.UPDATE);
     }
