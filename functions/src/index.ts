@@ -34,12 +34,14 @@ app.get('/edit_rule/:token', async (request, response) => {
         const rule_snapshot = await rule_ref.get();
 
         if (!rule_snapshot.exists) {
+            // TODO: Log the failure of edit_rule GET request
             response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
         } else {
             const rule = rule_snapshot.data() as RuleInput;
 
             fs.readFile(path.resolve(__dirname, '../edit_rule.html'), 'utf8', (error, data) => {
                 if (error) {
+                    // TODO: Log the failure of edit_rule GET request
                     response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
                 } else {
                     const html = data;
@@ -68,11 +70,13 @@ app.get('/edit_rule/:token', async (request, response) => {
                     const edit_rule = protocol_filled.replace('::DIRECTION::', direction);
     
                     // response.set('Content-Type', 'text/html');
+                    // TODO: Log the success of edit_rule GET request
                     response.send(edit_rule);
                 }
             });
         }
     } catch (error) {
+        // TODO: Log the failure of edit_rule GET request
         console.error(`Error while serving GET request for /edit_rule: ${error}`);
         response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
     }
@@ -87,24 +91,28 @@ app.get('/delete_rule/:token', async (request, response) => {
         const rule_snapshot = await rule_ref.get();
 
         if (!rule_snapshot.exists) {
+            // TODO: Log the failure of delete_rule GET request
             response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
         } else {
             const { name } = rule_snapshot.data() as RuleInput;
     
             fs.readFile(path.resolve(__dirname, '../delete_rule.html'), 'utf8', (error, data) => {
                 if (error) {
+                    // TODO: Log the failure of delete_rule GET request
                     response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
                 } else {
                     const html = data;
     
                     const id_filled = html.replace('::ID::', rule_snapshot.id);
                     const name_filled = id_filled.replace('::NAME::', name);
-    
+                    
+                    // TODO: Log the failure of delete_rule GET request
                     response.send(name_filled);
                 }
             });
         }
     } catch (error) {
+        // TODO: Log the failure of delete_rule GET request
         console.error(`Error while serving GET request for /delete_rule: ${error}`);
         response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
     }
