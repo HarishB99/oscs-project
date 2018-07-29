@@ -15,24 +15,26 @@ const UIUtils = require('./modules/UIUtils').default;
 
 firebase.auth().onAuthStateChanged(user => {
     if (!InputValidator.isEmpty(user)) {
+        let lock = false;
         const email_display = document.getElementById('mdl-drawer--email');
         const profile_btn = document.getElementById('mdl-menu__item--profile');
         const signout_btn = document.getElementById('mdl-menu__item--signout');
         
         email_display.innerHTML = user.displayName;
-        
+
         profile_btn.addEventListener('click', () => {
+            if (lock) return; lock = true;
             location.href = '/profile';
+            lock = false;
         });
         
         signout_btn.addEventListener('click', () => {
+            if (lock) return; lock = true;
             firebase.auth().signOut()
-            .then(() => {
-                location.replace('/login');
-            })
             .catch(error => {
                 console.error('Error while signing out user: ', error);
-                UIUtils.showSnackbar('An unexpected error occurred. Please clear your browser cache, restart your browser and try again.');
+                UIUtils.showSnackbar('Please clear your browser cache or restart your browser, and try again.');
+                lock = false;
             });
         });
         
@@ -84,12 +86,12 @@ firebase.auth().onAuthStateChanged(user => {
         });
         
         acc_prof_btn.addEventListener('click', () => {
+            if (lock) return; lock = true;
             checkAllInputs();
             
             if (UIUtils.stillAnyInvalid()) return;
         
-            firebase.auth().currentUser
-            .getIdToken(true).then(token => {
+            user.getIdToken(true).then(token => {
                 return axios({
                     url: '/account-update',
                     method: 'POST',
@@ -109,9 +111,11 @@ firebase.auth().onAuthStateChanged(user => {
                 } else {
                     UIUtils.showSnackbar(payload.message);
                 }
+                lock = false;
             }).catch(error => {
                 console.error('Error while sending account update request to server: ', error);
                 UIUtils.showSnackbar('An unexpected error occurred. Please try again.');
+                lock = false;
             });
         })
         
