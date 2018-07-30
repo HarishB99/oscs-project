@@ -41,7 +41,7 @@ export class ErrorCode {
         },
         ALREADY_EXIST: {
             code: 'rule/creation-failure',
-            message: 'This rule has been created before'
+            message: 'A rule with the same name or priority has been created before'
         },
         UPDATE: {
             code: 'rule/update-failure',
