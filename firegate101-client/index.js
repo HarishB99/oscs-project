@@ -20,6 +20,7 @@ db.settings(settings);
 
 let rules_final = null;
 let filter_final = null;
+let global_options_final = null;
 
 app.use(express.json());
 app.use(cors);
@@ -75,6 +76,13 @@ firebase.auth().onAuthStateChanged(user => {
             filter_final = filterDoc.data();
             console.log(`${datestring()} [+] Retrieved filters sucessfully`);
         });
+
+        db.doc(`/users/${uid}/options/global`)
+        .onSnapshot(optionsDoc => {
+            console.log(`${datestring()} [+] Retrieving options...`);
+            global_options_final = optionsDoc.data();
+            console.log(`${datestring()} [+] Retrieved options sucessfully`);
+        });
     } else {
         console.log(`${datestring()} [-] No user logged in.`);
     }
@@ -83,7 +91,13 @@ firebase.auth().onAuthStateChanged(user => {
 app.get('/rules.json', (request, response) => {
     const responseJson = {
         rules: [],
-        webfilter: {},
+        webfilter: {
+            mode: '',
+            domainGroups: [],
+            domains: [],
+            blockAds: true,
+            blockMalicious: true,
+        },
         dpi: true,
         virusScan: true,
         message: 'If the properties of this object are empty, you probably forgot to login first before performing this query.'
@@ -98,11 +112,16 @@ app.get('/rules.json', (request, response) => {
     if (filter_final) {
         responseJson.webfilter = {
             mode: (filter_final.mode === 1 ? 'whitelist' : 'blacklist'),
-            blockAds: filter_final.blockAds,
-            blockMalicious: filter_final.blockMalicious,
             domainGroups: filter_final.domainGroups,
             domains: filter_final.domains
         };
+    }
+
+    if (global_options_final) {
+        responseJson.dpi = global_options_final.dpi;
+        responseJson.virusScan = global_options_final.virusScan;
+        responseJson.webfilter.blockAds = global_options_final.blockAds;
+        responseJson.webfilter.blockMalicious = global_options_final.blockMalicious;
     }
 
     response.json(responseJson);
