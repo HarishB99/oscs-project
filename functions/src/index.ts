@@ -6,9 +6,11 @@ import { Authenticator } from './Authenticator';
 import { UserInput } from './UserInput';
 import { SuccessCode } from './SuccessCode';
 import { ErrorCode } from './ErrorCode';
+import { Logger } from './Logger';
 import * as fs from 'fs';
 import * as path from 'path';
 import { RuleInput } from './RuleInput';
+import { Log } from './Log';
 // import { h, render } from 'preact';
 // const cors = require('cors')({ origin: true });
 
@@ -22,8 +24,14 @@ db.settings({
 const auth = admin.auth();
 const iv = new InputValidator();
 const authenticator = new Authenticator();
+const logger = new Logger();
+const appLogsRef = db.collection('logs');
 
 const TOKEN = Authenticator.TOKEN_HEADER;
+
+function log(logObj: Log) {
+    return appLogsRef.doc().set(logObj.log());
+}
 
 app.get('/edit_rule/:token', async (request, response) => {
     try {
@@ -34,14 +42,14 @@ app.get('/edit_rule/:token', async (request, response) => {
         const rule_snapshot = await rule_ref.get();
 
         if (!rule_snapshot.exists) {
-            // TODO: Log the failure of edit_rule GET request
+            await log(logger.getRuleRequestFailure(request, uid, ErrorCode.RULE.NOT_FOUND, FirebaseFirestore.Timestamp.now()));
             response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
         } else {
             const rule = rule_snapshot.data() as RuleInput;
 
-            fs.readFile(path.resolve(__dirname, '../edit_rule.html'), 'utf8', (error, data) => {
+            fs.readFile(path.resolve(__dirname, '../edit_rule.html'), 'utf8', async (error, data) => {
                 if (error) {
-                    // TODO: Log the failure of edit_rule GET request
+                    await log(logger.getRuleRequestFailure(request, uid, 'HTML Page Not Found Corresponding to URL Not Found', FirebaseFirestore.Timestamp.now()));
                     response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
                 } else {
                     const html = data;
@@ -69,14 +77,13 @@ app.get('/edit_rule/:token', async (request, response) => {
                     const direction = rule.direction ? ' checked' : '';
                     const edit_rule = protocol_filled.replace('::DIRECTION::', direction);
     
-                    // response.set('Content-Type', 'text/html');
-                    // TODO: Log the success of edit_rule GET request
+                    await log(logger.getRuleRequestSuccess(request, uid, FirebaseFirestore.Timestamp.now()));
                     response.send(edit_rule);
                 }
             });
         }
     } catch (error) {
-        // TODO: Log the failure of edit_rule GET request
+        await log(logger.getRuleRequestFailure(request, null, error, FirebaseFirestore.Timestamp.now()));
         console.error(`Error while serving GET request for /edit_rule: ${error}`);
         response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
     }
@@ -91,14 +98,14 @@ app.get('/delete_rule/:token', async (request, response) => {
         const rule_snapshot = await rule_ref.get();
 
         if (!rule_snapshot.exists) {
-            // TODO: Log the failure of delete_rule GET request
+            await log(logger.getRuleRequestFailure(request, uid, ErrorCode.RULE.NOT_FOUND, FirebaseFirestore.Timestamp.now()));
             response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
         } else {
             const { name } = rule_snapshot.data() as RuleInput;
     
-            fs.readFile(path.resolve(__dirname, '../delete_rule.html'), 'utf8', (error, data) => {
+            fs.readFile(path.resolve(__dirname, '../delete_rule.html'), 'utf8', async (error, data) => {
                 if (error) {
-                    // TODO: Log the failure of delete_rule GET request
+                    await log(logger.getRuleRequestFailure(request, uid, 'HTML Page Not Found Corresponding to URL Not Found', FirebaseFirestore.Timestamp.now()));
                     response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
                 } else {
                     const html = data;
@@ -106,13 +113,13 @@ app.get('/delete_rule/:token', async (request, response) => {
                     const id_filled = html.replace('::ID::', rule_snapshot.id);
                     const name_filled = id_filled.replace('::NAME::', name);
                     
-                    // TODO: Log the failure of delete_rule GET request
+                    await log(logger.getRuleRequestSuccess(request, uid, FirebaseFirestore.Timestamp.now()));
                     response.send(name_filled);
                 }
             });
         }
     } catch (error) {
-        // TODO: Log the failure of delete_rule GET request
+        await log(logger.getRuleRequestFailure(request, null, error, FirebaseFirestore.Timestamp.now()));
         console.error(`Error while serving GET request for /delete_rule: ${error}`);
         response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
     }
@@ -253,7 +260,7 @@ app.post('/rule-create', async (request, response) => {
         const input = iv.isValidRule(name, access, priority, proto, sip, sport, dip, dport, direction);
 
         if (!input) {
-            // TODO: Log failure of creation of rule
+            await log(logger.ruleCreateFailure(request, uid, ErrorCode.RULE.BAD_DATA, FirebaseFirestore.Timestamp.now()));
             response.send(ErrorCode.RULE.BAD_DATA);
         } else {
             // Check whether user has already created 
@@ -268,10 +275,9 @@ app.post('/rule-create', async (request, response) => {
             ]);
             
             if (!ruleWithSameName.empty || !ruleWithSamePriority.empty) {
-                // TODO: Log failure of creation of rule
+                await log(logger.ruleCreateFailure(request, uid, ErrorCode.RULE.ALREADY_EXIST, FirebaseFirestore.Timestamp.now()));
                 response.send(ErrorCode.RULE.ALREADY_EXIST);
             } else {
-                // TODO: Log failure of creation of rule
                 const ruleRef = db.collection(`/users/${uid}/rules`).doc();
                 const writeResult = await ruleRef.set({
                     name: input.name,
@@ -286,11 +292,12 @@ app.post('/rule-create', async (request, response) => {
                     direction: input.direction,
                     created: admin.firestore.FieldValue.serverTimestamp()
                 });
+                await log(logger.ruleCreateSuccess(request, uid, writeResult.writeTime));
                 response.send(SuccessCode.RULE.CREATE);
             }
         }
     } catch (error) {
-        // TODO: Log failure of creation of rule
+        await log(logger.ruleCreateFailure(request, null, error, FirebaseFirestore.Timestamp.now()));
         console.error(`Error while creating firewall rule: ${error}`);
         response.send(ErrorCode.RULE.CREATE);
     }
@@ -302,22 +309,19 @@ app.post('/rule-update', async (request, response) => {
         const {name, access, priority, proto, sip, sport, dip, dport, direction, id}
             = request.body;
 
-        console.log(`id received: ${id}`);
-        
         const input = iv.isValidRule(name, access, priority, proto, sip, sport, dip, dport, direction);
     
         if (!input) {
-            // TODO: Log failure of update of rule
+            await log(logger.ruleUpdateFailure(request, uid, ErrorCode.RULE.BAD_DATA, FirebaseFirestore.Timestamp.now()));
             response.send(ErrorCode.RULE.BAD_DATA);
         } else {
             const ruleRef = db.doc(`/users/${uid}/rules/${id}`);
             const rule = await ruleRef.get();
 
             if (!rule.exists) {
-                // TODO: Log failure of update of rule
+                await log(logger.ruleUpdateFailure(request, uid, ErrorCode.RULE.NOT_FOUND, FirebaseFirestore.Timestamp.now()));
                 response.send(ErrorCode.RULE.NOT_FOUND);
             } else {
-                // TODO: Log update of rule
                 const writeResult = await ruleRef.set({
                     name: input.name,
                     access: input.access,
@@ -331,11 +335,12 @@ app.post('/rule-update', async (request, response) => {
                     direction: input.direction,
                     lastUpdate: admin.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
+                await log(logger.ruleUpdateSuccess(request, uid, writeResult.writeTime));
                 response.send(SuccessCode.RULE.UPDATE);
             }
         }
     } catch (error) {
-        // TODO: Log failure of update of rule
+        await log(logger.ruleUpdateFailure(request, null, error, FirebaseFirestore.Timestamp.now()));
         console.error(`Error while updating firewall rule: ${error}`);
         response.send(ErrorCode.RULE.UPDATE);
     }
@@ -350,16 +355,16 @@ app.post('/rule-delete', async (request, response) => {
         const rule = await ruleRef.get();
 
         if (!rule.exists) {
-            // TODO: Log failure of deletion of rule
+            await log(logger.ruleDeleteFailure(request, uid, ErrorCode.RULE.NOT_FOUND, FirebaseFirestore.Timestamp.now()));
             response.send(ErrorCode.RULE.NOT_FOUND);
         } else {
-            // TODO: Log the deletion of rule
             const writeResult = await ruleRef.delete();
+            await log(logger.ruleDeleteSuccess(request, uid, writeResult.writeTime));
             response.send(SuccessCode.RULE.DELETE);
         }
     } catch (error) {
-        // TODO: Log failure of deletion of rule
-        console.log(`Error while deleting rule: ${error}`);
+        await log(logger.ruleDeleteFailure(request, null, error, FirebaseFirestore.Timestamp.now()));
+        console.error(`Error while deleting rule: ${error}`);
         response.send(ErrorCode.RULE.DELETE);
     }
 });
@@ -377,10 +382,9 @@ app.post('/global-update', async (request, response) => {
         const input = iv.isValidOptions(dpi, virusScan, blockAds, blockMalicious)
 
         if (!input) {
-            // TODO: Log failure of update of options
+            await log(logger.globalOptionsUpdateFailure(request, uid, ErrorCode.GLOBAL_OPTIONS.BAD_DATA, FirebaseFirestore.Timestamp.now()));
             response.send(ErrorCode.GLOBAL_OPTIONS.BAD_DATA);
         } else {
-            // TODO: Log update of options
             const writeResult = await db.doc(`/users/${uid}/options/global`).set({
                 dpi: input.dpi,
                 virusScan: input.virusScan,
@@ -388,11 +392,11 @@ app.post('/global-update', async (request, response) => {
                 blockMalicious: input.blockMalicious,
                 lastUpdated: admin.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
-
+            await log(logger.globalOptionsUpdateSuccess(request, uid, writeResult.writeTime));
             response.send(SuccessCode.GLOBAL_OPTIONS.UPDATE);
         }
     } catch (error) {
-        // TODO: Log failure of update of options
+        await log(logger.globalOptionsUpdateFailure(request, null, error, FirebaseFirestore.Timestamp.now()));
         console.error(`Error while updating global options: ${error}`);
         response.send(ErrorCode.GLOBAL_OPTIONS.UPDATE);
     }
@@ -411,18 +415,19 @@ app.post('/filter-update', async (request, response) => {
         const input = iv.isValidFilter(filters, mode);
 
         if (!input) {
+            await log(logger.filterUpdateFailure(request, uid, ErrorCode.FILTER.BAD_DATA, FirebaseFirestore.Timestamp.now()));
             response.send(ErrorCode.FILTER.BAD_DATA);
         } else {
-            // TODO: Log the creation of filters
             const writeResult = await db.doc(`/users/${uid}/filters/filter`)
             .set({
                 domains: input.domains,
                 mode: input.mode
             }, { merge: true });
-    
+            await log(logger.filterUpdateSuccess(request, uid, writeResult.writeTime));
             response.send(SuccessCode.FILTER.UPDATE);
         }
     } catch (error) {
+        await log(logger.filterUpdateFailure(request, null, error, FirebaseFirestore.Timestamp.now()));
         console.error(`Error while updating filters: ${error}`);
         response.send(ErrorCode.FILTER.UPDATE);
     }
@@ -438,7 +443,7 @@ app.post('/filter-update', async (request, response) => {
 
 export const web_app = functions.https.onRequest(app);
 
-export const createNewUser = functions.auth.user().onCreate(user => {
+export const createNewUser = functions.auth.user().onCreate(async user => {
     const uid = user.uid;
     // const email = user.email;
     // const photoURL = user.photoURL;
@@ -454,6 +459,8 @@ export const createNewUser = functions.auth.user().onCreate(user => {
     //     organisationVerified: false,
     //     accountVerified: false
     // });
+
+    await log(logger.userCreate(uid, FirebaseFirestore.Timestamp.now()));
 
     return Promise.all([
         db.doc(`/users/${uid}/options/global`).set({
@@ -477,7 +484,6 @@ export const createNewUser = functions.auth.user().onCreate(user => {
 });
 
 export const deleteUser = functions.auth.user().onDelete(async user => {
-    // TODO: Log deletion of user
     const userDoc = db.doc(`/users/${user.uid}`);
     const userRuleDocs = await userDoc.collection('rules').get();
     const userFiltersDocs = await userDoc.collection('filter').get();
@@ -496,6 +502,8 @@ export const deleteUser = functions.auth.user().onDelete(async user => {
     deleteDocs.push(userOptionsDoc.delete());
 
     deleteDocs.push(userDoc.delete());
+
+    await log(logger.userDelete(user.uid, FirebaseFirestore.Timestamp.now()));
 
     return Promise.all(deleteDocs);
 });
