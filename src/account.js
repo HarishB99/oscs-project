@@ -31,8 +31,8 @@ firebase.auth().onAuthStateChanged(user => {
         wasntAlreadyLoggedIn = true;
         let lock = false;
         const acc_req_email = document.getElementById("account-create--input-email");
-        const acc_req_org = document.getElementById("account-create--input-org");
-        const acc_req_phone = document.getElementById("account-create--input-phone");
+        // const acc_req_org = document.getElementById("account-create--input-org");
+        // const acc_req_phone = document.getElementById("account-create--input-phone");
         const acc_req_pass = document.getElementById("account-create--input-password");
         const pass2 = document.getElementById("account-create--input-password2");
         const acc_req_btn = document.getElementById("account-create--button-submit");
@@ -47,10 +47,10 @@ firebase.auth().onAuthStateChanged(user => {
         var checkAllInputs = function () {
             UIUtils.update_text_field_ui(acc_req_email, 
                 InputValidator.isValidEmail(acc_req_email.value));
-            UIUtils.update_text_field_ui(acc_req_org, 
-                InputValidator.isValidOrgName(acc_req_org.value));
-            UIUtils.update_text_field_ui(acc_req_phone, 
-                InputValidator.isValidPhoneNum(acc_req_phone.value));
+            // UIUtils.update_text_field_ui(acc_req_org, 
+            //     InputValidator.isValidOrgName(acc_req_org.value));
+            // UIUtils.update_text_field_ui(acc_req_phone, 
+            //     InputValidator.isValidPhoneNum(acc_req_phone.value));
             UIUtils.update_text_field_ui(acc_req_pass, 
                 InputValidator.isAReasonablyStrongPassword(acc_req_pass.value));
             UIUtils.update_text_field_ui(pass2, 
@@ -69,15 +69,15 @@ firebase.auth().onAuthStateChanged(user => {
                 InputValidator.isValidEmail(e.target.value));
         });
 
-        acc_req_org.addEventListener('keyup', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidOrgName(e.target.value));
-        });
+        // acc_req_org.addEventListener('keyup', e => {
+        //     UIUtils.update_text_field_ui(e.target, 
+        //         InputValidator.isValidOrgName(e.target.value));
+        // });
 
-        acc_req_phone.addEventListener('keyup', e => {
-            UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidPhoneNum(e.target.value));
-        });
+        // acc_req_phone.addEventListener('keyup', e => {
+        //     UIUtils.update_text_field_ui(e.target, 
+        //         InputValidator.isValidPhoneNum(e.target.value));
+        // });
 
         acc_req_pass.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
