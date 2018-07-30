@@ -497,71 +497,24 @@
                                 <h2 class="mdl-card__title-text">Filters</h2>
                             </div>
                             <div class="mdl-card__supporting-text">
-                                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--12-col" for="web-filter__mode">
-                                    <input type="checkbox" id="web-filter__mode" class="mdl-switch__input web-filter__mode" checked>
-                                    <span class="mdl-switch__label">Filter Using Whitelist</span>
-                                </label>
-                                <br/>
-                                <div id="web-filter__domain--holder" class="mdl-textfield mdl-js-textfield">
-                                    <input class="mdl-textfield__input" type="text" pattern="^(?:(?:(?:https?):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:[/?#]\S*)?$" autofocus id="web-filter__domain">
-                                    <label class="mdl-textfield__label" for="web-filter__domain">URL...</label>
-                                    <span class="mdl-textfield__error">Please enter a valid URL.</span>
-                                </div>
-                                <button id="web-filter__btn-add" class="web-filter__btn-add mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
-                                    <i class="material-icons">add</i>
-                                </button>
-                                <div class="web-filter__table--holder">
-                                    <table id="web-filter__table" class="mdl-data-table mdl-js-data-table">
-                                        <!-- <thead>
-                                            <tr>
-                                                <th class="mdl-data-table__cell--non-numeric">Name</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead> -->
-                                        <tbody id="firewall-rule__table--list" class="list firewall-rule__table--list">
-                                            <!-- <tr id="mdl-spinner--holder">
-                                                <td colspan="2"><div id="mdl-spinner" class="mdl-spinner mdl-js-spinner is-active"></div></td>
-                                            </tr> -->
-                                            <tr>
-                                                <td class="mdl-data-table__cell--non-numeric">
-                                                    https://www.google.com.sg
-                                                </td>
-                                                <td>
-                                                    <button class="mdl-button mdl-js-button mdl-button--icon">
-                                                        <i class="material-icons">cancel</i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="mdl-data-table__cell--non-numeric">
-                                                    https://www.khanacademy.org
-                                                </td>
-                                                <td>
-                                                    <button class="mdl-button mdl-js-button mdl-button--icon">
-                                                        <i class="material-icons">cancel</i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="mdl-data-table__cell--non-numeric">
-                                                    https://www.google.com
-                                                </td>
-                                                <td>
-                                                    <button class="mdl-button mdl-js-button mdl-button--icon">
-                                                        <i class="material-icons">cancel</i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="mdl-data-table__cell--non-numeric">
-                                                    https://firegate-101.firebaseapp.com
-                                                </td>
-                                                <td>
-                                                    <button class="mdl-button mdl-js-button mdl-button--icon">
-                                                        <i class="material-icons">cancel</i>
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                <div class="web-filter__table--holder mdl-grid">
+                                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--12-col" for="web-filter__mode">
+                                        <input type="checkbox" id="web-filter__mode" class="mdl-switch__input web-filter__mode" checked>
+                                        <span class="mdl-switch__label">Filter Using Whitelist</span>
+                                    </label>
+                                    <div class="mdl-cell mdl-cell--12-col">
+                                        <div id="web-filter__domain--holder" class="mdl-textfield mdl-js-textfield">
+                                            <input class="mdl-textfield__input" type="text" autofocus id="web-filter__domain">
+                                            <label class="mdl-textfield__label" for="web-filter__domain">URL...</label>
+                                            <span class="mdl-textfield__error">Please enter a valid URL starting with 'http://' or 'https://'.</span>
+                                        </div>
+                                        <button id="web-filter__btn-add" class="web-filter__btn-add mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+                                            <i class="material-icons">add</i>
+                                        </button>
+                                    </div>
+                                    <table id="web-filter__table" class="mdl-data-table mdl-js-data-table mdl-cell mdl-cell--12-col">
+                                        <tbody id="web-filter__table--list" class="web-filter__table--list">
+                                            
                                         </tbody>
                                     </table>
                                 </div>

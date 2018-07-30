@@ -16,9 +16,24 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
     if (!InputValidator.isEmpty(user)) {
         location.replace('/');
     } else {
+        let lock = false;
         const acc_login_btn = document.getElementById("account-login--button");
         const acc_login_email = document.getElementById("account-login--email");
         const acc_login_pass = document.getElementById("account-login--pass");
+        const acc_create_btn = document.getElementById('account-create--button');
+        const acc_rst_pass_btn = document.getElementById('account-rst-pass--button');
+
+        acc_create_btn.addEventListener('click', () => {
+            if (lock) return; lock = true;
+            location.href = '/create_account';
+            lock = false
+        });
+
+        acc_rst_pass_btn.addEventListener('click', () => {
+            if (lock) return; lock = true;
+            location.href = '/reset_password';
+            lock = false;
+        });
         
         var checkAllInputs = function() {
             UIUtils.update_text_field_ui(acc_login_email, 
@@ -44,6 +59,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
         });
         
         acc_login_btn.addEventListener('click', () => {
+            if (lock) return; lock = true;
             checkAllInputs();
         
             if (UIUtils.stillAnyInvalid()) return;
@@ -72,6 +88,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                 } else {
                     UIUtils.showSnackbar("An unexpected error occurred. Please try again later.");
                 }
+                lock = false;
             });
         });
     }

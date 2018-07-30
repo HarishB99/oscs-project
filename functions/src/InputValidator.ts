@@ -1,6 +1,7 @@
 import { RuleInput } from "./RuleInput";
 import { GlobalOptionsInput } from "./GlobalOptionsInput";
 import { UserInput } from "./UserInput";
+import { FilterInput } from "./FilterInput";
 
 /**
  * Input validation library to validate input
@@ -217,6 +218,30 @@ export class InputValidator {
             return new RuleInput(name, access, priority, proto, sip, sport, dip, dport, direction);
         } else {
             console.error(`Received rule: Name: ${name}, Access: ${access}, Priority: ${priority}, Protocol: ${proto}, Source IP: ${sip}, Source Port: ${sport}, Dest IP: ${dip}, Dest Port: ${dport}, Direction: ${direction}`);
+            return null;
+        }
+    }
+
+    /**
+     * Checks whether the inputs given to 
+     * create/update a filter are valid.
+     * 
+     * @param filters a string array of URLs
+     * @param mode a boolean value, received as a string
+     */
+    public isValidFilter(filters: string[], mode: string) {
+        if (filters.length !== 0) {
+            for (const filter of filters) {
+                if (!this.isValidUrl(filter)) {
+                    return null;
+                }
+            }
+        }
+
+        if (this.isBoolean(mode)) {
+            return new FilterInput(filters, mode);
+        } else {
+            console.error(`Received filter: Filters: ${filters}, mode: ${mode}`);
             return null;
         }
     }

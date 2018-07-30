@@ -15,29 +15,26 @@ const UIUtils = require('./modules/UIUtils').default;
 
 firebase.auth().onAuthStateChanged(user => {
     if (!InputValidator.isEmpty(user)) {
+        let lock = false;
         const email_display = document.getElementById('mdl-drawer--email');
         const profile_btn = document.getElementById('mdl-menu__item--profile');
         const signout_btn = document.getElementById('mdl-menu__item--signout');
         
         email_display.innerHTML = user.displayName;
-        
-        profile_btn.addEventListener('click', e => {
-            e.currentTarget.disabled = true
+
+        profile_btn.addEventListener('click', () => {
+            if (lock) return; lock = true;
             location.href = '/profile';
-            e.currentTarget.disabled = false
+            lock = false;
         });
         
-        signout_btn.addEventListener('click', e => {
-            e.currentTarget.disabled = true
+        signout_btn.addEventListener('click', () => {
+            if (lock) return; lock = true;
             firebase.auth().signOut()
-            .then(() => {
-                location.replace('/login');
-                e.currentTarget.disabled = false
-            })
             .catch(error => {
                 console.error('Error while signing out user: ', error);
-                UIUtils.showSnackbar('An unexpected error occurred. Please clear your browser cache, restart your browser and try again.');
-                e.currentTarget.disabled = false
+                UIUtils.showSnackbar('Please clear your browser cache or restart your browser, and try again.');
+                lock = false;
             });
         });
         
@@ -82,8 +79,8 @@ firebase.auth().onAuthStateChanged(user => {
             if (e.keyCode === 13) rule_delete_btn.click();
         });
 
-        rule_delete_btn.addEventListener('click', e => {
-            e.currentTarget.disabled = true;
+        rule_delete_btn.addEventListener('click', () => {
+            if (lock) return; lock = true;
             checkAllInputs();
             
             if (UIUtils.stillAnyInvalid()) return;
@@ -109,7 +106,7 @@ firebase.auth().onAuthStateChanged(user => {
                 } else {
                     UIUtils.showSnackbar(payload.message);
                 }
-                e.currentTarget.disabled = false;
+                lock = false;
             }).catch(error => {
                 console.error('Error while performing rule deletion request: ', error);
                 if (error.message === "Network Error") {
@@ -117,8 +114,8 @@ firebase.auth().onAuthStateChanged(user => {
                 } else {
                     UIUtils.showSnackbar("An unexpected error occurred. Please try again later.");
                 }
-                e.currentTarget.disabled = false;
-            })
+                lock = false;
+            });
         });
     } else { UIUtils.logoutUI(); }
 });

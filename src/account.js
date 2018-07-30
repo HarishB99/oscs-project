@@ -17,12 +17,20 @@ firebase.auth().onAuthStateChanged(user => {
     if (!InputValidator.isEmpty(user)) {
         location.replace('/');
     } else {
+        let lock = false;
         const acc_req_email = document.getElementById("account-create--input-email");
         const acc_req_org = document.getElementById("account-create--input-org");
         const acc_req_phone = document.getElementById("account-create--input-phone");
         const acc_req_pass = document.getElementById("account-create--input-password");
         const pass2 = document.getElementById("account-create--input-password2");
         const acc_req_btn = document.getElementById("account-create--button-submit");
+        const acc_login_btn = document.getElementById('account-login--button');
+
+        acc_login_btn.addEventListener('click', () => {
+            if (lock) return; lock = true;
+            location.href = '/login';            
+            lock = false;
+        });
 
         var checkAllInputs = function () {
             UIUtils.update_text_field_ui(acc_req_email, 
@@ -75,6 +83,7 @@ firebase.auth().onAuthStateChanged(user => {
         });
 
         acc_req_btn.addEventListener("click", () => {
+            if (lock) return; lock = true;
             checkAllInputs();
             
             if (UIUtils.stillAnyInvalid()) return;
@@ -89,6 +98,7 @@ firebase.auth().onAuthStateChanged(user => {
                     location.replace('/login');
                 } else {
                     UIUtils.showSnackbar(response.data.message);
+                    lock = false;
                 }
             }).catch(error => {
                 console.error("Error while performing account creation request: ", error);
@@ -99,6 +109,7 @@ firebase.auth().onAuthStateChanged(user => {
                 } else {
                     UIUtils.showSnackbar("An unexpected error occurred. Please try again later.");
                 }
+                lock = false;
             });
         });
     }

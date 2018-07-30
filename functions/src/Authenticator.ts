@@ -35,6 +35,7 @@ export class Authenticator {
      */
     public async checkPostAccess(header: string): Promise<auth.UserRecord> {
         const { uid } = await auth().verifyIdToken(this.getAccessToken(header));
+        // console.log(`Logged at checkPostAccess: Signin provider: ${firebase.sign_in_provider}, Identity: ${firebase.identities}`);
         const userRecord = await auth().getUser(uid);
         return userRecord;
     }
