@@ -1,6 +1,6 @@
 const UIUtils = function() {};
 
-UIUtils.showSnackbar = function (message, actionText, actionHandler) {
+UIUtils.showSnackbar = function (message, actionText, actionHandler, timeout) {
     var notification = document.querySelector('.mdl-js-snackbar');
     var data = {
         message: message,
@@ -12,6 +12,13 @@ UIUtils.showSnackbar = function (message, actionText, actionHandler) {
             data.actionHandler = actionHandler;
         }
     }
+
+    if (typeof timeout !== 'undefined') {
+        if (timeout) {
+            data.timeout = timeout;
+        }
+    }
+
     // console.log(data);
     if (notification.getAttribute('aria-hidden') !== "false")
         notification.MaterialSnackbar.showSnackbar(data);
