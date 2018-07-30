@@ -80,7 +80,7 @@ firebase.auth().onAuthStateChanged(user => {
     }
 });
 
-app.post('/rules.json', (request, response) => {
+app.get('/rules.json', (request, response) => {
     const responseJson = {
         rules: [],
         webfilter: {},

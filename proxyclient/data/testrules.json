@@ -66,8 +66,9 @@
     "blockAds": true,
     "blockMalicious": true,
     "domainGroups" : ["socialMedia"],
-    "domains": [
-      "www.kongregate.com"
+    "domains": [],
+    "exclude": [
+      "www.reddit.com"
     ]
   },
   "dpi" : true,

@@ -60,6 +60,7 @@ ad-pay.de
 ad-rotator.com
 ad-server.gulasidorna.se
 ad-serverparc.nl
+adservice.google.com
 ad-souk.com
 ad-space.net
 ad-tech.com
@@ -790,6 +791,7 @@ adtiger.de
 adtoll.com
 adtology.com
 adtoma.com
+securepubads.g.doubleclick.net
 adtrace.org
 adtrade.net
 adtrading.de
@@ -797,6 +799,7 @@ adtrak.net
 adtriplex.com
 adultadvertising.com
 adv-adserver.com
+adserver-us.adtech.advertising.com
 adv-banner.libero.it
 adv.cooperhosting.net
 adv.freeonline.it
@@ -900,6 +903,7 @@ all4spy.com
 alladvantage.com
 allosponsor.com
 alphonso.tv
+s.amazon-adsystem.com
 amazingcounters.com
 amazon-adsystem.com
 ambitiousagreement.com
