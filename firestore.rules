@@ -1,15 +1,15 @@
 service cloud.firestore {
   match /databases/{database}/documents {
         match /users/{uid}/rules/{rule} {
-            allow read: if request.auth.uid == uid;
+            allow read: if request.auth.uid == uid && request.auth.token.email_verified == true;
         }
 
         match /users/{uid}/filters/filter {
-            allow read: if request.auth.uid == uid;
+            allow read: if request.auth.uid == uid && request.auth.token.email_verified == true;
         }
         
         match /users/{uid}/options/global {
-        		allow read: if request.auth.uid == uid;
+            allow read: if request.auth.uid == uid && request.auth.token.email_verified == true;
         }
   }
 }
