@@ -87,7 +87,7 @@ def load(l):
             rules = json.loads(rulesFile.read())
     else:
         #retrive policy
-        time.sleep(3) #wait a while for node client
+        time.sleep(3) #wait a while for node client to load rules
         policyRequest = requests.get('http://localhost:3000/rules.json')
         policyJson = policyRequest.json()
 
@@ -195,15 +195,13 @@ def request(flow):
             if gResults != 0 and gResults != 1:
                 if len(gResults) > 0:
                     print(gResults)
-                    results["threatType"] = gResults[0]["threatType"]
-                    results["platform"] = gResults[0]["platformType"]
-                    results["domain"] = gResults[0]["threat"]["url"]
+                    results["threatType"] = gResults
+                    #CheckedDomains.add(d, False, "Dangerous site", False)
+                    #LogDatabase.securityEvent(ip, d, "suspiciousDomain")
             else:
                 () #TODO: log failure to another database
 
             #web of trust
-            print("WOTRESULTS---------------------:")
-            print(wotResults)
             wotR = wotResults["reputation"]
             if wotR["trustworthiness"] is not None:
                 results["trustworthiness"] = wotR["trustworthiness"][0]
@@ -220,6 +218,7 @@ def request(flow):
 
 
             #check api call results
+            '''
             if "childSafety" in results:
                 if results["childSafety"] < options["block-child-unsafe-level"] and \
                  results["childSafety-confidence"] > 30:
@@ -239,6 +238,7 @@ def request(flow):
                     LogDatabase.securityEvent(ip, d, str(cat[0]))
                 if cat[0][0] == "3" and int(cat[1]) > 40:
                     () #TODO: Add filters for certain topics
+            '''
 
         #passed all the above checks -> safe domain
         if CheckedDomains.search(d) is None:
@@ -263,22 +263,36 @@ def request(flow):
 
 def response(flow):
     #check images using header
+    d = flow.request.pretty_host
+    ip = flow.client_conn.ip_address[0][7:]
     if flow.response.headers.get("content-type", "").startswith("image"):
         () #TODO:: check images (may abondon for performance reasons)
-        #check image
-        #encoded_image = base64.b64encode(flow.response.content)
-        #subprocess.run(["python3", "classify_nsfw.py", "-m", "data/open_nsfw-weights.py", "-t", "base64_"])
-        #replace image with another
-        #img = open("file.png", "rb").read()
-        #if
-        #flow.response.content = img
-        #flow.response.headers["content-type"] = "image/png"
-
-    #check downloading files
     elif flow.response.headers.get("content-type", "").startswith("video"): #video
         () #Do nothing
-    elif flow.response.headers.get("content-type", "").startswith("application/octet-stream") or flow.response.headers.get("content-disposition", "").startswith("attachment"): #downloaded files
-        () #TODO::scan file for viruses
+    elif flow.response.headers.get("content-type", "").startswith("application/octet-stream") or \
+     flow.response.headers.get("content-disposition", "").startswith("attachment") or \
+     "x-msdownload" in flow.response.headers.get("content-type", ""): #downloaded files
+        print("DOWNLOAD FILE")
+        print(flow.request.url)
+        #scan url for viruses
+        params = {'apikey': apiKeys["virusTotal"], 'resource': flow.request.url}
+        response = requests.post('https://www.virustotal.com/vtapi/v2/url/report',
+          params=params)
+        if response.status_code == 200:
+            vtJson = response.json()
+            print(json.dumps(vtJson, indent=4))
+            if vtJson["positives"] <= 0:
+                print("DOWNLOAD SAFE FILE")
+                #log downloaded file event
+                LogDatabase.downloadFile(ip, d, flow.request.url, True)
+            else:
+                #not safe, stop download
+                LogDatabase.downloadFile(ip, d, flow.request.url, False)
+                flow.response = http.HTTPResponse.make(
+                    418, "Malicious file detected"
+                )
+        else: #failed connection for whatever reason, just stop download
+            flow.kill()
     else:
         #html text
         () #do nothing
