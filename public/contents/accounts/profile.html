@@ -347,31 +347,17 @@
                             <h2 class="mdl-card__title-text" >Welcome,&nbsp;<span id="account-profile--display-name"></span></h2>
                         </div>
                         <div class="mdl-card__supporting-text">
-                            <div class="mdl-typography--title-color-contrast">
-                                From: <span id="account-profile--display-org"></span>
-                            </div>
-                            <!-- <br/> -->
-                            <div class="mdl-textfield mdl-js-textfield">
-                                <input class="mdl-textfield__input" type="email" id="account-profile--input-email">
-                                <label class="mdl-textfield__label" for="account-profile--input-email">Email Address...</label>
-                                <span class="mdl-textfield__error">Please enter a valid email address.</span>
-                            </div>
-                            <!-- <br/> -->
-                            <div class="mdl-textfield mdl-js-textfield">
-                                <input class="mdl-textfield__input" type="text" id="account-profile--input-phone" maxlength="8">
-                                <label class="mdl-textfield__label" for="account-profile--input-phone">Contact number...</label>
-                                <span class="mdl-textfield__error">Please enter a valid contact number.</span>
+                            <div class="mdl-typography--subhead">
+                                Email: <span id="account-profile--display-email"></span>
                             </div>
                             <br/>
-                            <button class="mdl-button mdl-js-button mdl-button--colored mdl-button--raised mdl-js-ripple-effect">
+                            <button id="account-profile--btn-email" class="mdl-button mdl-js-button mdl-button--colored mdl-button--raised mdl-js-ripple-effect">
+                                <i class="material-icons">edit</i> Change Email
+                            </button>
+                            <button id="account-profile--btn-rst-pass" class="mdl-button mdl-js-button mdl-button--colored mdl-button--raised mdl-js-ripple-effect">
                                 <i class="material-icons">update</i> Reset Password
                             </button>
                         </div>
-                    </div>
-                    <div class="mdl-card__actions mdl-card--border">
-                        <button id="account-update--button" class="account-update--button mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-                            <i class="material-icons">edit</i> Update
-                        </button>
                     </div>
                 </div>
                 <div aria-live="assertive" aria-atomic="true" aria-relevant="text" class="mdl-snackbar mdl-js-snackbar">
