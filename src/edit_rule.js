@@ -19,6 +19,7 @@ firebase.auth().onAuthStateChanged(user => {
         const email_display = document.getElementById('mdl-drawer--email');
         const profile_btn = document.getElementById('mdl-menu__item--profile');
         const signout_btn = document.getElementById('mdl-menu__item--signout');
+        const firewall_policies_btn = document.getElementById('mdl-navigation__link--rules');
         
         email_display.innerHTML = user.displayName;
 
@@ -36,6 +37,12 @@ firebase.auth().onAuthStateChanged(user => {
                 UIUtils.showSnackbar('Please clear your browser cache or restart your browser, and try again.');
                 lock = false;
             });
+        });
+
+        firewall_policies_btn.addEventListener('click', () => {
+            if (lock) return; lock = true;
+            location.href = '/';
+            lock = false
         });
         
         const rule_edit_name = document.getElementById('rule--name');

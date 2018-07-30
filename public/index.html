@@ -375,12 +375,12 @@
             top: 4px;
             right: -5px;
         }
-        th.sort {
-            cursor: pointer;
-        }
         .mdl-spinner {
             display: block;
             margin: auto;
+        }
+        a, th.sort {
+            cursor: pointer;
         }
         /*
             Source code for .mdl-button--floating-action 
@@ -435,7 +435,7 @@
             </header>
             <nav class="navigation mdl-navigation mdl-color--blue-grey-800">
                 <!-- <a id="mdl-navigation__link--home" class="mdl-navigation__link mdl-navigation__link--home"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dashboard</i>Dashboard</a> -->
-                <a href="/" id="mdl-navigation__link--rules" class="mdl-navigation__link mdl-navigation__link--rules"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">flag</i>Rules & Policies</a>
+                <a id="mdl-navigation__link--rules" class="mdl-navigation__link mdl-navigation__link--rules"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">flag</i>Rules & Policies</a>
                 <div class="mdl-layout-spacer"></div>
                 <a id="mdl-navigation__link--help" class="mdl-navigation__link mdl-navigation__link--help"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">help_outline</i><span class="visuallyhidden">Help</span></a>
             </nav>
@@ -443,22 +443,10 @@
         <main class="mdl-layout__content mdl-color--grey-100">
             <section id="firewall-rule__table" class="mdl-layout__tab-panel is-active">
                 <div class="search-box">
-                    <!-- <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable">
-                        <label class="mdl-button mdl-js-button mdl-button--icon" for="firewall-rule__search--input-name">
-                            <i class="material-icons">search</i>
-                        </label>
-                        <div class="mdl-textfield__expandable-holder">
-                            <input class="search mdl-textfield__input" type="text" id="firewall-rule__search--input-name">
-                            <label class="mdl-textfield__label" for="firewall-rule__search--input-name">Expandable Input</label>
-                        </div>
-                    </div> -->
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                         <input class="search mdl-textfield__input firewall-rule__search--input-name" type="text" id="firewall-rule__search--input-name" autofocus tabindex="1">
                         <label class="mdl-textfield__label" for="firewall-rule__search--input-name">Rule name, Port Number, IP Address, etc...</label>
                     </div>
-                    <!-- <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect firewall-rule__search--input-button" id="firewall-rule__search--input-button">
-                        <i class="material-icons">search</i> Search
-                    </button> -->
                 </div>
                 <div class="page-content">
                     <div class="action-bar">
