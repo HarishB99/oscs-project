@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { RuleInput } from './RuleInput';
 // import { h, render } from 'preact';
-const cors = require('cors')({ origin: true });
+// const cors = require('cors')({ origin: true });
 
 admin.initializeApp();
 
@@ -121,13 +121,13 @@ app.get('/delete_rule/:token', async (request, response) => {
 /**
  * The following is a test app to test CORS
  */
-app.post('/cors-allowed', cors, (request, response, next) => {
-    const body = request.body;
-    const email = body.email;
-    const password = body.password;
+// app.post('/cors-allowed', cors, (request, response, next) => {
+//     const body = request.body;
+//     const email = body.email;
+//     const password = body.password;
 
-    response.status(200).send(`Received Post Data: Your email is ${email}. Your password is ${password}. This was possible via Cross Origin Resource Sharing, also known as CORS for short.`);
-});
+//     response.status(200).send(`Received Post Data: Your email is ${email}. Your password is ${password}. This was possible via Cross Origin Resource Sharing, also known as CORS for short.`);
+// });
 
 // Accounts
 // app.post('/account', async (request, response) => {
@@ -236,13 +236,13 @@ app.post('/cors-allowed', cors, (request, response, next) => {
 //     }
 // });
 
-app.post('/account-delete', (request, response) => {
-    response.status(503).send('Functionality not available yet.');
-});
+// app.post('/account-delete', (request, response) => {
+//     response.status(503).send('Functionality not available yet.');
+// });
 
-app.post('/account-pass-update', (request, response) => {
-    response.status(503).send('Functionality not available yet.');
-});
+// app.post('/account-pass-update', (request, response) => {
+//     response.status(503).send('Functionality not available yet.');
+// });
 
 app.post('/rule-create', async (request, response) => {
     try {
