@@ -147,94 +147,94 @@ app.post('/cors-allowed', cors, (request, response, next) => {
 //     }
 // });
 
-app.post('/account-create', async (request, response) => {
-    try {
-        const { email, org, 
-            contact, pass } = request.body;
+// app.post('/account-create', async (request, response) => {
+//     try {
+//         const { email, org, 
+//             contact, pass } = request.body;
 
-        const input = iv.isValidUserDetails(email, pass, contact, org, null);
+//         const input = iv.isValidUserDetails(email, pass, contact, org, null);
 
-        if (!input) {
-            // TODO: Log failure of account creation
-            response.send(ErrorCode.ACCOUNT.BAD_DATA);
-        } else {
-            const { uid } = await auth.createUser({
-                email: input.email,
-                password: input.password,
-                photoURL: input.photoURL,
-                phoneNumber: input.phoneNumber,
-                displayName: input.displayName
-            });
+//         if (!input) {
+//             // TODO: Log failure of account creation
+//             response.send(ErrorCode.ACCOUNT.BAD_DATA);
+//         } else {
+//             const { uid } = await auth.createUser({
+//                 email: input.email,
+//                 password: input.password,
+//                 photoURL: input.photoURL,
+//                 phoneNumber: input.phoneNumber,
+//                 displayName: input.displayName
+//             });
 
-            // TODO: Log account creation
-            await auth.setCustomUserClaims(uid, {
-                organisation: input.organisation,
-                phoneVerified: false
-            });
+//             // TODO: Log account creation
+//             await auth.setCustomUserClaims(uid, {
+//                 organisation: input.organisation,
+//                 phoneVerified: false
+//             });
 
-            response.send(SuccessCode.ACCOUNT.CREATE);
-        }
-    } catch (error) {
-        // TODO: Log failure of account creation
-        console.error('Error while creating account request: ', error);
-        response.send(ErrorCode.ACCOUNT.CREATE);
-    }
-});
+//             response.send(SuccessCode.ACCOUNT.CREATE);
+//         }
+//     } catch (error) {
+//         // TODO: Log failure of account creation
+//         console.error('Error while creating account request: ', error);
+//         response.send(ErrorCode.ACCOUNT.CREATE);
+//     }
+// });
 
-app.post('/account-update', async (request, response) => {
-    try {
-        const { email, phoneNumber, uid } = await authenticator.checkPostAccess(request.get(TOKEN));
+// app.post('/account-update', async (request, response) => {
+//     try {
+//         const { email, phoneNumber, uid } = await authenticator.checkPostAccess(request.get(TOKEN));
 
-        const body = request.body;
+//         const body = request.body;
 
-        let input: UserInput = null;
-        if (iv.isValidEmail(body.email) && 
-        iv.isValidPhoneNum(body.contact)) {
-            input = new UserInput(body.email, null, 
-                body.contact, null, null);
-        }
+//         let input: UserInput = null;
+//         if (iv.isValidEmail(body.email) && 
+//         iv.isValidPhoneNum(body.contact)) {
+//             input = new UserInput(body.email, null, 
+//                 body.contact, null, null);
+//         }
 
-        if (!input) {
-            // TODO: Log failure of account update
-            response.send(ErrorCode.ACCOUNT.BAD_DATA);
-        } else {
-            // TODO: Send verification email and verification SMS
-            // if email or phone number has been changed.
-            let emailVerified = false;
-            let phoneVerified = false;
+//         if (!input) {
+//             // TODO: Log failure of account update
+//             response.send(ErrorCode.ACCOUNT.BAD_DATA);
+//         } else {
+//             // TODO: Send verification email and verification SMS
+//             // if email or phone number has been changed.
+//             let emailVerified = false;
+//             let phoneVerified = false;
 
-            // TODO: If emailverified is not changed after a change 
-            // or emailverified is changed after every update, 
-            // use the following value to update userRecord
-            if (email === input.email)
-                emailVerified = true;
+//             // TODO: If emailverified is not changed after a change 
+//             // or emailverified is changed after every update, 
+//             // use the following value to update userRecord
+//             if (email === input.email)
+//                 emailVerified = true;
             
-            if (phoneNumber === input.phoneNumber) {
-                phoneVerified = true;
-            }
+//             if (phoneNumber === input.phoneNumber) {
+//                 phoneVerified = true;
+//             }
 
-            // TODO: Log account update
-            const [,,writeResult] = await Promise.all([
-                auth.updateUser(uid, {
-                    email: input.email,
-                    phoneNumber: input.phoneNumber
-                }),
-                auth.setCustomUserClaims(uid, {
-                    phoneVerified: phoneVerified
-                }),
-                db.doc(`/users/${uid}`).set({
-                    lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-                }, { merge: true })
-            ]);
+//             // TODO: Log account update
+//             const [,,writeResult] = await Promise.all([
+//                 auth.updateUser(uid, {
+//                     email: input.email,
+//                     phoneNumber: input.phoneNumber
+//                 }),
+//                 auth.setCustomUserClaims(uid, {
+//                     phoneVerified: phoneVerified
+//                 }),
+//                 db.doc(`/users/${uid}`).set({
+//                     lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+//                 }, { merge: true })
+//             ]);
 
-            response.send(SuccessCode.ACCOUNT.UPDATE);
-        }
-    } catch (error) {
-        // TODO: Log failure of account update
-        console.error('Error while updating account details: ', error);
-        response.send(ErrorCode.ACCOUNT.UPDATE);
-    }
-});
+//             response.send(SuccessCode.ACCOUNT.UPDATE);
+//         }
+//     } catch (error) {
+//         // TODO: Log failure of account update
+//         console.error('Error while updating account details: ', error);
+//         response.send(ErrorCode.ACCOUNT.UPDATE);
+//     }
+// });
 
 app.post('/account-delete', (request, response) => {
     response.status(503).send('Functionality not available yet.');
@@ -477,6 +477,7 @@ export const createNewUser = functions.auth.user().onCreate(user => {
 });
 
 export const deleteUser = functions.auth.user().onDelete(async user => {
+    // TODO: Log deletion of user
     const userDoc = db.doc(`/users/${user.uid}`);
     const userRuleDocs = await userDoc.collection('rules').get();
     const userFiltersDocs = await userDoc.collection('filter').get();
