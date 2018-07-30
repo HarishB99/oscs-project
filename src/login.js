@@ -68,14 +68,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
 
             firebase.auth().signInWithEmailAndPassword(
                 acc_login_email.value, acc_login_pass.value)
-            .then(result => {
-                if (!result.user.emailVerified)
-                    return result.user.sendEmailVerification();
-                else
-                    return null;
-            }).then(() => {
-                location.replace('/');
-            }).catch(error => {
+            .then(() => location.replace('/')).catch(error => {
                 console.error(error);
                 if (error.code === 'auth/user-not-found') {
                     UIUtils.showSnackbar("Your email does not match our records.", "Create Account", () => {

@@ -9,14 +9,26 @@ const config = require('./modules/config').config;
 firebase.initializeApp(config);
 
 // Import other custom libraries
-const axios = require('axios').default;
+// const axios = require('axios').default;
 const InputValidator = require('./modules/InputValidator').default;
 const UIUtils = require('./modules/UIUtils').default;
 
+let wasntAlreadyLoggedIn = false;
+
 firebase.auth().onAuthStateChanged(user => {
     if (!InputValidator.isEmpty(user)) {
-        location.replace('/');
+        if (!wasntAlreadyLoggedIn) {
+            location.replace('/');
+        } else {
+            user.sendEmailVerification()
+            .then(() => location.replace('/login'))
+            .catch(error => {
+                console.error(`Error while sending email verification: ${error}`);
+                location.replace('/login');
+            });
+        }
     } else {
+        wasntAlreadyLoggedIn = true;
         let lock = false;
         const acc_req_email = document.getElementById("account-create--input-email");
         const acc_req_org = document.getElementById("account-create--input-org");
@@ -87,30 +99,43 @@ firebase.auth().onAuthStateChanged(user => {
             checkAllInputs();
             
             if (UIUtils.stillAnyInvalid()) return;
-            
-            axios.post("/account-create", {
-                email: acc_req_email.value,
-                org: acc_req_org.value,
-                contact: acc_req_phone.value,
-                pass: acc_req_pass.value
-            }).then(response => {
-                if (response.data.code === 'account/creation-success') {
-                    location.replace('/login');
-                } else {
-                    UIUtils.showSnackbar(response.data.message);
-                    lock = false;
-                }
-            }).catch(error => {
+
+            firebase.auth()
+            .createUserWithEmailAndPassword(
+                acc_req_email.value, acc_req_pass.value)
+            .catch(error => {
                 console.error("Error while performing account creation request: ", error);
                 if (error.message === "Network Error") {
                     UIUtils.showSnackbar("Please check your network connection and try again.");
-                } else if (error.message.indexOf('404') >= 0) {
-                    UIUtils.showSnackbar("Sorry. The functionality has not been enabled.");
                 } else {
                     UIUtils.showSnackbar("An unexpected error occurred. Please try again later.");
                 }
                 lock = false;
             });
+            
+            // axios.post("/account-create", {
+            //     email: acc_req_email.value,
+            //     org: acc_req_org.value,
+            //     contact: acc_req_phone.value,
+            //     pass: acc_req_pass.value
+            // }).then(response => {
+            //     if (response.data.code === 'account/creation-success') {
+            //         location.replace('/login');
+            //     } else {
+            //         UIUtils.showSnackbar(response.data.message);
+            //         lock = false;
+            //     }
+            // }).catch(error => {
+            //     console.error("Error while performing account creation request: ", error);
+            //     if (error.message === "Network Error") {
+            //         UIUtils.showSnackbar("Please check your network connection and try again.");
+            //     } else if (error.message.indexOf('404') >= 0) {
+            //         UIUtils.showSnackbar("Sorry. The functionality has not been enabled.");
+            //     } else {
+            //         UIUtils.showSnackbar("An unexpected error occurred. Please try again later.");
+            //     }
+            //     lock = false;
+            // });
         });
     }
 });

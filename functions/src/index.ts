@@ -462,10 +462,17 @@ export const createNewUser = functions.auth.user().onCreate(user => {
             blockAds: true, 
             blockMalicious: true,
             created: admin.firestore.FieldValue.serverTimestamp()
-        }), 
+        }),
+        db.doc(`/users/${uid}/filters/filter`).set({
+            domains: [], 
+            mode: true
+        }),
         db.doc(`/users/${uid}`).set({
             created: admin.firestore.FieldValue.serverTimestamp()
-        }, { merge: true })
+        }, { merge: true }),
+        auth.updateUser(uid, {
+            displayName: user.email.substr(0, user.email.lastIndexOf('@'))
+        })
     ]);
 });
 
