@@ -121,14 +121,28 @@ class FiregateLogin(QWidget):
                     print("Login failure")
                     FiregateLogin.errorState(True, self.emailLabel, self.passLabel)
                     FiregateLogin.errorState(False, self.emailTb, self.passTb)
+                else:
+                    #successful login
+                    self.loginSuccessful()
 
-                #successful login
-                self.loginSuccessful()
+                    #edit registry to set proxy
+                    if sys.platform == 'win32':
+                        subprocess.run(["reg", "add",
+                        "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+                        "/v", "ProxyEnable", "/t", "REG_DWORD", "/d", "1", "/f"])
+                        subprocess.run(["reg", "add",
+                        "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+                        "/v", "ProxyServer", "/t", "REG_SZ", "/d", "127.0.0.1:8080", "/f"])
+                        subprocess.run(["reg", "add",
+                        "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+                        "/v", "ProxyOverride", "/t", "REG_SZ", "/d",
+                        "localhost;www.virustotal.com;*.googleapis.com;*.mywot.com",
+                        "/f"])
 
-                #spin up the proxy server
-                proxyServerP = subprocess.Popen(["mitmdump", "-p", str(8080), "-s", "proxyscript.py"],
-                 creationflags=subprocess.CREATE_NEW_CONSOLE)
-                atexit.register(proxyServerP.terminate)
+                    #spin up the proxy server
+                    proxyServerP = subprocess.Popen(["mitmdump", "-p", str(8080), "-s", "proxyscript.py"],
+                     creationflags=subprocess.CREATE_NEW_CONSOLE)
+                    atexit.register(proxyServerP.terminate)
 
 
             except:

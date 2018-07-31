@@ -1,4 +1,4 @@
-import pymongo
+import pymongo, time
 
 class LogDatabase:
     client = pymongo.MongoClient('localhost', 27017)
@@ -14,10 +14,10 @@ class LogDatabase:
                 "maliciousFile": [],
                 "blockedDomains" : {},
                 "suspiciousDomain": {},
-                "questionableDomain": {},
                 "childUnsafe": {},
                 "downloadedFile": []
-            }
+            },
+            "timeline":[]
         }
         return LogDatabase.users.insert_one(user)
 
@@ -35,6 +35,20 @@ class LogDatabase:
         LogDatabase.users.update_one({'_id':u["_id"]}, {"$set": u}, upsert=False)
 
     @staticmethod
+    def timelineAdd(ip, event, domain):
+        u = LogDatabase.getUser(ip)
+        if "timeline" not in u:
+            u["timeline"] = []
+
+        u["timeline"].append({
+            "time" : time.time(),
+            "event" : event,
+            "domain" : domain
+        })
+
+        LogDatabase.updateUser(u)
+
+    @staticmethod
     def request(ip, domain):
         u = LogDatabase.getUser(ip)
         if domain not in u["domains"]:
@@ -42,6 +56,7 @@ class LogDatabase:
         else:
             u["domains"][domain] += 1
         LogDatabase.updateUser(u)
+        LogDatabase.timelineAdd(ip, "request", domain)
 
     @staticmethod
     def blockedDomain(ip, domain):
@@ -51,7 +66,9 @@ class LogDatabase:
         else:
             u["events"]["blockedDomains"][domain] += 1
         LogDatabase.updateUser(u)
+        LogDatabase.timelineAdd(ip, "Requested blocked domain", domain)
 
+    @staticmethod
     def securityEvent(ip, domain, eventType):
         u = LogDatabase.getUser(ip)
         if eventType not in u["events"]:
@@ -61,3 +78,21 @@ class LogDatabase:
         else:
             u["events"][eventType][domain] += 1
         LogDatabase.updateUser(u)
+        LogDatabase.timelineAdd(ip, "Security event: "+eventType, domain)
+
+    @staticmethod
+    def downloadFile(ip, domain, url, safe):
+        u = LogDatabase.getUser(ip)
+        if "downloadedFile" not in u["events"]:
+            u["events"]["downloadedFile"] = []
+
+        downloadLog = {
+            "domain" : domain,
+            "url" : url,
+            "safe" : safe,
+            "time" : time.time()
+        }
+        u["events"]["downloadedFile"].append(downloadLog)
+
+        LogDatabase.updateUser(u)
+        LogDatabase.timelineAdd(ip, "Download File", domain)

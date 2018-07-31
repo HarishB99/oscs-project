@@ -46,10 +46,10 @@ Function Add-Rule {
     $command = ""
     If (![string]::IsNullOrEmpty($name)) {
         $command += "New-NetFirewallRule -DisplayName $name "
-        If (!(($remoteAddress -eq "0.0.0.0") -or ($remoteAddress -eq "*"))){
+        If (!(($remoteAddress -eq "0.0.0.0") -or ($remoteAddress -eq "*.*.*.*"))){
             $command += "-RemoteAddress $remoteAddress "
         }
-        If (!(($localAddress -eq "0.0.0.0") -or ($localAddress -eq "*"))){
+        If (!(($localAddress -eq "0.0.0.0") -or ($localAddress -eq "*.*.*.*"))){
             $command += "-LocalAddress $localAddress "
         }
         If (!([string]::IsNullOrEmpty($protocol)) -and !($protocol -eq "*")){
