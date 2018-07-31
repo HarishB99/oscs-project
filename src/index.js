@@ -56,12 +56,25 @@ firebase.auth().onAuthStateChanged(user => {
             lock = false;
         });
 
+        const showVerifyEmail = function(tbody) {
+            UIUtils.toggleLoader(false, mdl_spinner_holder);
+            const tr = document.createElement('tr');
+            tr.className = ruleRowsName;
+                const noRules = document.createElement('td');
+                    noRules.className = "mdl-data-table__cell--non-numeric rule";
+                    noRules.colSpan = 10;
+                    noRules.innerHTML = "Please verify your email before proceeding on.";
+                tr.appendChild(noRules);
+            tbody.appendChild(tr);
+        };
+
         const db = firebase.firestore();
         db.settings({timestampsInSnapshots: true});
 
+        const tbody = document.getElementById('firewall-rule__table--list');
+
         db.collection(`/users/${user.uid}/rules`).onSnapshot(rules => {
             UIUtils.toggleLoader(true, mdl_spinner_holder);
-            const tbody = document.getElementById('firewall-rule__table--list');
             
             UIUtils.clearTable(tbody, ruleRowsName);
 
@@ -181,8 +194,13 @@ firebase.auth().onAuthStateChanged(user => {
                 });
             });
         }, error => {
-            console.log('Error while retrieving data from server: ', error);
-            UIUtils.showSnackbar('We are unable to retrieve your firewall rules. Please try again later.');
+            console.error('Error while retrieving data from server: ', error);
+            if (error.message === "Missing or insufficient permissions.") {
+                UIUtils.showSnackbar('Please verify your email before proceeding on to manage your firewall proxy.');
+                showVerifyEmail(tbody);
+            } else {
+                UIUtils.showSnackbar('We are unable to retrieve your firewall rules. Please try again later.');
+            }
         });
 
         // #web-filter
@@ -310,6 +328,13 @@ firebase.auth().onAuthStateChanged(user => {
         db.doc(`/users/${user.uid}/filters/filter`).onSnapshot(snapshot => {
             filters = snapshot.data();
             resetFiltersList();
+        }, error => {
+            console.error('Error while retrieving data from server: ', error);
+            if (error.message === "Missing or insufficient permissions.") {
+                UIUtils.showSnackbar('Please verify your email before proceeding on to manage your firewall proxy.');
+            } else {
+                UIUtils.showSnackbar('We are unable to retrieve your web filters. Please try again later.');
+            }
         });
 
         // #global
@@ -355,8 +380,12 @@ firebase.auth().onAuthStateChanged(user => {
             UIUtils.toggleSwitch(opts.blockAds, block_ads);
             UIUtils.toggleSwitch(opts.blockMalicious, block_malicious);
         }, error => {
-            console.log('Error while retrieving data from server: ', error);
-            UIUtils.showSnackbar('An unexpected error occurred while retrieving your firewall settings.');
+            console.error('Error while retrieving data from server: ', error);
+            if (error.message === "Missing or insufficient permissions.") {
+                UIUtils.showSnackbar('Please verify your email before proceeding on to manage your firewall proxy.');
+            } else {
+                UIUtils.showSnackbar('An unexpected error occurred while retrieving your firewall settings.');
+            }
         });
     } else { UIUtils.logoutUI(); }
 });
