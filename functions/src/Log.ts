@@ -32,15 +32,16 @@ export class Log {
     public uid: string;
     public outcome: string;
     public remarks: any;
-    public timestamp: FirebaseFirestore.Timestamp;
+    public timestamp: any;
     public method: string;
+    public input: any;
 
     private parseBool(input: string): boolean {
         const input_lower = input.toLowerCase();
         return (input_lower === 'true' || input_lower === 't') ? true : false;
     }
 
-    public constructor(action: string, type: string, url: string, ip: string, uid: string, outcome: boolean, remarks: any, timestamp: FirebaseFirestore.Timestamp, method: string) {
+    public constructor(action: string, type: string, url: string, ip: string, uid: string, outcome: boolean, remarks: any, timestamp: any, method: string, input: any) {
         this.action = action;
         this.type = type;
         this.url = url;
@@ -50,6 +51,7 @@ export class Log {
         this.remarks = remarks;
         this.timestamp = timestamp;
         this.method = method;
+        this.input = input;
     }
 
     public log(): object {
@@ -66,7 +68,8 @@ export class Log {
             outcome: this.outcome,
             remarks: this.remarks,
             timestamp: this.timestamp,
-            method: this.method
+            method: this.method,
+            input: this.input
         });
     }
 }
