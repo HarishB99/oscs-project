@@ -76,18 +76,23 @@ Function Add-Rule {
 
 Set-NetFirewallProfile -All -DefaultInboundAction Block -DefaultOutboundAction Allow
 Remove-NetFirewallRule -All
-$rulesObj = ConvertFrom-Json -InputObject $ruleList
-ForEach ($rule in $rulesObj) {
-  $args = "& Add-Rule -Name $($rule.name) -Protocol $($rule.protocol) -Action "
-  If ($($rule.allow)) {
-    $args += "Allow "
-  } Else {
-    $args += "Block "
-  }
-  If ($($rule.direction) -eq "incoming") {
-    $args += "-Direction Inbound -RemoteAddress $($rule.sourceip) -RemotePort $($rule.sourceport) -LocalAddress $($rule.destip) -LocalPort $($rule.destport)"
-  } Else {
-    $args += "-Direction Outbound -RemoteAddress $($rule.destip) -RemotePort $($rule.destport) -LocalAddress $($rule.sourceip) -LocalPort $($rule.sourceport)"
-  }
-  Invoke-Expression $args
+Try {
+    $rulesObj = ConvertFrom-Json -InputObject $ruleList
+    ForEach ($rule in $rulesObj) {
+      $args = "& Add-Rule -Name $($rule.name) -Protocol $($rule.protocol) -Action "
+      If ($($rule.allow)) {
+        $args += "Allow "
+      } Else {
+        $args += "Block "
+      }
+      If ($($rule.direction) -eq "incoming") {
+        $args += "-Direction Inbound -RemoteAddress $($rule.sourceip) -RemotePort $($rule.sourceport) -LocalAddress $($rule.destip) -LocalPort $($rule.destport)"
+      } Else {
+        $args += "-Direction Outbound -RemoteAddress $($rule.destip) -RemotePort $($rule.destport) -LocalAddress $($rule.sourceip) -LocalPort $($rule.sourceport)"
+      }
+      Invoke-Expression $args
+    }
+}
+Catch {
+    exit 1
 }

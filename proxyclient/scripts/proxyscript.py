@@ -47,7 +47,7 @@ categories = {
 }
 
 #spin up mongo server
-mongoServerP = subprocess.Popen(["C:\\Program Files\\MongoDB\\Server\\3.6\\bin\\mongod.exe"],
+mongoServerP = subprocess.Popen(["D:\\Program Files\\MongoDB\\Server\\4.0\\bin\\mongod.exe"],
     creationflags=subprocess.CREATE_NEW_CONSOLE)
 #close mongo server on exit
 import atexit
