@@ -9,6 +9,7 @@ const config = require('./modules/config').config;
 firebase.initializeApp(config);
 
 // Import other custom libraries
+// const axios = require('axios').default;
 const InputValidator = require('./modules/InputValidator').default;
 const UIUtils = require('./modules/UIUtils').default;
 
@@ -57,6 +58,24 @@ firebase.auth().onAuthStateChanged(user => {
         
         acc_prof_email_btn.addEventListener('click', () => {
             if (lock) return; lock = true;
+
+            location.href = '/reset_email';
+
+            // user.getIdToken(true)
+            // .then(token => {
+            //     // return axios({
+            //     //     url: '/reset_email',
+            //     //     method: 'POST',
+            //     //     headers: {
+            //     //         'Authorisation': `Bearer ${token}`
+            //     //     }
+            //     // });
+            // }).catch(error => {
+            //     console.error(`Error while sending reset_email request to server: ${error}`);
+            //     UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+            //     lock = false;
+            // });
+
             // checkAllInputs();
             
             // if (UIUtils.stillAnyInvalid()) return;
@@ -68,15 +87,35 @@ firebase.auth().onAuthStateChanged(user => {
             //     UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
             //     lock = false;
             // });
-            lock = false;
+            // lock = false;
         })
 
         acc_prof_rst_pass_btn.addEventListener('click', () => {
             if (lock) return; lock = true;
+
+            location.href = '/reset_password';
+
+            // user.getIdToken(true)
+            // .then(token => {
+            //     location.href = '/reset_password'
+            //     // return axios({
+            //     //     url: '/reset_pass',
+            //     //     method: 'POST',
+            //     //     headers: {
+            //     //         'Authorisation': `Bearer ${token}`
+            //     //     }
+            //     // });
+            // })
+            // .catch(error => {
+            //     console.error(`Error while sending reset_email request to server: ${error}`);
+            //     UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+            //     lock = false;
+            // });
+
             // firebase.auth().sendPasswordResetEmail(user.email);
             
             // user.updatePassword();
-            lock = false;
+            // lock = false;
         });
         
         var displayProfile = function(user) {
