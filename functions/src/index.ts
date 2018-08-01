@@ -287,10 +287,6 @@ app.post('/global-update', async (request, response) => {
     }
 });
 
-// app.post('/filter-add', (request, response) => {
-    // response.status(503).send('Functionality not available yet.');
-// });
-
 app.post('/filter-update', async (request, response) => {
     try {
         const { uid } = await authenticator.checkPostAccess(request.get(TOKEN));
@@ -318,9 +314,17 @@ app.post('/filter-update', async (request, response) => {
     }
 });
 
-// app.post('/filter-delete', (request, response) => {
-    // response.status(503).send('Functionality not available yet.');
-// });
+app.post('/logs', async (request, response) => {
+    // TODO: If possible, perform authentication
+    try {
+        const { logs } = request.body;
+
+        response.send(`Received the following: <br/>${logs}`);
+    } catch (error) {
+        console.error(`Error while reading logs from user: ${error}`);
+        response.status(404).send(`Not Found`);
+    }
+});
 
 // app.all('*', (request, response) => {
 //     response.status(404).send('Sorry, we can\'t find that ');
@@ -345,7 +349,7 @@ export const createNewUser = functions.auth.user().onCreate(async user => {
     //     accountVerified: false
     // });
 
-    await log(logger.userCreate(uid, admin.firestore.FieldValue.serverTimestamp()));
+    await log(logger.userCreate(uid, user.metadata.creationTime));
 
     return Promise.all([
         db.doc(`/users/${uid}/options/global`).set({

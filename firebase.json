@@ -39,8 +39,12 @@
         "destination": "/contents/accounts/login.html"
       },
       {
+        "source": "/reset_email",
+        "destination": "/contents/accounts/reset_email.html"
+      },
+      {
         "source": "/reset_password",
-        "destination": "/contents/accounts/pass_rst.html"
+        "destination": "/contents/accounts/reset_password.html"
       },
       {
         "source": "/profile",
