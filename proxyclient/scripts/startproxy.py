@@ -1,4 +1,6 @@
-import sys, re, requests, subprocess, json, atexit, webbrowser
+import sys, re, requests, subprocess, json, atexit, webbrowser, os, time
+from windowsFirewallHandler import WindowsFirewallHandler
+from iptableSetup import IptablesHandler
 from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QDesktopWidget,
     QHBoxLayout, QVBoxLayout, QAction, QLineEdit, QLabel, QStackedWidget)
 from PyQt5.QtGui import QIcon
@@ -6,15 +8,16 @@ from PyQt5.QtCore import pyqtSlot, Qt
 from PyQt5 import QtGui
 
 #spawn firegate client server
-firegateClientP = subprocess.Popen(["node", "..\\..\\firegate101-client\\index.js"],
+os.chdir("../../firegate101-client")
+firegateClientP = subprocess.Popen(["node", "index.js"],
  creationflags=subprocess.CREATE_NEW_CONSOLE)
 atexit.register(firegateClientP.terminate)
 
+os.chdir("../proxyclient/scripts")
 class FiregateLogin(QWidget):
     def __init__(self):
         super().__init__()
         #adjust size, position
-        self.resize(250, 400)
         self.center()
         self.setWindowTitle('Firegate - Login')
         #self.setWindowIcon(QIcon('firegate-logo.png'))
@@ -32,6 +35,10 @@ class FiregateLogin(QWidget):
 
         #First layout, login screen
         self.loginScreen = QWidget()
+        #logo display
+        logo = QtGui.QPixmap("../../firegate-logo.png")
+        logoLabel = QLabel(self)
+        logoLabel.setPixmap(logo.scaledToHeight(100))
         #textbox for email
         self.emailLabel = QLabel("Email:", self)
         self.emailTb = QLineEdit("angjinkuan@hotmail.sg", self)
@@ -55,27 +62,60 @@ class FiregateLogin(QWidget):
 
         #VBox container for layout
         c = QVBoxLayout()
+        c.addWidget(logoLabel)
         c.addWidget(self.emailLabel)
         c.addWidget(self.emailTb)
         c.addWidget(self.passLabel)
         c.addWidget(self.passTb)
         c.addWidget(self.errorMessage)
         c.addWidget(loginBtn)
+        #c.addStretch(0)
         self.loginScreen.setLayout(c)
 
         #second layout, login success
         self.loginSuccess = QWidget()
+        #stack for tick and cross
+        self.imageStack = QStackedWidget()
         #tick image
-        tick = QLabel(self)
-        tick.setPixmap(QtGui.QPixmap("../data/images/tick.png"))
+        tick = QtGui.QPixmap("../data/images/tick.png")
+        tickLabel = QLabel(self)
+        tickLabel.setPixmap(tick.scaledToHeight(150))
+        #cross image
+        cross = QtGui.QPixmap("../data/images/cross.png")
+        crossLabel = QLabel(self)
+        crossLabel.setPixmap(cross.scaledToHeight(150))
+        #add to stack
+        self.imageStack.addWidget(tickLabel)
+        self.imageStack.addWidget(crossLabel)
 
         #login successful text
         lsText = QLabel("Login Successful! Your proxy is now active!", self)
+        #edit rules button
+        self.editRules = QPushButton("Edit rules", self)
+        self.editRules.setDefault(True)
+        self.editRules.clicked.connect(
+        lambda:webbrowser.open_new_tab('https://firegate-101.firebaseapp.com/'))
+        #stop proxy button
+        self.proxyToggle = QStackedWidget(self)
+        self.startProxy = QPushButton('Start Proxy', self)
+        self.startProxy.clicked.connect(self.startProxyServer)
+        self.stopProxy = QPushButton('Stop Proxy', self)
+        self.stopProxy.clicked.connect(self.stopProxyServer)
+
+        self.proxyToggle.addWidget(self.startProxy)
+        self.proxyToggle.addWidget(self.stopProxy)
+        #Hbox for the two buttons
+        bottomRow = QHBoxLayout()
+        bottomRow.addWidget(self.editRules)
+        bottomRow.addWidget(self.proxyToggle)
 
         #creating layout
         loginSuccessLayout = QVBoxLayout()
-        loginSuccessLayout.addWidget(tick)
+        loginSuccessLayout.addWidget(self.imageStack, Qt.AlignCenter)
         loginSuccessLayout.addWidget(lsText)
+        loginSuccessLayout.addWidget(self.editRules)
+        loginSuccessLayout.addWidget(self.proxyToggle)
+
 
         self.loginSuccess.setLayout(loginSuccessLayout)
 
@@ -87,6 +127,7 @@ class FiregateLogin(QWidget):
         appContainer = QVBoxLayout()
         appContainer.addWidget(self.stack)
         self.setLayout(appContainer)
+        self.resize(self.minimumSizeHint())
         self.stack.setCurrentIndex(0)
         self.show()
 
@@ -125,24 +166,7 @@ class FiregateLogin(QWidget):
                     #successful login
                     self.loginSuccessful()
 
-                    #edit registry to set proxy
-                    if sys.platform == 'win32':
-                        subprocess.run(["reg", "add",
-                        "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
-                        "/v", "ProxyEnable", "/t", "REG_DWORD", "/d", "1", "/f"])
-                        subprocess.run(["reg", "add",
-                        "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
-                        "/v", "ProxyServer", "/t", "REG_SZ", "/d", "127.0.0.1:8080", "/f"])
-                        subprocess.run(["reg", "add",
-                        "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
-                        "/v", "ProxyOverride", "/t", "REG_SZ", "/d",
-                        "localhost;www.virustotal.com;*.googleapis.com;*.mywot.com",
-                        "/f"])
-
-                    #spin up the proxy server
-                    proxyServerP = subprocess.Popen(["mitmdump", "-p", str(8080), "-s", "proxyscript.py"],
-                     creationflags=subprocess.CREATE_NEW_CONSOLE)
-                    atexit.register(proxyServerP.terminate)
+                    self.startProxyServer()
 
 
             except:
@@ -154,6 +178,82 @@ class FiregateLogin(QWidget):
             self.showError("Email: not an email")
             FiregateLogin.errorState(True, self.emailLabel)
             FiregateLogin.errorState(False, self.emailTb)
+
+    #connect to proxy via registry keys and start proxy server
+    def startProxyServer(self):
+        #edit registry to set proxy
+        if sys.platform == 'win32':
+            subprocess.run(["reg", "add",
+            "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+            "/v", "ProxyEnable", "/t", "REG_DWORD", "/d", "1", "/f"])
+            subprocess.run(["reg", "add",
+            "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+            "/v", "ProxyServer", "/t", "REG_SZ", "/d", "127.0.0.1:8080", "/f"])
+            subprocess.run(["reg", "add",
+            "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+            "/v", "ProxyOverride", "/t", "REG_SZ", "/d",
+            "localhost;www.virustotal.com;*.googleapis.com;*.mywot.com",
+            "/f"])
+
+
+        #firewallRules
+        #test Variable
+        test_rules = False
+        if test_rules:
+            with open('../data/testrules.json', 'r') as rulesFile:
+                rules = json.loads(rulesFile.read())
+        else:
+            #retrive policy
+            time.sleep(3) #wait a while for node client to load rules
+            policyRequest = requests.get('http://localhost:3000/rules.json')
+            policyJson = policyRequest.json()
+
+            #firewall rules formatting
+            policyJson["firewallRules"] = policyJson.pop("rules")
+            firewallRules = policyJson["firewallRules"]
+            for firewallRule in firewallRules:
+                firewallRule["allow"] = firewallRule.pop("access")
+
+            rules = policyJson
+
+            print(json.dumps(rules, indent=4))
+            #configuring firewall according to rules
+            if sys.platform.startswith('linux'): #iptables for linux
+                print("Linux machine detected. Configuring iptables...")
+                IptablesHandler.initialize(port)
+                for r in rules["firewallRules"]:
+                    if r["direction"] == "incoming":
+                        IptablesHandler.createRule(r, True)
+                    elif r["direction"] == "outgoing":
+                        IptablesHandler.createRule(r, False)
+                    else:
+                        print("Error: Unrecognized firewall rule direction")
+            elif sys.platform == 'win32': #windows firewall for windows
+                print("Windows detected. Configuring windows firewall...\n" +
+                 "Note that windows firewall behaves differently from regular firewalls, and can lead to weird behaviour")
+                WindowsFirewallHandler.setRules(rules)
+
+        #spin up the proxy server
+        self.proxyServerP = subprocess.Popen(["mitmdump", "-p", str(8080), "-s", "proxyscript.py"],
+         creationflags=subprocess.CREATE_NEW_CONSOLE)
+        atexit.register(self.proxyServerP.terminate)
+
+        #update display
+        self.proxyToggle.setCurrentIndex(1)
+        self.imageStack.setCurrentIndex(0)
+
+    #edit registry keys again and stop proxy server
+    def stopProxyServer(self):
+        subprocess.run(["reg", "add",
+        "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+        "/v", "ProxyEnable", "/t", "REG_DWORD", "/d", "0", "/f"])
+
+        ps = self.proxyServerP
+        if ps is not None: ps.terminate()
+
+        #update display
+        self.proxyToggle.setCurrentIndex(0)
+        self.imageStack.setCurrentIndex(1)
 
     #swap to login success screen
     def loginSuccessful(self):

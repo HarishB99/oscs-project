@@ -4,7 +4,7 @@ from db import LogDatabase
 from checkedDomains import CheckedDomains
 from iptableSetup import IptablesHandler
 from windowsFirewallHandler import WindowsFirewallHandler
-import subprocess, json, requests, atexit, sys, time
+import subprocess, json, requests, atexit, sys, time, os, urllib
 
 text_clf = None
 options = {
@@ -46,8 +46,11 @@ categories = {
     '501': 'Positive: Good site'
 }
 
+with open("../data/proxy.config") as proxyConfigFile:
+    config = json.load(proxyConfigFile)
+
 #spin up mongo server
-mongoServerP = subprocess.Popen(["D:\\Program Files\\MongoDB\\Server\\4.0\\bin\\mongod.exe"],
+mongoServerP = subprocess.Popen([config["mongo"]],
     creationflags=subprocess.CREATE_NEW_CONSOLE)
 #close mongo server on exit
 import atexit
@@ -78,7 +81,7 @@ def addDomainGroup(groupNames):
 test_rules = False
 def load(l):
     #build hash table of domains to block
-    addDomainsF("../data/ad-domains-list.txt", "ad")
+    addDomainsF("../data/ad-domains-full.txt", "ad")
     addDomainsF("../data/malicious-domains-list.txt", "malicious")
 
     #load user defined domains
@@ -100,20 +103,6 @@ def load(l):
         rules = policyJson
 
     print(json.dumps(rules, indent=4))
-    #configuring firewall according to rules
-    if sys.platform.startswith('linux'): #iptables for linux
-        print("LINUX MACHINE")
-        IptablesHandler.initialize(port)
-        for r in rules["firewallRules"]:
-            if r["direction"] == "incoming":
-                IptablesHandler.createRule(r, True)
-            elif r["direction"] == "outgoing":
-                IptablesHandler.createRule(r, False)
-            else:
-                print("Error: Unrecognized firewall rule direction")
-    elif sys.platform == 'win32': #windows firewall for windows
-        print("WINDOWS MACHINE")
-        WindowsFirewallHandler.setRules(rules)
 
     #webfilter setup
     r = rules["webfilter"]
@@ -138,9 +127,14 @@ def load(l):
     #add user-defined domains
     if "domains" in r:
         for domain in r["domains"]:
+            if "http://" in domain: domain = domain.replace("http://", "")
+            if "https://" in domain : domain = domain.replace("https://", "")
             blockedDomains["user"].add(domain)
+            if "www." in domain: blockedDomains["user"].add(domain.replace("www.", ""))
     if "exclude" in r:
         for domain2 in r["exclude"]:
+            if "http://" in domain2: domain2 = domain.replace("http://", "")
+            if "https://" in domain2 : domain2 = domain.replace("https://", "")
             if "www." not in domain2:
                 blockedDomains["exclude"].add('www.'+domain2)
             blockedDomains["exclude"].add(domain2)
@@ -194,10 +188,9 @@ def request(flow):
             #google safe browsing
             if gResults != 0 and gResults != 1:
                 if len(gResults) > 0:
-                    print(gResults)
                     results["threatType"] = gResults
-                    #CheckedDomains.add(d, False, "Dangerous site", False)
-                    #LogDatabase.securityEvent(ip, d, "suspiciousDomain")
+                    CheckedDomains.add(d, False, "Dangerous site", False)
+                    LogDatabase.securityEvent(ip, d, "suspiciousDomain")
             else:
                 () #TODO: log failure to another database
 
@@ -218,10 +211,10 @@ def request(flow):
 
 
             #check api call results
-            '''
+
             if "childSafety" in results:
                 if results["childSafety"] < options["block-child-unsafe-level"] and \
-                 results["childSafety-confidence"] > 30:
+                 results["childSafety-confidence"] >= 5:
                     CheckedDomains.add(d, False, "Blocked by policy (child safety)", False)
                     LogDatabase.securityEvent(ip, d, "childUnsafe")
             if "trustworthiness" in results:
@@ -238,7 +231,7 @@ def request(flow):
                     LogDatabase.securityEvent(ip, d, str(cat[0]))
                 if cat[0][0] == "3" and int(cat[1]) > 40:
                     () #TODO: Add filters for certain topics
-            '''
+
 
         #passed all the above checks -> safe domain
         if CheckedDomains.search(d) is None:
@@ -248,15 +241,17 @@ def request(flow):
     sc = CheckedDomains.search(d)
     if not sc["isSafe"]: #previously logged as unsafe
         if sc["kill"]:
-            flow.response = ""
+            flow.response = http.HTTPResponse.make(
+                200, ""
+            )
         else:
             #list all reasons the domain is bad
             r = ""
             for reason in sc["reason"]:
-                r += reason + '\n'
-            flow.response = http.HTTPResponse.make(
-                418, r
-            )
+                r += reason
+            #flow.response = http.HTTPResponse.make(418, b)
+            b = {"reason" : r}
+            flow.request.url = "http://localhost:3000/blocked?" + urllib.parse.urlencode(b)
     else:
         print("SAFE DOMAIN-----------"+d)
 
@@ -272,25 +267,25 @@ def response(flow):
     elif flow.response.headers.get("content-type", "").startswith("application/octet-stream") or \
      flow.response.headers.get("content-disposition", "").startswith("attachment") or \
      "x-msdownload" in flow.response.headers.get("content-type", ""): #downloaded files
-        print("DOWNLOAD FILE")
-        print(flow.request.url)
         #scan url for viruses
         params = {'apikey': apiKeys["virusTotal"], 'resource': flow.request.url}
         response = requests.post('https://www.virustotal.com/vtapi/v2/url/report',
           params=params)
         if response.status_code == 200:
             vtJson = response.json()
-            print(json.dumps(vtJson, indent=4))
-            if vtJson["positives"] <= 0:
-                print("DOWNLOAD SAFE FILE")
-                #log downloaded file event
-                LogDatabase.downloadFile(ip, d, flow.request.url, True)
+            if "positives" in vtJson:
+                if vtJson["positives"] <= 0:
+                    #log downloaded file event
+                    LogDatabase.downloadFile(ip, d, flow.request.url, True)
+                else:
+                    #not safe, stop download
+                    LogDatabase.downloadFile(ip, d, flow.request.url, False)
+                    flow.response = http.HTTPResponse.make(
+                        418, "Malicious file detected"
+                    )
             else:
-                #not safe, stop download
-                LogDatabase.downloadFile(ip, d, flow.request.url, False)
-                flow.response = http.HTTPResponse.make(
-                    418, "Malicious file detected"
-                )
+                #no record
+                ()
         else: #failed connection for whatever reason, just stop download
             flow.kill()
     else:

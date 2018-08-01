@@ -19,7 +19,11 @@
 15f3c01c.info
 174.142.194.177
 17a898b9.info
+www.googleadservices.com
+googleadservices.com
 17a898bb.info
+adssettings.google.com
+
 188.138.1.45
 188server.com
 18clicks.com
@@ -15521,6 +15525,8 @@ lightspeedcash.com
 lijit.com
 limpingline.com
 link-booster.de
+googleads.g.doubleclick.net
+adclick.g.doubleclick.net
 link4ads.com
 linkadd.de
 linkprice.com
