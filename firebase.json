@@ -3,6 +3,10 @@
     "public": "public",
     "rewrites": [
       {
+        "source": "/favicon.ico",
+        "destination": "/images/favicon.ico"
+      },
+      {
         "source": "/",
         "destination": "/index.html"
       },
