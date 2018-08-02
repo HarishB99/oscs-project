@@ -19,14 +19,18 @@ export class RuleInput {
         return (input_lower === 'true' || input_lower === 't') ? true : false;
     }
 
+    private parseIp(input: string): string {
+        return (input === "*" || input === "*.*.*.*" || input === "0.0.0.0") ? "0.0.0.0" : input;
+    }
+
     public constructor(name: string, access: string, priority: string, proto: string, sip: string, sport: string, dip: string, dport: string, direction: string) {
         this.name = name;
         this.access = this.parseBool(access);
         this.priority = parseInt(priority, 10);
         this.protocol = proto.toUpperCase();
-        this.sourceip = sip;
+        this.sourceip = this.parseIp(sip);
         this.sourceport = sport;
-        this.destip = dip;
+        this.destip = this.parseIp(dip);
         this.destport = dport;
         this.direction = this.parseBool(direction);
     }

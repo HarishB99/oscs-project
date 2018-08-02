@@ -3,7 +3,8 @@
  * @author Harish S/O Balamurugan
  */
 export class GlobalOptionsInput {
-    public dpi: boolean;
+    // public dpi: boolean;
+    public childSafety: boolean;
     public virusScan: boolean;
     public blockAds: boolean; 
     public blockMalicious: boolean;
@@ -13,8 +14,8 @@ export class GlobalOptionsInput {
         return (input_lower === 'true' || input_lower === 't') ? true : false;
     }
 
-    public constructor(dpi: string, virusScan: string, blockAds: string, blockMalicious: string) {
-        this.dpi = this.parseBool(dpi);
+    public constructor(childSafety: string, virusScan: string, blockAds: string, blockMalicious: string) {
+        this.childSafety = this.parseBool(childSafety);
         this.virusScan = this.parseBool(virusScan);
         this.blockAds = this.parseBool(blockAds);
         this.blockMalicious = this.parseBool(blockMalicious);
@@ -22,7 +23,7 @@ export class GlobalOptionsInput {
 
     public toString(): string {
         return JSON.stringify({
-            dpi: this.dpi,
+            childSafety: this.childSafety,
             virusScan: this.virusScan,
             blockAds: this.blockAds,
             blockMalicious: this.blockMalicious
