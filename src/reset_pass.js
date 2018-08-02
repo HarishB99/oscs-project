@@ -27,6 +27,15 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
             const acc_rst_pass_new_pass2 = document.getElementById('account-rst-pass--new-password2');
             const acc_rst_pass_btn = document.getElementById('account-rst-pass--button-submit');
             const acc_login_btn = document.getElementById('account-login--button');
+
+            if (!user.emailVerified) {
+                acc_rst_pass_pass.disabled = true;
+                acc_rst_pass_new_pass.disabled = true;
+                acc_rst_pass_new_pass2.disabled = true;
+                acc_rst_pass_btn.disabled = true;
+                acc_login_btn.disabled = true;
+                UIUtils.showSnackbar('Please verify your email before you proceed.');
+            }
     
             var checkAllInputs = function() {
                 UIUtils.update_text_field_ui(acc_rst_pass_pass, 
