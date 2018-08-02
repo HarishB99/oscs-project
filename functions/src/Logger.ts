@@ -29,14 +29,22 @@ export class Logger {
         return new Log(this.DELETE, this.ACCOUNT, null, null, uid, true, Log.NOT_APPLICABLE, timestamp, null, null);
     }
 
-    public getRuleRequestSuccess(request: Request, uid: string, timestamp: any) {
-        const url = request.originalUrl;
+    public getRuleRequestSuccess(request: Request, url: string, uid: string, timestamp: any) {
+        // const url = request.originalUrl;
         const ip = request.ip;
         return new Log(this.RETRIEVE, this.RULE, url, ip, uid, true, Log.NOT_APPLICABLE, timestamp, this.GET, null);
     }
 
-    public getRuleRequestFailure(request: Request, uid: string, error: any, timestamp: any) {
-        const url = request.originalUrl;
+    public emailHandlerSuccess(url: string, timestamp: any) {
+        return new Log(this.UPDATE, this.ACCOUNT, url, null, null, true, null, timestamp, this.GET, null);
+    }
+
+    public emailHandlerFailure(url: string, timestamp: any, error: any) {
+        return new Log(this.UPDATE, this.ACCOUNT, url, null, null, false, error, timestamp, this.GET, null);
+    }
+
+    public getRuleRequestFailure(request: Request, url: string, uid: string, error: any, timestamp: any) {
+        // const url = request.originalUrl;
         const ip = request.ip;
         return new Log(this.RETRIEVE, this.RULE, url, ip, uid, true, error, timestamp, this.GET, null);
     }
