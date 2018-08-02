@@ -11,11 +11,11 @@ class LogDatabase:
             "_id": ip,
             "domains" : {},
             "events": {
-                "maliciousFile": [],
                 "blockedDomains" : {},
                 "suspiciousDomain": {},
                 "childUnsafe": {},
-                "downloadedFile": []
+                "downloadedFile": [],
+                "maliciousFile": []
             },
             "timeline":[]
         }
@@ -87,12 +87,17 @@ class LogDatabase:
             u["events"]["downloadedFile"] = []
 
         downloadLog = {
-            "domain" : domain,
-            "url" : url,
-            "safe" : safe,
-            "time" : time.time()
+        "domain" : domain,
+        "url" : url,
+        "safe" : safe,
+        "time" : time.time()
         }
-        u["events"]["downloadedFile"].append(downloadLog)
+
+        if safe:
+            u["events"]["downloadedFile"].append(downloadLog)
+            LogDatabase.timelineAdd(ip, "Download File", domain)
+        if not safe:
+            u["events"]["maliciousFile"].append(downloadLog)
+            LogDatabase.timelineAdd(ip, "Download malicious file", domain)
 
         LogDatabase.updateUser(u)
-        LogDatabase.timelineAdd(ip, "Download File", domain)
