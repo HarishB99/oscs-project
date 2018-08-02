@@ -18,11 +18,14 @@ firebase.auth().onAuthStateChanged(user => {
         const actionCode = document.querySelector('.id').id;
 
         firebase.auth().applyActionCode(actionCode)
-        .then(() => user.reload()).then(() => {
+        .then(() => {
+            return user.reload();
+        })
+        .then(() => {
             const form_holder_container = document.getElementById('form-holder--container');
             const acc_rst_pass_status = document.getElementById('account-rst-pass--status');
             const buttons_holder = document.getElementById('buttons-holder');
-            const firewall_btn = document.getElementById('account-firewall--button');
+            const account_login_btn = document.getElementById('account-login--button');
 
             acc_rst_pass_status.innerHTML = 'Success!';
             acc_rst_pass_status.parentElement.classList.remove('mdl-color-text--amber');
@@ -33,12 +36,17 @@ firebase.auth().onAuthStateChanged(user => {
             span.innerHTML = 'Your email has been verified.';
             form_holder_container.appendChild(span);
 
-            buttons_holder.style.display = 'block';
+            // buttons_holder.style.display = 'block';
+            buttons_holder.classList.remove('visually-hidden');
 
-            firewall_btn.addEventListener('click', () => {
+            account_login_btn.addEventListener('click', () => {
                 if (lock) return; lock = true;
-                location.href = '/';
-                lock = false
+                firebase.auth().signOut()
+                .catch(error => {
+                    console.error('Error while signing out user: ', error);
+                    UIUtils.showSnackbar('Please clear your browser cache or restart your browser, and try again.');
+                    lock = false;
+                });
             });
         })
         .catch(error => {

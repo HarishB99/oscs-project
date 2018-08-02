@@ -47,7 +47,8 @@ firebase.auth().onAuthStateChanged(user => {
                 });
             form_holder_container.appendChild(span);
 
-            buttons_holder.style.display = 'block';
+            // buttons_holder.style.display = 'block';
+            buttons_holder.classList.remove('visually-hidden');
 
             firewall_btn.addEventListener('click', () => {
                 if (lock) return; lock = true;

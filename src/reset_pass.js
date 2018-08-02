@@ -55,6 +55,12 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
             document.addEventListener('keyup', e => {
                 if (e.keyCode === 13 && !InputValidator.isEmpty(acc_rst_pass_btn)) acc_rst_pass_btn.click();
             });
+
+            acc_login_btn.addEventListener('click', () => {
+                if (lock) return; lock = true;
+                location.replace('/login');
+                lock = false
+            });
     
             acc_rst_pass_btn.addEventListener('click', () => {
                 if (lock) return; lock = true;
@@ -80,8 +86,10 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                         span.innerHTML = 'Your password has been reset.';
                     form_holder_container.appendChild(span);
 
-                    acc_rst_pass_btn.style.display = 'none';
-                    acc_login_btn.style.display = 'block';
+                    if (!acc_rst_pass_btn.classList.contains('visually-hidden'))
+                        acc_rst_pass_btn.classList.add('visually-hidden');
+                    acc_login_btn.classList.remove('visually-hidden');
+                    lock = false;
                     // location.replace('/');
                 }).catch(error => {
                     console.log(`Error while updating password: ${error}`);
