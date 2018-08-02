@@ -375,14 +375,18 @@ firebase.auth().onAuthStateChanged(user => {
 
         if (!user.emailVerified) {
             rule_add_btn.disabled = true;
-            document.getElementsByClassName('firewall-rule__button--delete')
-            .forEach(delBtn => {
-                delBtn.disabled = true;
-            });
-            document.getElementsByClassName('firewall-rule__button--edit')
-            .forEach(btn => {
-                btn.disabled = true;
-            });
+            if (!InputValidator.isEmpty(document.querySelectorAll('.firewall-rule__button--delete'))) {
+                document.querySelectorAll('.firewall-rule__button--delete')
+                .forEach(delBtn => {
+                    delBtn.disabled = true;
+                });
+            }
+            if (!InputValidator.isEmpty(document.querySelectorAll('.firewall-rule__button--edit'))) {
+                document.querySelectorAll('.firewall-rule__button--edit')
+                .forEach(btn => {
+                    btn.disabled = true;
+                });
+            }
             global_submit_btn.disabled = true;
         }
 
