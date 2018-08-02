@@ -2,6 +2,7 @@ const express = require('express');
 const firebase = require('firebase');
 const axios = require('axios');
 const cors = require('cors')({ origin: true });
+const path = require('path');
 // const bodyParser = require('body-parser');
 const config = {
     apiKey: "AIzaSyCUJp0rD0b9nNgA5pn4WOXtZr6mM4PxQp8",
@@ -30,6 +31,21 @@ function datestring() {
 }
 const dateString = new Date().toString();
 console.log(`Timezone: ${dateString.substring(dateString.indexOf("GMT"))}`);
+
+app.set('view engine', 'pug')
+app.get('/blocked', (req, res) => {
+  res.redirect('http://localhost:3000/b?reason=' + encodeURIComponent(req.query.reason));
+});
+
+app.get("/b", (req, res) => {
+  res.render("blocked", {
+    "reason" : req.query.reason
+  });
+});
+
+app.get("/images/:picture", (req, res) => {
+    res.sendFile(__dirname + "/images/" + req.params.picture)
+});
 
 app.post('/login', (request, response) => {
     // TODO: Check if user has verified phone number
