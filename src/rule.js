@@ -55,6 +55,20 @@ firebase.auth().onAuthStateChanged(user => {
         const rule_create_dport = document.getElementById('rule--dest-port');
         const rule_create_direction = document.getElementById('rule--direction');
         const rule_create_btn = document.getElementById('rule-button--update');
+
+        if (!user.emailVerified) {
+            rule_create_name.disabled = true;
+            rule_create_access.disabled = true;
+            rule_create_proto_inputs.disabled = true;
+            rule_create_priority.disabled = true;
+            rule_create_sip.disabled = true;
+            rule_create_sport.disabled = true;
+            rule_create_dip.disabled = true;
+            rule_create_dport.disabled = true;
+            rule_create_direction.disabled = true;
+            rule_create_btn.disabled = true;
+            UIUtils.showSnackbar('Please verify your email before you proceed to manage your firewall proxy.');
+        }
         
         var checkAllInputs = function () {
             UIUtils.update_text_field_ui(rule_create_name, 

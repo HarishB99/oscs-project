@@ -31,7 +31,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
 
         acc_rst_pass_btn.addEventListener('click', () => {
             if (lock) return; lock = true;
-            location.href = '/reset_password';
+            location.href = '/forgot_password';
             lock = false;
         });
         

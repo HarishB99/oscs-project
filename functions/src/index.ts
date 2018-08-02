@@ -42,14 +42,14 @@ app.get('/edit_rule/:token', async (request, response) => {
         const rule_snapshot = await rule_ref.get();
 
         if (!rule_snapshot.exists) {
-            await log(logger.getRuleRequestFailure(request, uid, ErrorCode.RULE.NOT_FOUND, admin.firestore.FieldValue.serverTimestamp()));
+            await log(logger.getRuleRequestFailure(request, '/edit_rule', uid, ErrorCode.RULE.NOT_FOUND, admin.firestore.FieldValue.serverTimestamp()));
             response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
         } else {
             const rule = rule_snapshot.data() as RuleInput;
 
             fs.readFile(path.resolve(__dirname, '../edit_rule.html'), 'utf8', async (error, data) => {
                 if (error) {
-                    await log(logger.getRuleRequestFailure(request, uid, 'HTML Page Not Found Corresponding to URL Not Found', admin.firestore.FieldValue.serverTimestamp()));
+                    await log(logger.getRuleRequestFailure(request, '/edit_rule', uid, 'HTML Page Not Found Corresponding to URL Not Found', admin.firestore.FieldValue.serverTimestamp()));
                     response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
                 } else {
                     const html = data;
@@ -77,13 +77,13 @@ app.get('/edit_rule/:token', async (request, response) => {
                     const direction = rule.direction ? ' checked' : '';
                     const edit_rule = protocol_filled.replace('::DIRECTION::', direction);
     
-                    await log(logger.getRuleRequestSuccess(request, uid, admin.firestore.FieldValue.serverTimestamp()));
+                    await log(logger.getRuleRequestSuccess(request, '/edit_rule', uid, admin.firestore.FieldValue.serverTimestamp()));
                     response.send(edit_rule);
                 }
             });
         }
     } catch (error) {
-        await log(logger.getRuleRequestFailure(request, null, error, admin.firestore.FieldValue.serverTimestamp()));
+        await log(logger.getRuleRequestFailure(request, '/edit_rule', null, error, admin.firestore.FieldValue.serverTimestamp()));
         console.error(`Error while serving GET request for /edit_rule: ${error}`);
         response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
     }
@@ -98,14 +98,14 @@ app.get('/delete_rule/:token', async (request, response) => {
         const rule_snapshot = await rule_ref.get();
 
         if (!rule_snapshot.exists) {
-            await log(logger.getRuleRequestFailure(request, uid, ErrorCode.RULE.NOT_FOUND, admin.firestore.FieldValue.serverTimestamp()));
+            await log(logger.getRuleRequestFailure(request, '/delete_rule', uid, ErrorCode.RULE.NOT_FOUND, admin.firestore.FieldValue.serverTimestamp()));
             response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
         } else {
             const { name } = rule_snapshot.data() as RuleInput;
     
             fs.readFile(path.resolve(__dirname, '../delete_rule.html'), 'utf8', async (error, data) => {
                 if (error) {
-                    await log(logger.getRuleRequestFailure(request, uid, 'HTML Page Not Found Corresponding to URL Not Found', admin.firestore.FieldValue.serverTimestamp()));
+                    await log(logger.getRuleRequestFailure(request, '/delete_rule', uid, 'HTML Page Not Found Corresponding to URL Not Found', admin.firestore.FieldValue.serverTimestamp()));
                     response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
                 } else {
                     const html = data;
@@ -113,15 +113,72 @@ app.get('/delete_rule/:token', async (request, response) => {
                     const id_filled = html.replace('::ID::', rule_snapshot.id);
                     const name_filled = id_filled.replace('::NAME::', name);
                     
-                    await log(logger.getRuleRequestSuccess(request, uid, admin.firestore.FieldValue.serverTimestamp()));
+                    await log(logger.getRuleRequestSuccess(request, '/delete_rule', uid, admin.firestore.FieldValue.serverTimestamp()));
                     response.send(name_filled);
                 }
             });
         }
     } catch (error) {
-        await log(logger.getRuleRequestFailure(request, null, error, admin.firestore.FieldValue.serverTimestamp()));
+        await log(logger.getRuleRequestFailure(request, '/delete_rule', null, error, admin.firestore.FieldValue.serverTimestamp()));
         console.error(`Error while serving GET request for /delete_rule: ${error}`);
         response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html')));
+    }
+});
+
+app.get('/account', async (request, response) => {
+    try {
+        const { mode, oobCode } = request.query;
+
+        switch(mode) {
+            case 'resetPassword':
+                fs.readFile(path.resolve(__dirname, '../reset_pass.html'), 'utf8', async (err, data) => {
+                    if (err) {
+                        throw new Error('File not found');
+                        response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
+                    } else {
+                        const html = data;
+                        const finalHtml = html.replace('::CODE::', oobCode);
+                        response.send(finalHtml);
+                    }
+                });
+                break;
+            case 'recoverEmail':
+                fs.readFile(path.resolve(__dirname, '../recover_email.html'), 'utf8', async (err, data) => {
+                    if (err) {
+                        throw new Error('File not found');
+                        response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
+                    } else {
+                        const html = data;
+                        const finalHtml = html.replace('::CODE::', oobCode);
+                        response.send(finalHtml);
+                    }
+                });
+                break;
+            case 'verifyEmail':
+                fs.readFile(path.resolve(__dirname, '../verify_email.html'), 'utf8', async (err, data) => {
+                    if (err) {
+                        throw new Error('File not found');
+                        response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
+                    } else {
+                        const html = data;
+                        const finalHtml = html.replace('::CODE::', oobCode);
+                        response.send(finalHtml);
+                    }
+                });
+                break;
+            default:
+                throw new Error('Invalid mode received');
+                response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
+                break;
+        }
+
+        // TODO: Replace html with oobCode
+        // TODO: Replace html with necessary html for the relevant actions
+        // TODO: Perform logging
+    } catch (error) {
+        await log(logger.emailHandlerFailure('/account', admin.firestore.FieldValue.serverTimestamp(), error));
+        console.error(`Error while handling email action: ${error}`);
+        response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
     }
 });
 

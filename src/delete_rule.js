@@ -49,6 +49,11 @@ firebase.auth().onAuthStateChanged(user => {
         const rule_delete_name = document.getElementById('rule--name');
         const rule_delete_btn = document.getElementById('rule-button--delete');
 
+        if (!user.emailVerified) {
+            rule_delete_name.disabled = true;
+            UIUtils.showSnackbar('Please verify your email before you proceed to manage your firewall proxy.');
+        }
+
         rule_delete_btn.disabled = true;
 
         var checkAllInputs = function() {

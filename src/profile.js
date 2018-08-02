@@ -55,67 +55,32 @@ firebase.auth().onAuthStateChanged(user => {
         const acc_prof_email = document.getElementById("account-profile--display-email");
         const acc_prof_email_btn = document.getElementById("account-profile--btn-email");
         const acc_prof_rst_pass_btn = document.getElementById('account-profile--btn-rst-pass');
+
+        if (!user.emailVerified) {
+            acc_prof_email_btn.disabled = true;
+            acc_prof_rst_pass_btn.disabled = true;
+            UIUtils.showSnackbar('Please verify your email before you proceed to manage your profile.');
+        }
         
         acc_prof_email_btn.addEventListener('click', () => {
             if (lock) return; lock = true;
-
             location.href = '/reset_email';
-
-            // user.getIdToken(true)
-            // .then(token => {
-            //     // return axios({
-            //     //     url: '/reset_email',
-            //     //     method: 'POST',
-            //     //     headers: {
-            //     //         'Authorisation': `Bearer ${token}`
-            //     //     }
-            //     // });
-            // }).catch(error => {
-            //     console.error(`Error while sending reset_email request to server: ${error}`);
-            //     UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
-            //     lock = false;
-            // });
-
-            // checkAllInputs();
-            
-            // if (UIUtils.stillAnyInvalid()) return;
-
-            // user.updateEmail(acc_prof_email.value)
-            // .then(() => { lock = false; })
-            // .catch(error => {
-            //     console.error(`Error while updating user's email: ${error}`);
-            //     UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
-            //     lock = false;
-            // });
-            // lock = false;
+            lock = false;
         })
 
         acc_prof_rst_pass_btn.addEventListener('click', () => {
             if (lock) return; lock = true;
 
-            location.href = '/reset_password';
-
-            // user.getIdToken(true)
-            // .then(token => {
-            //     location.href = '/reset_password'
-            //     // return axios({
-            //     //     url: '/reset_pass',
-            //     //     method: 'POST',
-            //     //     headers: {
-            //     //         'Authorisation': `Bearer ${token}`
-            //     //     }
-            //     // });
-            // })
-            // .catch(error => {
-            //     console.error(`Error while sending reset_email request to server: ${error}`);
-            //     UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
-            //     lock = false;
-            // });
-
-            // firebase.auth().sendPasswordResetEmail(user.email);
-            
-            // user.updatePassword();
-            // lock = false;
+            firebase.auth().sendPasswordResetEmail(user.email)
+            .then(() => {
+                UIUtils.showSnackbar('An email has been sent your email. Please click on the link to reset your password.');
+                lock = false;
+            })
+            .catch(error => {
+                console.log(`Error while sending password reset email: ${error}`);
+                UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                lock = false;
+            });
         });
         
         var displayProfile = function(user) {
