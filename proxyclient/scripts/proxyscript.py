@@ -4,7 +4,7 @@ from db import LogDatabase
 from checkedDomains import CheckedDomains
 from iptableSetup import IptablesHandler
 from windowsFirewallHandler import WindowsFirewallHandler
-import subprocess, json, requests, atexit, sys, time, os, urllib
+import subprocess, json, requests, atexit, sys, time, os, urllib, tldextract
 
 text_clf = None
 options = {
@@ -60,6 +60,7 @@ atexit.register(mongoServerP.terminate)
 checkedDomains = {}
 apiKeys = None
 log = None
+extract = tldextract.TLDExtract(suffix_list_urls=None)
 with open("../data/apiKeys.json", "r") as f:
     apiKeys = json.loads(f.read())
 
@@ -140,7 +141,9 @@ def load(l):
             blockedDomains["exclude"].add(domain2)
 
 def request(flow):
-    d = flow.request.pretty_host
+    fullDomain = extract(flow.request.pretty_host)
+    d = '.'.join([fullDomain.domain, fullDomain.suffix])
+    #d = flow.request.pretty_host
     if (d == 'api.mywot.com' or d == 'safebrowsing.googleapis.com'):
         return
 
@@ -257,8 +260,10 @@ def request(flow):
 
 
 def response(flow):
-    #check images using header
-    d = flow.request.pretty_host
+    #remove subdomain
+    fullDomain = extract(flow.request.pretty_host)
+    d = '.'.join([fullDomain.domain, fullDomain.suffix])
+
     ip = flow.client_conn.ip_address[0][7:]
     if flow.response.headers.get("content-type", "").startswith("image"):
         () #TODO:: check images (may abondon for performance reasons)
