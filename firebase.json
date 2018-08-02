@@ -47,6 +47,10 @@
         "destination": "/contents/accounts/profile.html"
       },
       {
+        "source": "/forgot_password",
+        "destination": "/contents/accounts/forgot_password.js"
+      },
+      {
         "source": "**",
         "function": "web_app"
       }
