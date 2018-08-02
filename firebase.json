@@ -43,10 +43,6 @@
         "destination": "/contents/accounts/reset_email.html"
       },
       {
-        "source": "/reset_password",
-        "destination": "/contents/accounts/reset_password.html"
-      },
-      {
         "source": "/profile",
         "destination": "/contents/accounts/profile.html"
       },

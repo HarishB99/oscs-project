@@ -125,6 +125,58 @@ app.get('/delete_rule/:token', async (request, response) => {
     }
 });
 
+app.get('/account', async (request, response) => {
+    try {
+        const { mode, oobCode } = request.query;
+
+        switch(mode) {
+            case 'resetPassword':
+                fs.readFile(path.resolve(__dirname, '../reset_pass.html'), 'utf8', (err, data) => {
+                    if (err) {
+                        response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
+                    } else {
+                        const html = data;
+                        const finalHtml = html.replace('::CODE::', oobCode);
+                        response.send(finalHtml);
+                    }
+                });
+                break;
+            case 'recoverEmail':
+                fs.readFile(path.resolve(__dirname, '../recover_email.html'), 'utf8', (err, data) => {
+                    if (err) {
+                        response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
+                    } else {
+                        const html = data;
+                        const finalHtml = html.replace('::CODE::', oobCode);
+                        response.send(finalHtml);
+                    }
+                });
+                break;
+            case 'verifyEmail':
+                fs.readFile(path.resolve(__dirname, '../verify_email.html'), 'utf8', (err, data) => {
+                    if (err) {
+                        response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
+                    } else {
+                        const html = data;
+                        const finalHtml = html.replace('::CODE::', oobCode);
+                        response.send(finalHtml);
+                    }
+                });
+                break;
+            default:
+                response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
+                break;
+        }
+
+        // TODO: Replace html with oobCode
+        // TODO: Replace html with necessary html for the relevant actions
+        // TODO: Perform logging
+    } catch (error) {
+        console.error(`Error while handling email action: ${error}`);
+        response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
+    }
+});
+
 /**
  * The following is a test app to test CORS
  */

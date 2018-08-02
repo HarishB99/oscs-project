@@ -87,13 +87,23 @@ firebase.auth().onAuthStateChanged(user => {
             //     UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
             //     lock = false;
             // });
-            // lock = false;
+            lock = false;
         })
 
         acc_prof_rst_pass_btn.addEventListener('click', () => {
             if (lock) return; lock = true;
 
-            location.href = '/reset_password';
+            firebase.auth().sendPasswordResetEmail(user.email)
+            .then(() => {
+                UIUtils.showSnackbar('An email has been sent your email. Please click on the link to reset your password.');
+                lock = false;
+            })
+            .catch(error => {
+                console.log(`Error while sending password reset email: ${error}`);
+                UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                lock = false;
+            });
+            // location.href = '/reset_password';
 
             // user.getIdToken(true)
             // .then(token => {

@@ -21,7 +21,7 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Reset Password | Account</title>
+    <title>Email Verification | Account</title>
 
     <!-- TODO: Set up PWA/AMP when possible -->
     <!-- Add to homescreen for Chrome on Android -->
@@ -72,6 +72,14 @@
         a {
             cursor: pointer;
         }
+        .login__supporting-text {
+            /* margin: auto; */
+            text-align: center;
+            font-size: 1.1em;
+        }
+        #buttons-holder {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -80,7 +88,7 @@
         <header class="mdl-layout__header">
             <div class="mdl-layout__header-row">
                 <!-- Title -->
-                <span class="mdl-layout-title">Firegate-101 Reset Password</span>
+                <span class="mdl-layout-title">Firegate-101 Verify Email</span>
             </div>
         </header>
         <!-- <div class="mdl-layout__drawer">
@@ -93,37 +101,23 @@
         </div> -->
         <main class="mdl-layout__content">
             <div class="page-content">
+                <div class="id" id="::CODE::"></div>
+                <p class="login__supporting-text mdl-color-text--amber">
+                    Email Verification: <span id="account-rst-pass--status">Pending</span>
+                </p>
                 <!-- Wide card with share menu button -->
                 <div class="card-wide mdl-card mdl-shadow--2dp">
                     <div class="form-holder">
                         <div class="mdl-card__title">
-                            <h2 class="mdl-card__title-text">Reset Password</h2>
+                            <h2 class="mdl-card__title-text">Verify Email</h2>
                         </div>
-                        <div class="mdl-card__supporting-text">
-                            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                <input class="mdl-textfield__input" type="password" id="account-rst-pass--password" autofocus autocomplete="off" tabindex="1">
-                                <label class="mdl-textfield__label" for="account-rst-pass--password">Old Password...</label>
-                                <span class="mdl-textfield__error">Please enter a valid password</span>
-                            </div>
-                            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                <input class="mdl-textfield__input" type="password" id="account-rst-pass--new-password" autofocus autocomplete="off" tabindex="1">
-                                <label class="mdl-textfield__label" for="account-rst-pass--new-password">New Password...</label>
-                                <span class="mdl-textfield__error">Please enter a valid strong password (Hover over input field to learn about password strength)</span>
-                                <div class="mdl-tooltip mdl-tooltip--large" for="account-rst-pass--new-password">
-                                    Minimum be at least 8 characters long, must have at least 2 capital letter, 2 small letter, 2 number and 1 special character
-                                </div>
-                            </div>
-                            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                <input class="mdl-textfield__input" type="password" id="account-rst-pass--new-password2" autocomplete="off" tabindex="2">
-                                <label class="mdl-textfield__label" for="account-rst-pass--new-password2">Confirm Password...</label>
-                                <span class="mdl-textfield__error">Please enter the new password you entered above, which should not be empty.</span>
-                            </div>
+                        <div id="form-holder--container" class="mdl-card__supporting-text">
                         </div>
                     </div>
-                    <div class="mdl-layout__header-row mdl-card__actions mdl-card--border">
+                    <div id="buttons-holder" class="mdl-layout__header-row mdl-card__actions mdl-card--border">
                         <div class="mdl-layout-spacer"></div>
-                        <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect account-rst-pass--button-submit" id="account-rst-pass--button-submit" tabindex="5">
-                            Next
+                        <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect account-firewall--button" id="account-firewall--button" tabindex="5">
+                            Proceed to Dashboard
                         </button>
                     </div>
                 </div>
@@ -134,6 +128,6 @@
             </div>
         </main>
     </div>
-    <script async defer src="/scripts/reset_pass.js"></script>
+    <script async defer src="/scripts/verify_email.js"></script>
 </body>
 </html>
