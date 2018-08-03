@@ -47,6 +47,22 @@ app.get("/images/:picture", (req, res) => {
     res.sendFile(__dirname + "/images/" + req.params.picture)
 });
 
+app.get("/logs", (req, res) => {
+  var MongoClient = require('mongodb').MongoClient;
+  var url = "mongodb://localhost:27017/";
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var logdb = db.db("logDatabase");
+    var usersCol = logdb.collection("users");
+    var log = usersCol.find({})
+
+    res.render("logs", {
+      "logs" : log
+    });
+    db.close();
+  });
+});
+
 app.post('/login', (request, response) => {
     // TODO: Check if user has verified phone number
     // and email. If no, can do nothing. Else, can

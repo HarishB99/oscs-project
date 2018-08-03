@@ -4,7 +4,7 @@ from db import LogDatabase
 from checkedDomains import CheckedDomains
 from iptableSetup import IptablesHandler
 from windowsFirewallHandler import WindowsFirewallHandler
-import subprocess, json, requests, atexit, sys, time, os, urllib, tldextract
+import subprocess, json, requests, atexit, sys, time, os, urllib, tldextract, hashlib
 
 text_clf = None
 options = {
@@ -115,7 +115,7 @@ def load(l):
         options["block-malicious"] = True
     else:
         options["block-malicious"] = False
-    if "blockChildUnsafe" not in r or r["blockChildUnsafe"]:
+    if "childSafety" not in rules or rules["childSafety"]:
         options["block-child-unsafe"] = True
     else:
         options["block-child-unsafe"] = False
@@ -127,13 +127,13 @@ def load(l):
     #get domain groups
     if "domainGroups" in r: addDomainGroup(r["domainGroups"])
     #add user-defined domains
-    if "domains" in r:
-        for domain in r["domains"]:
+    if "blacklist" in r:
+        for domain in r["blacklist"]:
             full = extract(domain)
             d = '.'.join([full.domain, full.suffix])
             blockedDomains["user"].add(d)
-    if "exclude" in r:
-        for domain2 in r["exclude"]:
+    if "whitelist" in r:
+        for domain2 in r["whitelist"]:
             full2 = extract(domain2)
             d2 = '.'.join([full2.domain, full2.suffix])
             blockedDomains["exclude"].add(d2)
@@ -287,13 +287,31 @@ def response(flow):
                         flow.response = http.HTTPResponse.make(
                             418, "Malicious file detected"
                         )
-                else:
-                    #no record
-                    flow.response = http.HTTPResponse.make(
-                        418, "Unknown download"
-                    )
-            else: #failed connection for whatever reason, just stop download
-                flow.kill()
+                else:#url not recognized, trying out file hash
+                    hasher = hashlib.sha256()
+                    hasher.update(flow.response.content)
+                    hash = hasher.hexdigest()
+                    params2 = {'apikey': apiKeys["virusTotal"], 'resource': hash}
+                    headers2 = {
+                        "Accept-Encoding": "gzip, deflate",
+                    }
+                    response2 = requests.get('https://www.virustotal.com/vtapi/v2/file/report',
+                      params=params2, headers=headers2)
+                    json_response = response2.json()
+                    if "positives" in json_response:
+                        if json_response["positives"] <= 0: #safe
+                            print("SAFE DOWNLOAD - VIA HASH")
+                            LogDatabase.downloadFile(ip, d, flow.request.url, True)
+                        else:#unasfe
+                            print("UNSAFE DOWNLOAD - HASH CHECK")
+                            LogDatabase.downloadFile(ip, d, flow.request.url, False)
+                            flow.response = http.HTTPResponse.make(
+                                418, "Malicious file detected"
+                            )
+                    else: #still no record
+                        () #Do nothing. I can't think of a good way to use their api
+            else: #failed connection, possibly over the api limit
+                () #do nothing
     else:
         #html text
         () #do nothing
