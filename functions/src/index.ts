@@ -133,7 +133,6 @@ app.get('/account', async (request, response) => {
                 fs.readFile(path.resolve(__dirname, '../reset_pass.html'), 'utf8', async (err, data) => {
                     if (err) {
                         throw new Error('File not found');
-                        response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
                     } else {
                         const html = data;
                         const finalHtml = html.replace('::CODE::', oobCode);
@@ -145,7 +144,6 @@ app.get('/account', async (request, response) => {
                 fs.readFile(path.resolve(__dirname, '../recover_email.html'), 'utf8', async (err, data) => {
                     if (err) {
                         throw new Error('File not found');
-                        response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
                     } else {
                         const html = data;
                         const finalHtml = html.replace('::CODE::', oobCode);
@@ -157,7 +155,6 @@ app.get('/account', async (request, response) => {
                 fs.readFile(path.resolve(__dirname, '../verify_email.html'), 'utf8', async (err, data) => {
                     if (err) {
                         throw new Error('File not found');
-                        response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
                     } else {
                         const html = data;
                         const finalHtml = html.replace('::CODE::', oobCode);
@@ -167,13 +164,8 @@ app.get('/account', async (request, response) => {
                 break;
             default:
                 throw new Error('Invalid mode received');
-                response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
                 break;
         }
-
-        // TODO: Replace html with oobCode
-        // TODO: Replace html with necessary html for the relevant actions
-        // TODO: Perform logging
     } catch (error) {
         await log(logger.emailHandlerFailure('/account', admin.firestore.FieldValue.serverTimestamp(), error));
         console.error(`Error while handling email action: ${error}`);
@@ -206,16 +198,12 @@ app.post('/rule-create', async (request, response) => {
         } else {
             // Check whether user has already created 
             // a similar rule
-            const [ ruleWithSamePriority, ruleWithSameName ] = await Promise.all([
-                db.collection(`/users/${uid}/rules`)
-                    .where('priority', '==', input.priority)
-                .get(), 
-                db.collection(`/users/${uid}/rules`)
-                    .where('name', '==', input.name)
-                .get()
-            ]);
+            const ruleWithSameNameAndPriority = await db.collection(`/users/${uid}/rules`)
+                .where('priority', '==', input.priority)
+                .where('name', '==', input.name)
+            .get();
             
-            if (!ruleWithSameName.empty && !ruleWithSamePriority.empty) {
+            if (!ruleWithSameNameAndPriority.empty) {
                 await log(logger.ruleCreateFailure(request, uid, ErrorCode.RULE.ALREADY_EXIST, admin.firestore.FieldValue.serverTimestamp(), input));
                 response.send(ErrorCode.RULE.ALREADY_EXIST);
             } else {
@@ -256,19 +244,15 @@ app.post('/rule-update', async (request, response) => {
             await log(logger.ruleUpdateFailure(request, uid, ErrorCode.RULE.BAD_DATA, admin.firestore.FieldValue.serverTimestamp(), input));
             response.send(ErrorCode.RULE.BAD_DATA);
         } else {
-            const [ ruleWithSamePriority, ruleWithSameName ] = await Promise.all([
-                db.collection(`/users/${uid}/rules`)
-                    .where('priority', '==', input.priority)
-                .get(), 
-                db.collection(`/users/${uid}/rules`)
-                    .where('name', '==', input.name)
-                .get()
-            ]);
+            const ruleWithSameNameAndPriority = await db.collection(`/users/${uid}/rules`)
+                .where('priority', '==', input.priority)
+                .where('name', '==', input.name)
+            .get();
 
             const ruleRef = db.doc(`/users/${uid}/rules/${id}`);
             const rule = await ruleRef.get();
 
-            if (!ruleWithSameName.empty && !ruleWithSamePriority.empty) {
+            if (!ruleWithSameNameAndPriority.empty) {
                 await log(logger.ruleCreateFailure(request, uid, ErrorCode.RULE.ALREADY_EXIST, admin.firestore.FieldValue.serverTimestamp(), input));
                 response.send(ErrorCode.RULE.ALREADY_EXIST);
             } else if (!rule.exists) {
