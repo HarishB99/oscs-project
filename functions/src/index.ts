@@ -215,7 +215,7 @@ app.post('/rule-create', async (request, response) => {
                 .get()
             ]);
             
-            if (!ruleWithSameName.empty || !ruleWithSamePriority.empty) {
+            if (!ruleWithSameName.empty && !ruleWithSamePriority.empty) {
                 await log(logger.ruleCreateFailure(request, uid, ErrorCode.RULE.ALREADY_EXIST, admin.firestore.FieldValue.serverTimestamp(), input));
                 response.send(ErrorCode.RULE.ALREADY_EXIST);
             } else {
@@ -256,13 +256,25 @@ app.post('/rule-update', async (request, response) => {
             await log(logger.ruleUpdateFailure(request, uid, ErrorCode.RULE.BAD_DATA, admin.firestore.FieldValue.serverTimestamp(), input));
             response.send(ErrorCode.RULE.BAD_DATA);
         } else {
+            const [ ruleWithSamePriority, ruleWithSameName ] = await Promise.all([
+                db.collection(`/users/${uid}/rules`)
+                    .where('priority', '==', input.priority)
+                .get(), 
+                db.collection(`/users/${uid}/rules`)
+                    .where('name', '==', input.name)
+                .get()
+            ]);
+
             const ruleRef = db.doc(`/users/${uid}/rules/${id}`);
             const rule = await ruleRef.get();
 
-            if (!rule.exists) {
+            if (!ruleWithSameName.empty && !ruleWithSamePriority.empty) {
+                await log(logger.ruleCreateFailure(request, uid, ErrorCode.RULE.ALREADY_EXIST, admin.firestore.FieldValue.serverTimestamp(), input));
+                response.send(ErrorCode.RULE.ALREADY_EXIST);
+            } else if (!rule.exists) {
                 await log(logger.ruleUpdateFailure(request, uid, ErrorCode.RULE.NOT_FOUND, admin.firestore.FieldValue.serverTimestamp(), input));
                 response.send(ErrorCode.RULE.NOT_FOUND);
-            } else {
+            }  else {
                 const writeResult = await ruleRef.set({
                     name: input.name,
                     access: input.access,
