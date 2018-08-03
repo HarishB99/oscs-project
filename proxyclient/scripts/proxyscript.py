@@ -50,7 +50,7 @@ with open("../data/proxy.config") as proxyConfigFile:
     config = json.load(proxyConfigFile)
 
 #spin up mongo server
-mongoServerP = subprocess.Popen([config["mongo"]],
+mongoServerP = subprocess.Popen([config["mongo"], "--dbpath", "../data/mongodb"],
     creationflags=subprocess.CREATE_NEW_CONSOLE)
 #close mongo server on exit
 import atexit
@@ -94,13 +94,6 @@ def load(l):
         time.sleep(3) #wait a while for node client to load rules
         policyRequest = requests.get('http://localhost:3000/rules.json')
         policyJson = policyRequest.json()
-
-        #firewall rules formatting
-        policyJson["firewallRules"] = policyJson.pop("rules")
-        firewallRules = policyJson["firewallRules"]
-        for firewallRule in firewallRules:
-            firewallRule["allow"] = firewallRule.pop("access")
-
         rules = policyJson
 
     print(json.dumps(rules, indent=4))
@@ -122,23 +115,28 @@ def load(l):
         options["block-malicious"] = True
     else:
         options["block-malicious"] = False
+    if "blockChildUnsafe" not in r or r["blockChildUnsafe"]:
+        options["block-child-unsafe"] = True
+    else:
+        options["block-child-unsafe"] = False
+    if "virusScan" not in rules or rules["virusScan"]:
+        options["virus-scan"] = True
+    else:
+        options["virus-scan"] = False
 
     #get domain groups
     if "domainGroups" in r: addDomainGroup(r["domainGroups"])
     #add user-defined domains
     if "domains" in r:
         for domain in r["domains"]:
-            if "http://" in domain: domain = domain.replace("http://", "")
-            if "https://" in domain : domain = domain.replace("https://", "")
-            blockedDomains["user"].add(domain)
-            if "www." in domain: blockedDomains["user"].add(domain.replace("www.", ""))
+            full = extract(domain)
+            d = '.'.join([full.domain, full.suffix])
+            blockedDomains["user"].add(d)
     if "exclude" in r:
         for domain2 in r["exclude"]:
-            if "http://" in domain2: domain2 = domain.replace("http://", "")
-            if "https://" in domain2 : domain2 = domain.replace("https://", "")
-            if "www." not in domain2:
-                blockedDomains["exclude"].add('www.'+domain2)
-            blockedDomains["exclude"].add(domain2)
+            full2 = extract(domain2)
+            d2 = '.'.join([full2.domain, full2.suffix])
+            blockedDomains["exclude"].add(d2)
 
 def request(flow):
     fullDomain = extract(flow.request.pretty_host)
@@ -214,17 +212,18 @@ def request(flow):
 
 
             #check api call results
-
-            if "childSafety" in results:
-                if results["childSafety"] < options["block-child-unsafe-level"] and \
-                 results["childSafety-confidence"] >= 5:
-                    CheckedDomains.add(d, False, "Blocked by policy (child safety)", False)
-                    LogDatabase.securityEvent(ip, d, "childUnsafe")
-            if "trustworthiness" in results:
-                if results["trustworthiness"] < options["block-suspicious-level"] and \
-                 results["trustworthiness-confidence"] > 30:
-                    CheckedDomains.add(d, False, "Blocked by policy (suspicious)", False)
-                    LogDatabase.securityEvent(ip, d, "suspiciousDomain")
+            if options["block-child-unsafe"]:
+                if "childSafety" in results:
+                    if results["childSafety"] < options["block-child-unsafe-level"] and \
+                     results["childSafety-confidence"] >= 5:
+                        CheckedDomains.add(d, False, "Blocked by policy (child safety)", False)
+                        LogDatabase.securityEvent(ip, d, "childUnsafe")
+            if options["block-malicious"]:
+                if "trustworthiness" in results:
+                    if results["trustworthiness"] < options["block-suspicious-level"] and \
+                     results["trustworthiness-confidence"] > 30:
+                        CheckedDomains.add(d, False, "Blocked by policy (suspicious)", False)
+                        LogDatabase.securityEvent(ip, d, "suspiciousDomain")
             for cat in results["categories"]:
                 if cat[0][0] == "1" and int(cat[1]) > 90:
                     CheckedDomains.add(d, False, "Blocked by policy (" + category[cat[0]])
@@ -252,7 +251,6 @@ def request(flow):
             r = ""
             for reason in sc["reason"]:
                 r += reason
-            #flow.response = http.HTTPResponse.make(418, b)
             b = {"reason" : r}
             flow.request.url = "http://localhost:3000/blocked?" + urllib.parse.urlencode(b)
     else:
@@ -272,27 +270,30 @@ def response(flow):
     elif flow.response.headers.get("content-type", "").startswith("application/octet-stream") or \
      flow.response.headers.get("content-disposition", "").startswith("attachment") or \
      "x-msdownload" in flow.response.headers.get("content-type", ""): #downloaded files
-        #scan url for viruses
-        params = {'apikey': apiKeys["virusTotal"], 'resource': flow.request.url}
-        response = requests.post('https://www.virustotal.com/vtapi/v2/url/report',
-          params=params)
-        if response.status_code == 200:
-            vtJson = response.json()
-            if "positives" in vtJson:
-                if vtJson["positives"] <= 0:
-                    #log downloaded file event
-                    LogDatabase.downloadFile(ip, d, flow.request.url, True)
+        if options["virus-scan"]:
+            #scan url for viruses
+            params = {'apikey': apiKeys["virusTotal"], 'resource': flow.request.url}
+            response = requests.post('https://www.virustotal.com/vtapi/v2/url/report',
+              params=params)
+            if response.status_code == 200:
+                vtJson = response.json()
+                if "positives" in vtJson:
+                    if vtJson["positives"] <= 0:
+                        #log downloaded file event
+                        LogDatabase.downloadFile(ip, d, flow.request.url, True)
+                    else:
+                        #not safe, stop download
+                        LogDatabase.downloadFile(ip, d, flow.request.url, False)
+                        flow.response = http.HTTPResponse.make(
+                            418, "Malicious file detected"
+                        )
                 else:
-                    #not safe, stop download
-                    LogDatabase.downloadFile(ip, d, flow.request.url, False)
+                    #no record
                     flow.response = http.HTTPResponse.make(
-                        418, "Malicious file detected"
+                        418, "Unknown download"
                     )
-            else:
-                #no record
-                ()
-        else: #failed connection for whatever reason, just stop download
-            flow.kill()
+            else: #failed connection for whatever reason, just stop download
+                flow.kill()
     else:
         #html text
         () #do nothing

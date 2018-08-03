@@ -65,6 +65,7 @@
     "mode": "blacklist",
     "blockAds": true,
     "blockMalicious": true,
+    "blockChildUnsafe": true,
     "domainGroups" : ["socialMedia"],
     "domains": [],
     "exclude": [
@@ -72,5 +73,5 @@
     ]
   },
   "dpi" : true,
-  "virusScan" : true
+  "virusScan" : true,
 }
