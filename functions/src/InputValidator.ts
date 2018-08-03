@@ -8,8 +8,6 @@ import { FilterInput } from "./FilterInput";
  * @author Harish S/O Balamurugan
  */
 export class InputValidator {
-    private readonly TLDS = "";
-
     /**
      * Check whether the input is empty
      * @param input the string input to be validated
