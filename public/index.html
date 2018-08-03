@@ -382,6 +382,9 @@
         a, th.sort {
             cursor: pointer;
         }
+        #web-filter__white-list--title {
+            margin-top: 2.5%;
+        }
         /*
             Source code for .mdl-button--floating-action 
             from https://github.com/google/material-design-lite/issues/901
@@ -486,25 +489,51 @@
                             </div>
                             <div class="mdl-card__supporting-text">
                                 <div class="web-filter__table--holder mdl-grid">
-                                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--12-col" for="web-filter__mode">
+                                    <!-- <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell mdl-cell--12-col" for="web-filter__mode">
                                         <input type="checkbox" id="web-filter__mode" class="mdl-switch__input web-filter__mode" checked>
                                         <span class="mdl-switch__label">Filter Using Whitelist</span>
-                                    </label>
+                                    </label> -->
+                                    <div class="mdl-typography--title mdl-color-text--red">
+                                        Domains to be blocked
+                                    </div>
                                     <div class="mdl-cell mdl-cell--12-col">
-                                        <div id="web-filter__domain--holder" class="mdl-textfield mdl-js-textfield">
-                                            <input class="mdl-textfield__input" type="text" autofocus id="web-filter__domain">
-                                            <label class="mdl-textfield__label" for="web-filter__domain">URL...</label>
-                                            <span class="mdl-textfield__error">Please enter a valid URL starting with 'http://' or 'https://'.</span>
+                                        <div id="web-filter__domain--holder--black-list" class="mdl-textfield mdl-js-textfield">
+                                            <input class="mdl-textfield__input" type="text" autofocus id="web-filter__domain--black-list">
+                                            <label class="mdl-textfield__label" for="web-filter__domain--black-list">Domain...</label>
+                                            <span class="mdl-textfield__error">Please enter a valid domain (e.g. google.com)</span>
                                         </div>
-                                        <button id="web-filter__btn-add" class="web-filter__btn-add mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+                                        <button id="web-filter__btn-add--black-list" class="web-filter__btn-add--black-list mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
                                             <i class="material-icons">add</i> Add
                                         </button>
                                     </div>
-                                    <table id="web-filter__table" class="mdl-data-table mdl-js-data-table mdl-cell mdl-cell--12-col">
-                                        <tbody id="web-filter__table--list" class="web-filter__table--list">
+                                    <table id="web-filter__table--black-list" class="mdl-data-table mdl-js-data-table mdl-cell mdl-cell--12-col">
+                                        <tbody id="web-filter__tbody--black-list" class="web-filter__tbody--black-list">
                                             
                                         </tbody>
                                     </table>
+                                    
+                                    <div id="web-filter__white-list--title" class="mdl-typography--title mdl-color-text--green">
+                                        Domains to be allowed
+                                    </div>
+                                    <div class="mdl-cell mdl-cell--12-col">
+                                        <div id="web-filter__domain--holder--white-list" class="mdl-textfield mdl-js-textfield">
+                                            <input class="mdl-textfield__input" type="text" autofocus id="web-filter__domain--white-list">
+                                            <label class="mdl-textfield__label" for="web-filter__domain--white-list">Domain...</label>
+                                            <span class="mdl-textfield__error">Please enter a valid domain (e.g. google.com)</span>
+                                        </div>
+                                        <button id="web-filter__btn-add--white-list" class="web-filter__btn-add--white-list mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+                                            <i class="material-icons">add</i> Add
+                                        </button>
+                                    </div>
+                                    <table id="web-filter__table--white-list" class="mdl-data-table mdl-js-data-table mdl-cell mdl-cell--12-col">
+                                        <tbody id="web-filter__tbody--white-list" class="web-filter__tbody--white-list">
+                                            
+                                        </tbody>
+                                    </table>
+
+                                    <div class="mdl-typography--body-2">
+                                        * Please click on 'Save Filter' to save and 'Cancel' to discard your changes
+                                    </div>
                                 </div>
                             </div>
                         </div>

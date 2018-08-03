@@ -133,7 +133,6 @@ app.get('/account', async (request, response) => {
                 fs.readFile(path.resolve(__dirname, '../reset_pass.html'), 'utf8', async (err, data) => {
                     if (err) {
                         throw new Error('File not found');
-                        response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
                     } else {
                         const html = data;
                         const finalHtml = html.replace('::CODE::', oobCode);
@@ -145,7 +144,6 @@ app.get('/account', async (request, response) => {
                 fs.readFile(path.resolve(__dirname, '../recover_email.html'), 'utf8', async (err, data) => {
                     if (err) {
                         throw new Error('File not found');
-                        response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
                     } else {
                         const html = data;
                         const finalHtml = html.replace('::CODE::', oobCode);
@@ -157,7 +155,6 @@ app.get('/account', async (request, response) => {
                 fs.readFile(path.resolve(__dirname, '../verify_email.html'), 'utf8', async (err, data) => {
                     if (err) {
                         throw new Error('File not found');
-                        response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
                     } else {
                         const html = data;
                         const finalHtml = html.replace('::CODE::', oobCode);
@@ -167,13 +164,8 @@ app.get('/account', async (request, response) => {
                 break;
             default:
                 throw new Error('Invalid mode received');
-                response.send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
                 break;
         }
-
-        // TODO: Replace html with oobCode
-        // TODO: Replace html with necessary html for the relevant actions
-        // TODO: Perform logging
     } catch (error) {
         await log(logger.emailHandlerFailure('/account', admin.firestore.FieldValue.serverTimestamp(), error));
         console.error(`Error while handling email action: ${error}`);
@@ -206,16 +198,12 @@ app.post('/rule-create', async (request, response) => {
         } else {
             // Check whether user has already created 
             // a similar rule
-            const [ ruleWithSamePriority, ruleWithSameName ] = await Promise.all([
-                db.collection(`/users/${uid}/rules`)
-                    .where('priority', '==', input.priority)
-                .get(), 
-                db.collection(`/users/${uid}/rules`)
-                    .where('name', '==', input.name)
-                .get()
-            ]);
+            const ruleWithSameNameAndPriority = await db.collection(`/users/${uid}/rules`)
+                .where('priority', '==', input.priority)
+                .where('name', '==', input.name)
+            .get();
             
-            if (!ruleWithSameName.empty || !ruleWithSamePriority.empty) {
+            if (!ruleWithSameNameAndPriority.empty) {
                 await log(logger.ruleCreateFailure(request, uid, ErrorCode.RULE.ALREADY_EXIST, admin.firestore.FieldValue.serverTimestamp(), input));
                 response.send(ErrorCode.RULE.ALREADY_EXIST);
             } else {
@@ -256,13 +244,21 @@ app.post('/rule-update', async (request, response) => {
             await log(logger.ruleUpdateFailure(request, uid, ErrorCode.RULE.BAD_DATA, admin.firestore.FieldValue.serverTimestamp(), input));
             response.send(ErrorCode.RULE.BAD_DATA);
         } else {
+            const ruleWithSameNameAndPriority = await db.collection(`/users/${uid}/rules`)
+                .where('priority', '==', input.priority)
+                .where('name', '==', input.name)
+            .get();
+
             const ruleRef = db.doc(`/users/${uid}/rules/${id}`);
             const rule = await ruleRef.get();
 
-            if (!rule.exists) {
+            if (!ruleWithSameNameAndPriority.empty) {
+                await log(logger.ruleCreateFailure(request, uid, ErrorCode.RULE.ALREADY_EXIST, admin.firestore.FieldValue.serverTimestamp(), input));
+                response.send(ErrorCode.RULE.ALREADY_EXIST);
+            } else if (!rule.exists) {
                 await log(logger.ruleUpdateFailure(request, uid, ErrorCode.RULE.NOT_FOUND, admin.firestore.FieldValue.serverTimestamp(), input));
                 response.send(ErrorCode.RULE.NOT_FOUND);
-            } else {
+            }  else {
                 const writeResult = await ruleRef.set({
                     name: input.name,
                     access: input.access,
@@ -348,9 +344,9 @@ app.post('/filter-update', async (request, response) => {
     try {
         const { uid } = await authenticator.checkPostAccess(request.get(TOKEN));
 
-        const { filters, mode } = request.body;
+        const { blacklist, whitelist } = request.body;
 
-        const input = iv.isValidFilter(filters, mode);
+        const input = iv.isValidFilter(blacklist, whitelist);
 
         if (!input) {
             await log(logger.filterUpdateFailure(request, uid, ErrorCode.FILTER.BAD_DATA, admin.firestore.FieldValue.serverTimestamp(), input));
@@ -358,8 +354,8 @@ app.post('/filter-update', async (request, response) => {
         } else {
             const writeResult = await db.doc(`/users/${uid}/filters/filter`)
             .set({
-                domains: input.domains,
-                mode: input.mode
+                whitelist: input.whitelist,
+                blacklist: input.blacklist
             }, { merge: true });
             await log(logger.filterUpdateSuccess(request, uid, writeResult.writeTime, input));
             response.send(SuccessCode.FILTER.UPDATE);
@@ -418,8 +414,11 @@ export const createNewUser = functions.auth.user().onCreate(async user => {
             created: admin.firestore.FieldValue.serverTimestamp()
         }),
         db.doc(`/users/${uid}/filters/filter`).set({
-            domains: [], 
-            mode: false
+            // domains: [], 
+            // mode: false
+            whitelist: [],
+            blacklist: [],
+            created: admin.firestore.FieldValue.serverTimestamp()
         }),
         db.doc(`/users/${uid}`).set({
             created: admin.firestore.FieldValue.serverTimestamp()

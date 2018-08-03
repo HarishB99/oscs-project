@@ -108,13 +108,14 @@ app.get('/rules.json', (request, response) => {
     const responseJson = {
         rules: [],
         webfilter: {
-            mode: '',
+            // mode: '',
             domainGroups: [],
-            domains: [],
+            blacklist: [],
+            whitelist: [],
             blockAds: true,
             blockMalicious: true,
         },
-        dpi: true,
+        childSafety: true,
         virusScan: true,
         message: 'If the properties of this object are empty, you probably forgot to login first before performing this query.'
     };
@@ -127,14 +128,15 @@ app.get('/rules.json', (request, response) => {
 
     if (filter_final) {
         responseJson.webfilter = {
-            mode: (filter_final.mode === 1 ? 'whitelist' : 'blacklist'),
+            // mode: (filter_final.mode === 1 ? 'whitelist' : 'blacklist'),
             domainGroups: filter_final.domainGroups,
-            domains: filter_final.domains
+            blacklist: filter_final.blacklist,
+            whitelist: filter_final.whitelist
         };
     }
 
     if (global_options_final) {
-        responseJson.dpi = global_options_final.dpi;
+        responseJson.childSafety = global_options_final.childSafety;
         responseJson.virusScan = global_options_final.virusScan;
         responseJson.webfilter.blockAds = global_options_final.blockAds;
         responseJson.webfilter.blockMalicious = global_options_final.blockMalicious;

@@ -5,23 +5,27 @@ import * as _ from 'lodash';
  * @author Harish S/O Balamurugan
  */
 export class FilterInput {
-    public domains: string[];
-    public mode: boolean;
+    public whitelist: string[];
+    public blacklist: string[];
 
-    private parseBool(input: string): boolean {
-        const input_lower = input.toLowerCase();
-        return (input_lower === 'true' || input_lower === 't') ? true : false;
-    }
+    public constructor(blacklist: string[], whitelist: string[]) {
+        const receivedDomainsBlack = [];
+        blacklist.forEach(domain => {
+            receivedDomainsBlack.push(domain.toLowerCase());
+        });
 
-    public constructor(domains: string[], mode: string) {
-        this.domains = _.uniq(domains);
-        this.mode = this.parseBool(mode);
+        const receivedDomainsWhite = [];
+        whitelist.forEach(domain => {
+            receivedDomainsWhite.push(domain.toLowerCase());
+        });
+        this.blacklist = _.uniq(receivedDomainsBlack);
+        this.whitelist = _.uniq(receivedDomainsWhite);
     }
 
     public toString(): string {
         return JSON.stringify({
-            domains: this.domains,
-            mode: this.mode
+            whitelist: this.whitelist,
+            blacklist: this.blacklist
         });
     }
 }

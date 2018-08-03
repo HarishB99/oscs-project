@@ -22,7 +22,6 @@
     "es6-promise-polyfill": "^1.2.0",
     "firebase": "^5.2.0",
     "isomorphic-fetch": "^2.2.1",
-    "list.js": "^1.5.0",
     "material-components-web": "^0.37.0"
   },
   "devDependencies": {
