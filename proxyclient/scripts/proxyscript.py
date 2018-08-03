@@ -72,7 +72,7 @@ def addDomainsF(fileName, category):
             blockedDomains[category].add(d2)
 
 def addDomainGroup(groupNames):
-    with open('../data/domaingroups.json', 'r') as dg:
+    with open('../data/domain-groups.json', 'r') as dg:
         domainGroups = json.loads(dg.read())
 
         for dgName in groupNames:
