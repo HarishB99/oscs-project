@@ -348,9 +348,9 @@ app.post('/filter-update', async (request, response) => {
     try {
         const { uid } = await authenticator.checkPostAccess(request.get(TOKEN));
 
-        const { filters, mode } = request.body;
+        const { blacklist, whitelist } = request.body;
 
-        const input = iv.isValidFilter(filters, mode);
+        const input = iv.isValidFilter(blacklist, whitelist);
 
         if (!input) {
             await log(logger.filterUpdateFailure(request, uid, ErrorCode.FILTER.BAD_DATA, admin.firestore.FieldValue.serverTimestamp(), input));
@@ -358,8 +358,8 @@ app.post('/filter-update', async (request, response) => {
         } else {
             const writeResult = await db.doc(`/users/${uid}/filters/filter`)
             .set({
-                domains: input.domains,
-                mode: input.mode
+                whitelist: input.whitelist,
+                blacklist: input.blacklist
             }, { merge: true });
             await log(logger.filterUpdateSuccess(request, uid, writeResult.writeTime, input));
             response.send(SuccessCode.FILTER.UPDATE);
@@ -418,8 +418,11 @@ export const createNewUser = functions.auth.user().onCreate(async user => {
             created: admin.firestore.FieldValue.serverTimestamp()
         }),
         db.doc(`/users/${uid}/filters/filter`).set({
-            domains: [], 
-            mode: false
+            // domains: [], 
+            // mode: false
+            whitelist: [],
+            blacklist: [],
+            created: admin.firestore.FieldValue.serverTimestamp()
         }),
         db.doc(`/users/${uid}`).set({
             created: admin.firestore.FieldValue.serverTimestamp()

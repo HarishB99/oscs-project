@@ -8,6 +8,8 @@ import { FilterInput } from "./FilterInput";
  * @author Harish S/O Balamurugan
  */
 export class InputValidator {
+    private readonly TLDS = "";
+
     /**
      * Check whether the input is empty
      * @param input the string input to be validated
@@ -145,23 +147,14 @@ export class InputValidator {
     }
 
     /**
-     * Check whether the URL can be accepted as a valid value
+     * Check whether the domain can be accepted as a valid value
      * @param input the string input to be validated
      */
-    private isValidUrl(input: string): boolean {
-        if (this.isEmpty(input)) return false;
-        const re = /^(?:(?:(?:https?):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:[/?#]\S*)?$/;
-        // /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/
-        return re.test(input);
-    }
+    private isValidDomain(input: string): boolean {
+        const toBeValidated = input.toLowerCase();
 
-    // private isValidPhotoUrl(photoURL: string): boolean {
-    //     if (this.isEmpty(photoURL)) return false;
-    //     // TODO: Create a regular expression to 
-    //     // check for a valid photo url
-    //     const re = /^((https?|ftp):)?\/\/.*(jpeg|jpg|png|gif|bmp)$/;
-    //     return re.test(photoURL);
-    // }
+        return toBeValidated.startsWith('.') ? /^(?:\.[a-zA-Z]{2,})+$/.test(toBeValidated) : /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/.test(toBeValidated);
+    };
 
     /**
      * Checks whether the inputs given to 
@@ -194,24 +187,29 @@ export class InputValidator {
      * Checks whether the inputs given to 
      * create/update a filter are valid.
      * 
-     * @param filters a string array of URLs
-     * @param mode a boolean value, received as a string
+     * @param blacklist a string array of URLs
+     * @param whitelist a boolean value, received as a string
      */
-    public isValidFilter(filters: string[], mode: string) {
-        if (filters.length !== 0) {
-            for (const filter of filters) {
-                if (!this.isValidUrl(filter)) {
+    public isValidFilter(blacklist: string[], whitelist: string[]) {
+        if (blacklist.length !== 0) {
+            for (const filter of blacklist) {
+                if (!this.isValidDomain(filter)) {
+                    console.error(`Received filter: Blacklist: ${blacklist}, Whitelist: ${whitelist}`);
                     return null;
                 }
             }
         }
 
-        if (this.isBoolean(mode)) {
-            return new FilterInput(filters, mode);
-        } else {
-            console.error(`Received filter: Filters: ${filters}, mode: ${mode}`);
-            return null;
+        if (whitelist.length !== 0) {
+            for (const filter of whitelist) {
+                if (!this.isValidDomain(filter)) {
+                    console.error(`Received filter: Blacklist: ${blacklist}, Whitelist: ${whitelist}`);
+                    return null;
+                }
+            }
         }
+
+        return new FilterInput(blacklist, whitelist);
     }
 
     /**

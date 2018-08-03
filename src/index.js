@@ -206,40 +206,57 @@ firebase.auth().onAuthStateChanged(user => {
 
         // #web-filter
         let filters = '';
-        const web_filter_list = document.getElementById('web-filter__table--list');
-        const web_filter_domain = document.getElementById('web-filter__domain');
-        const web_filter_btn_add = document.getElementById('web-filter__btn-add');
-        const web_filter_mode_label = document.querySelector('label[for=\'web-filter__mode\']');
-        const web_filter_mode = document.getElementById('web-filter__mode');
+        const web_filter_list_black = document.getElementById('web-filter__tbody--black-list');
+        const web_filter_domain_black = document.getElementById('web-filter__domain--black-list');
+        const web_filter_btn_add_black = document.getElementById('web-filter__btn-add--black-list');
+        // const web_filter_mode_label = document.querySelector('label[for=\'web-filter__mode\']');
+        // const web_filter_mode = document.getElementById('web-filter__mode');
         const web_filter_btn_publish = document.getElementById('web-filter__btn-submit');
         const web_filter_btn_cancel = document.getElementById('web-filter__btn-cancel');
 
-        const checkAllInputs = function() {
-            UIUtils.update_text_field_ui(web_filter_domain, 
-                InputValidator.isValidUrl(web_filter_domain.value));
+        
+        const web_filter_list_white = document.getElementById('web-filter__tbody--white-list');
+        const web_filter_domain_white = document.getElementById('web-filter__domain--white-list');
+        const web_filter_btn_add_white = document.getElementById('web-filter__btn-add--white-list');
+
+        const checkAllInputsBlack = function() {
+            UIUtils.update_text_field_ui(web_filter_domain_black, 
+                InputValidator.isValidDomain(web_filter_domain_black.value));
         };
+
+        const checkAllInputsWhite = function() {
+            UIUtils.update_text_field_ui(web_filter_domain_white, 
+                InputValidator.isValidDomain(web_filter_domain_white.value));
+        };
+        
+        // const checkAllInputs = function() {
+        //     checkAllInputsBlack(); checkAllInputsWhite();
+        // };
 
         const allDomainsAreValid = function(domains) {
             for (let i = 0; i < domains.length; i++) {
                 let filter = domains[i].innerHTML;
                 filter = filter.trim();
-                if (!InputValidator.isValidUrl(filter)) {
+                if (!InputValidator.isValidDomain(filter)) {
                     return false;
                 }
             }
             return true;
         };
 
+        // TODO: Need to be changed
         const resetFiltersList = function () {
-            UIUtils.toggleSwitch(filters.mode, web_filter_mode);
+            // TODO: Change db structure and make client follow it.
+            // UIUtils.toggleSwitch(filters.mode, web_filter_mode);
 
-            // Reset web_filter_list
-            web_filter_list.innerHTML = '';
+            // Reset web_filter_lists
+            web_filter_list_black.innerHTML = '';
+            web_filter_list_white.innerHTML = '';
 
-            filters.domains.forEach(domain => {
+            filters.whitelist.forEach(domain => {
                 const tr = document.createElement('tr');
                     const domain_holder = document.createElement('td');
-                        domain_holder.className = 'domain mdl-data-table__cell--non-numeric';
+                        domain_holder.className = 'domain domain--white mdl-data-table__cell--non-numeric';
                         domain_holder.innerHTML = domain;
                     tr.appendChild(domain_holder);
                     const filter_del_btn_holder = document.createElement('td');
@@ -248,44 +265,91 @@ firebase.auth().onAuthStateChanged(user => {
                             filter_del_btn.innerHTML = '<i class=\"material-icons\">cancel</i>';
                             filter_del_btn.addEventListener('click', () => {
                                 if (lock) return; lock = true;
-                                web_filter_list.removeChild(tr)
+                                web_filter_list_white.removeChild(tr)
                                 lock = false
                             });
                         filter_del_btn_holder.appendChild(filter_del_btn);
                     tr.appendChild(filter_del_btn_holder)
-                web_filter_list.appendChild(tr);
+                web_filter_list_white.appendChild(tr);
+            });
+            filters.blacklist.forEach(domain => {
+                const tr = document.createElement('tr');
+                    const domain_holder = document.createElement('td');
+                        domain_holder.className = 'domain domain--black mdl-data-table__cell--non-numeric';
+                        domain_holder.innerHTML = domain;
+                    tr.appendChild(domain_holder);
+                    const filter_del_btn_holder = document.createElement('td');
+                        const filter_del_btn = document.createElement('button');
+                            filter_del_btn.className = 'mdl-button mdl-js-button mdl-button--icon';
+                            filter_del_btn.innerHTML = '<i class=\"material-icons\">cancel</i>';
+                            filter_del_btn.addEventListener('click', () => {
+                                if (lock) return; lock = true;
+                                web_filter_list_black.removeChild(tr)
+                                lock = false
+                            });
+                        filter_del_btn_holder.appendChild(filter_del_btn);
+                    tr.appendChild(filter_del_btn_holder)
+                web_filter_list_black.appendChild(tr);
             });
         }
 
-        web_filter_domain.addEventListener('keyup', e => {
+        web_filter_domain_black.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
-                InputValidator.isValidUrl(e.target.value));
+                InputValidator.isValidDomain(e.target.value));
         });
 
-        web_filter_btn_add.addEventListener('click', () => {
+        web_filter_domain_white.addEventListener('keyup', e => {
+            UIUtils.update_text_field_ui(e.target, 
+                InputValidator.isValidDomain(e.target.value));
+        });
+
+        web_filter_btn_add_black.addEventListener('click', () => {
             if (lock) return; lock = true;
-            checkAllInputs();
+            checkAllInputsBlack();
         
             if (UIUtils.stillAnyInvalid()) return;
 
             const tr = document.createElement('tr');
                 const domain = document.createElement('td');
                     // domain.id = 'domain';
-                    domain.className = 'domain mdl-data-table__cell--non-numeric';
-                    domain.innerHTML = web_filter_domain.value;
+                    domain.className = 'domain domain--black mdl-data-table__cell--non-numeric';
+                    domain.innerHTML = web_filter_domain_black.value;
                 tr.appendChild(domain);
                 const filter_del_btn_holder = document.createElement('td');
                     const filter_del_btn = document.createElement('button');
                         filter_del_btn.className = 'mdl-button mdl-js-button mdl-button--icon';
                         filter_del_btn.innerHTML = '<i class=\"material-icons\">cancel</i>';
-                        filter_del_btn.addEventListener('click', () => web_filter_list.removeChild(tr));
+                        filter_del_btn.addEventListener('click', () => web_filter_list_black.removeChild(tr));
                     filter_del_btn_holder.appendChild(filter_del_btn);
                 tr.appendChild(filter_del_btn_holder)
-            web_filter_list.appendChild(tr);
+            web_filter_list_black.appendChild(tr);
             lock = false
         });
 
+        web_filter_btn_add_white.addEventListener('click', () => {
+            if (lock) return; lock = true;
+            checkAllInputsWhite();
+        
+            if (UIUtils.stillAnyInvalid()) return;
 
+            const tr = document.createElement('tr');
+                const domain = document.createElement('td');
+                    // domain.id = 'domain';
+                    domain.className = 'domain domain--white mdl-data-table__cell--non-numeric';
+                    domain.innerHTML = web_filter_domain_white.value;
+                tr.appendChild(domain);
+                const filter_del_btn_holder = document.createElement('td');
+                    const filter_del_btn = document.createElement('button');
+                        filter_del_btn.className = 'mdl-button mdl-js-button mdl-button--icon';
+                        filter_del_btn.innerHTML = '<i class=\"material-icons\">cancel</i>';
+                        filter_del_btn.addEventListener('click', () => web_filter_list_white.removeChild(tr));
+                    filter_del_btn_holder.appendChild(filter_del_btn);
+                tr.appendChild(filter_del_btn_holder)
+            web_filter_list_white.appendChild(tr);
+            lock = false
+        });
+
+        // TODO: Need to be changed
         web_filter_btn_publish.addEventListener('click', () => {
             if (lock) return; lock = true;
             const domains = document.querySelectorAll('.domain');
@@ -295,18 +359,30 @@ firebase.auth().onAuthStateChanged(user => {
                 return;
             }
 
-            const finalFilters = [];
+            // const finalFilters = [];
 
-            domains.forEach(domain => {
+            const finalWhitelistDomains = [];
+            const finalBlacklistDomains = [];
+
+            const whitelistDomains = document.querySelectorAll('.domain--white');
+            const blacklistDomains = document.querySelectorAll('.domain--black');
+
+            whitelistDomains.forEach(domain => {
                 const filter = domain.innerHTML.trim();
-                finalFilters.push(filter);
+                finalWhitelistDomains.push(filter);
+            });
+            blacklistDomains.forEach(domain => {
+                const filter = domain.innerHTML.trim();
+                finalBlacklistDomains.push(filter);
             });
 
             user.getIdToken(true)
             .then(token => {
                 return axios.post('/filter-update', {
-                    filters: finalFilters,
-                    mode: web_filter_mode_label.classList.contains('is-checked').toString()
+                    blacklist: finalBlacklistDomains,
+                    whitelist: finalWhitelistDomains
+                    // filters: finalFilters
+                    // mode: web_filter_mode_label.classList.contains('is-checked').toString()
                 }, {
                     headers: {
                         'Authorisation': 'Bearer ' + token

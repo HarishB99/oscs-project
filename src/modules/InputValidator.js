@@ -70,4 +70,12 @@ InputValidator.isValidUrl = function(input) {
     return re.test(input);
 };
 
+InputValidator.isValidDomain = function(input) {
+    const toBeValidated = input.toLowerCase();
+
+    const domainStartWithDot = /^(?:\.[a-zA-Z]{2,})+$/;
+    const domain = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
+    return toBeValidated.startsWith('.') ? domainStartWithDot.test(toBeValidated) : domain.test(toBeValidated);
+};
+
 export default InputValidator;
