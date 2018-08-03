@@ -108,7 +108,7 @@ app.get('/rules.json', (request, response) => {
     const responseJson = {
         rules: [],
         webfilter: {
-            mode: '',
+            // mode: '',
             domainGroups: [],
             blacklist: [],
             whitelist: [],
@@ -128,7 +128,7 @@ app.get('/rules.json', (request, response) => {
 
     if (filter_final) {
         responseJson.webfilter = {
-            mode: (filter_final.mode === 1 ? 'whitelist' : 'blacklist'),
+            // mode: (filter_final.mode === 1 ? 'whitelist' : 'blacklist'),
             domainGroups: filter_final.domainGroups,
             blacklist: filter_final.blacklist,
             whitelist: filter_final.whitelist
