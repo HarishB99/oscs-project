@@ -17,28 +17,6 @@ export class InputValidator {
     }
 
     /**
-     * Check whether the input is within a gthisen range
-     * @param input the number input to be validated
-     * @param min the range minimum
-     * @param max the range maximum
-     * @param inclusive whether to include the minimum and maximum when performing validation (i.e. > vs >=)
-     */
-    private isInValidRange(input: number, min: number, max: number, inclusive: boolean): boolean {
-        return inclusive ? (input >= min && input <= max) : (input > min && input < max);
-    }
-
-    /**
-     * Check whether the input is of an expected length
-     * @param input the string input to be validated
-     * @param min the minimum length expected
-     * @param max the maximum length expected
-     * @param inclusive whether to include the minimum and maximum when performing validation (i.e. > vs >=)
-     */
-    private isOfValidLength(input: string, min: number, max: number, inclusive: boolean): boolean {
-        return this.isInValidRange(input.length, min, max, inclusive);
-    }
-
-    /**
      * Check whether the organisation name can be accepted as a valid value
      * @param input the string input to be validated
      */
@@ -145,16 +123,6 @@ export class InputValidator {
     }
 
     /**
-     * Check whether the input is a valid numerical value
-     * @param input the string input to be validated
-     */
-    private isNum(input: string): boolean {
-        if (this.isEmpty(input)) return false;
-        const re = /^[0-9]$/;
-        return re.test(input);
-    }
-
-    /**
      * TODO: Validate protocol against a list of whitelist values
      * @param input the string input to be validated
      */
@@ -173,7 +141,7 @@ export class InputValidator {
     private isValidIp(input: string): boolean {
         if (this.isEmpty(input)) return false;
         const re = /^(?=[\d\*]+\.[\d\*]\.[\d\*]\.[\d\*]$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9]|\*)\.?){4}$/;
-        return re.test(input);
+        return input === "*" ? true : re.test(input);
     }
 
     /**
@@ -250,17 +218,17 @@ export class InputValidator {
      * Checks whether the inputs given to update 
      * global firewall/web filter options are valid.
      * 
-     * @param dpi a boolean value represented in string
+     * @param childSafety a boolean value represented in string
      * @param virusScan a boolean value represented in string
      * @param blockAds a boolean value represented in string
      * @param blockMalicious a boolean value represented in string
      */
-    public isValidOptions(dpi: string, virusScan: string, blockAds: string, blockMalicious: string): GlobalOptionsInput {
-        if (this.isBoolean(dpi) && this.isBoolean(virusScan)
+    public isValidOptions(childSafety: string, virusScan: string, blockAds: string, blockMalicious: string): GlobalOptionsInput {
+        if (this.isBoolean(childSafety) && this.isBoolean(virusScan)
             && this.isBoolean(blockAds) && this.isBoolean(blockMalicious)) {
-            return new GlobalOptionsInput(dpi, virusScan, blockAds, blockMalicious);
+            return new GlobalOptionsInput(childSafety, virusScan, blockAds, blockMalicious);
         } else {
-            console.error(`Received rule: DPI: ${dpi}, VirusScan: ${virusScan}, blockAds: ${blockAds}, blockMalicious: ${blockMalicious}`);
+            console.error(`Received rule: Child Safety: ${childSafety}, VirusScan: ${virusScan}, blockAds: ${blockAds}, blockMalicious: ${blockMalicious}`);
             return null;
         }
     }

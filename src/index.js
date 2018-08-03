@@ -121,16 +121,16 @@ firebase.auth().onAuthStateChanged(user => {
                             prior.innerHTML = priority;
                         const sip = document.createElement("td");
                             sip.className = "saddr";
-                            sip.innerHTML = sourceip;
+                            sip.innerHTML = (sourceip === "0.0.0.0") ? "any" : sourceip;
                         const sport = document.createElement("td");
                             sport.className = "sport";
-                            sport.innerHTML = sourceport;
+                            sport.innerHTML = (sourceport === "*") ? "any" : sourceport;
                         const dip = document.createElement("td");
                             dip.className = "daddr";
-                            dip.innerHTML = destip;
+                            dip.innerHTML = (destip === "0.0.0.0") ? "any" : destip;
                         const dport = document.createElement("td");
                             dport.className = "dport";
-                            dport.innerHTML = destport;
+                            dport.innerHTML = (destport === "*") ? "any" : destport;
                         const proto = document.createElement("td");
                             proto.className = "protocol";
                             proto.innerHTML = protocol;
@@ -341,8 +341,9 @@ firebase.auth().onAuthStateChanged(user => {
         // #global
         const block_ads = document.getElementById('web-filter__block-ads');
         const block_malicious = document.getElementById('web-filter__block-malicious');
-        const dpi = document.getElementById('firewall-rule__dpi');
+        // const dpi = document.getElementById('firewall-rule__dpi');
         const vs = document.getElementById('firewall-rule__vs');
+        const cs = document.getElementById('firewall-rule__cs');
         const global_submit_btn = document.getElementById('global--btn-submit');
 
         global_submit_btn.addEventListener('click', () => {
@@ -356,7 +357,8 @@ firebase.auth().onAuthStateChanged(user => {
                         'Authorisation': 'Bearer ' + token
                     },
                     data: {
-                        dpi: dpi.parentElement.classList.contains('is-checked').toString(),
+                        // dpi: dpi.parentElement.classList.contains('is-checked').toString(),
+                        childSafety: cs.parentElement.classList.contains('is-checked').toString(),
                         virusScan: vs.parentElement.classList.contains('is-checked').toString(),
                         blockAds: block_ads.parentElement.classList.contains('is-checked').toString(),
                         blockMalicious: block_malicious.parentElement.classList.contains('is-checked').toString()
@@ -393,7 +395,7 @@ firebase.auth().onAuthStateChanged(user => {
         db.doc(`/users/${user.uid}/options/global`)
         .onSnapshot(options => {
             const opts = options.data();
-            UIUtils.toggleSwitch(opts.dpi, dpi);
+            UIUtils.toggleSwitch(opts.childSafety, cs);
             UIUtils.toggleSwitch(opts.virusScan, vs);
             UIUtils.toggleSwitch(opts.blockAds, block_ads);
             UIUtils.toggleSwitch(opts.blockMalicious, block_malicious);

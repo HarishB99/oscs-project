@@ -3,7 +3,6 @@ import * as admin from 'firebase-admin';
 import * as express from 'express';
 import { InputValidator } from './InputValidator';
 import { Authenticator } from './Authenticator';
-import { UserInput } from './UserInput';
 import { SuccessCode } from './SuccessCode';
 import { ErrorCode } from './ErrorCode';
 import { Logger } from './Logger';
@@ -226,7 +225,7 @@ app.post('/rule-create', async (request, response) => {
                     access: input.access,
                     priority: input.priority,
                     protocol: input.protocol,
-                    sourceip: sip,
+                    sourceip: input.sourceip,
                     sourceport: input.sourceport,
                     destip: input.destip,
                     destport: input.destport,
@@ -315,20 +314,21 @@ app.post('/global-update', async (request, response) => {
     try {
         const { uid } = await authenticator.checkPostAccess(request.get(TOKEN));
         const {
-            dpi,
+            // dpi,
             virusScan,
             blockAds, 
-            blockMalicious
+            blockMalicious,
+            childSafety
         } = request.body
     
-        const input = iv.isValidOptions(dpi, virusScan, blockAds, blockMalicious)
+        const input = iv.isValidOptions(childSafety, virusScan, blockAds, blockMalicious)
 
         if (!input) {
             await log(logger.globalOptionsUpdateFailure(request, uid, ErrorCode.GLOBAL_OPTIONS.BAD_DATA, admin.firestore.FieldValue.serverTimestamp(), input));
             response.send(ErrorCode.GLOBAL_OPTIONS.BAD_DATA);
         } else {
             const writeResult = await db.doc(`/users/${uid}/options/global`).set({
-                dpi: input.dpi,
+                childSafety: input.childSafety,
                 virusScan: input.virusScan,
                 blockAds: input.blockAds, 
                 blockMalicious: input.blockMalicious,
@@ -410,15 +410,16 @@ export const createNewUser = functions.auth.user().onCreate(async user => {
 
     return Promise.all([
         db.doc(`/users/${uid}/options/global`).set({
-            dpi: true,
+            // dpi: true,
             virusScan: true,
             blockAds: true, 
             blockMalicious: true,
+            childSafety: true,
             created: admin.firestore.FieldValue.serverTimestamp()
         }),
         db.doc(`/users/${uid}/filters/filter`).set({
             domains: [], 
-            mode: true
+            mode: false
         }),
         db.doc(`/users/${uid}`).set({
             created: admin.firestore.FieldValue.serverTimestamp()
