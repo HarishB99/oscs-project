@@ -41,8 +41,17 @@ firebase.auth().onAuthStateChanged(user => {
                     .then(() => {
                         UIUtils.showSnackbar('An email has been sent to your email. Please click on the link to reset your password.');
                     }).catch(error => {
-                        console.error(`Error while sending password reset email: ${error}`);
-                        UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                        if (error.code === 'auth/invalid-email' || error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired' || error.code === 'auth/user-disabled' || error.code === 'auth/user-not-found') {
+                            firebase.auth().signOut()
+                            .catch(() => {
+                                UIUtils.showSnackbar('Your have to logout and login again to perform this action.');
+                                lock = false;
+                            });
+                        } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
+                            UIUtils.showSnackbar('Please check your network connection and try again.');
+                        } else {
+                            UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                        }
                     });
                 });
             form_holder_container.appendChild(span);
@@ -56,8 +65,19 @@ firebase.auth().onAuthStateChanged(user => {
                 lock = false
             });
         }).catch(error => {
-            console.error(`Error while recovering email: ${error}`);
-            UIUtils.showSnackbar('The link has expired. Please try again.');
+            if (error.code === 'auth/expired-action-code' || error.code === 'auth/invalid-action-code') {
+                UIUtils.showSnackbar('The link has expired. Please try again.');
+            } else if (error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired' || error.code === 'auth/user-disabled' || error.code === 'auth/user-not-found') {
+                firebase.auth().signOut()
+                .catch(() => {
+                    UIUtils.showSnackbar('Your have to logout and login again to perform this action.');
+                    lock = false;
+                });
+            } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
+                UIUtils.showSnackbar('Please check your network connection and try again.');
+            } else {
+                UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+            }
         });
     } else { UIUtils.logoutUI(); }
 });

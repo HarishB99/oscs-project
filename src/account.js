@@ -9,7 +9,6 @@ const config = require('./modules/config').config;
 firebase.initializeApp(config);
 
 // Import other custom libraries
-// const axios = require('axios').default;
 const InputValidator = require('./modules/InputValidator').default;
 const UIUtils = require('./modules/UIUtils').default;
 
@@ -22,8 +21,7 @@ firebase.auth().onAuthStateChanged(user => {
         } else {
             user.sendEmailVerification()
             .then(() => location.replace('/login'))
-            .catch(error => {
-                console.error(`Error while sending email verification: ${error}`);
+            .catch(() => {
                 location.replace('/login');
             });
         }
@@ -31,8 +29,6 @@ firebase.auth().onAuthStateChanged(user => {
         wasntAlreadyLoggedIn = true;
         let lock = false;
         const acc_req_email = document.getElementById("account-create--input-email");
-        // const acc_req_org = document.getElementById("account-create--input-org");
-        // const acc_req_phone = document.getElementById("account-create--input-phone");
         const acc_req_pass = document.getElementById("account-create--input-password");
         const pass2 = document.getElementById("account-create--input-password2");
         const acc_req_btn = document.getElementById("account-create--button-submit");
@@ -47,37 +43,17 @@ firebase.auth().onAuthStateChanged(user => {
         var checkAllInputs = function () {
             UIUtils.update_text_field_ui(acc_req_email, 
                 InputValidator.isValidEmail(acc_req_email.value));
-            // UIUtils.update_text_field_ui(acc_req_org, 
-            //     InputValidator.isValidOrgName(acc_req_org.value));
-            // UIUtils.update_text_field_ui(acc_req_phone, 
-            //     InputValidator.isValidPhoneNum(acc_req_phone.value));
             UIUtils.update_text_field_ui(acc_req_pass, 
                 InputValidator.isAReasonablyStrongPassword(acc_req_pass.value));
             UIUtils.update_text_field_ui(pass2, 
                 (acc_req_pass.value === pass2.value && pass2.value !== ''));
         };
 
-        // checkAllInputs();
-
         /* ::Add keyboard event listeners to validate text fields:: */
-        // acc_req_email.addEventListener('focus', e => {
-        //     UIUtils.update_text_field_ui(e.target, 
-        //         InputValidator.isValidEmail(e.target.value));
-        // }); 
         acc_req_email.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isValidEmail(e.target.value));
         });
-
-        // acc_req_org.addEventListener('keyup', e => {
-        //     UIUtils.update_text_field_ui(e.target, 
-        //         InputValidator.isValidOrgName(e.target.value));
-        // });
-
-        // acc_req_phone.addEventListener('keyup', e => {
-        //     UIUtils.update_text_field_ui(e.target, 
-        //         InputValidator.isValidPhoneNum(e.target.value));
-        // });
 
         acc_req_pass.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
@@ -104,38 +80,19 @@ firebase.auth().onAuthStateChanged(user => {
             .createUserWithEmailAndPassword(
                 acc_req_email.value, acc_req_pass.value)
             .catch(error => {
-                console.error("Error while performing account creation request: ", error);
-                if (error.message === "Network Error") {
-                    UIUtils.showSnackbar("Please check your network connection and try again.");
+                if (error.code === 'auth/email-already-in-use') {
+                    location.replace('/login');
+                } else if (error.code === "auth/weak-password" || error.code === "auth/invalid-email") {
+                    UIUtils.showSnackbar("Please check your input and try again.");
+                } else if (error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired' || error.code === 'auth/user-disabled' || error.code === 'auth/user-not-found') {
+                    location.replace('/login');
+                } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
+                    UIUtils.showSnackbar('Please check your network connection and try again.');
                 } else {
-                    UIUtils.showSnackbar("An unexpected error occurred. Please try again later.");
+                    UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
                 }
                 lock = false;
             });
-            
-            // axios.post("/account-create", {
-            //     email: acc_req_email.value,
-            //     org: acc_req_org.value,
-            //     contact: acc_req_phone.value,
-            //     pass: acc_req_pass.value
-            // }).then(response => {
-            //     if (response.data.code === 'account/creation-success') {
-            //         location.replace('/login');
-            //     } else {
-            //         UIUtils.showSnackbar(response.data.message);
-            //         lock = false;
-            //     }
-            // }).catch(error => {
-            //     console.error("Error while performing account creation request: ", error);
-            //     if (error.message === "Network Error") {
-            //         UIUtils.showSnackbar("Please check your network connection and try again.");
-            //     } else if (error.message.indexOf('404') >= 0) {
-            //         UIUtils.showSnackbar("Sorry. The functionality has not been enabled.");
-            //     } else {
-            //         UIUtils.showSnackbar("An unexpected error occurred. Please try again later.");
-            //     }
-            //     lock = false;
-            // });
         });
     }
 });

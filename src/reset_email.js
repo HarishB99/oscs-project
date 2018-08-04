@@ -73,13 +73,25 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                 return credential.user.updateEmail(acc_rst_email_new_email.value);
             }).then(() => {
                 return user.sendEmailVerification();
-            })
-            .then(() => {
-                location.replace('/');
-            })
-            .catch(error => {
-                console.error(`An error occurred while trying to update email: ${error}`);
-                UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+            }).then(() => {
+                UIUtils.showSnackbar('We have sent a link to your email. Please click on the link to verify your email.');
+                lock = false;
+            }).catch(error => {
+                if (error.code === 'auth/wrong-password') {
+                    UIUtils.showSnackbar('Invalid Credentials. Please try again.');
+                } else if (error.code === 'auth/user-mismatch' || error.code === "auth/invalid-email" || error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired' || error.code === 'auth/user-disabled' || error.code === 'auth/user-not-found') {
+                    firebase.auth().signOut()
+                    .catch(() => {
+                        UIUtils.showSnackbar('Your have to logout and login again to perform this action.');
+                        lock = false;
+                    });
+                } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
+                    UIUtils.showSnackbar('Please check your network connection and try again.');
+                } else if (error.code === 'auth/email-already-in-use') {
+                    UIUtils.showSnackbar('That email is already in use.');
+                } else {
+                    UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                }
                 lock = false;
             });
         });

@@ -69,11 +69,12 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
             firebase.auth().signInWithEmailAndPassword(
                 acc_login_email.value, acc_login_pass.value)
             .then(() => location.replace('/')).catch(error => {
-                console.error(error);
                 if (error.code === 'auth/user-not-found') {
                     UIUtils.showSnackbar("Your email does not match our records.", "Create Account", () => {
                         location.href = '/create_account';
                     });
+                } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
+                    UIUtils.showSnackbar('Please check your network connection and try again.');
                 } else if (error.code === "auth/user-disabled") {
                     UIUtils.showSnackbar('Your account has been disabled. Please try again later.');
                 } else if (error.code === "auth/wrong-password" || error.code === "auth/invalid-email") {

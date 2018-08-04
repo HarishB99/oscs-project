@@ -44,11 +44,22 @@ firebase.auth().onAuthStateChanged(user => {
         
             firebase.auth().sendPasswordResetEmail(acc_rst_email.value)
             .then(() => {
-                UIUtils.showSnackbar('We have sent you a link to your email. Please click on the link to reset your password.');
-            })
-            .catch(error => {
-                console.error(`Error while sending password reset email: ${error}`);
-                UIUtils.showSnackbar(`An unexpected error occurred. Please try again later.`);
+                UIUtils.showSnackbar('We have sent a link to your email. Please click on the link to reset your password.');
+            }).catch(error => {
+                if (error.code === 'auth/invalid-email') {
+                    UIUtils.showSnackbar('Invalid Credentials. Please try again.');
+                } else if (error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired' || error.code === 'auth/user-disabled' || error.code === 'auth/user-not-found') {
+                    firebase.auth().signOut()
+                    .catch(() => {
+                        UIUtils.showSnackbar('Your have to logout and login again to perform this action.');
+                        lock = false;
+                    });
+                } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
+                    UIUtils.showSnackbar('Please check your network connection and try again.');
+                } else {
+                    UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                }
+                lock = false;
             });
         });
     }

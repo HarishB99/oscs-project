@@ -9,7 +9,6 @@ const config = require('./modules/config').config;
 firebase.initializeApp(config);
 
 // Import other custom libraries
-// const axios = require('axios').default;
 const InputValidator = require('./modules/InputValidator').default;
 const UIUtils = require('./modules/UIUtils').default;
 
@@ -33,8 +32,11 @@ firebase.auth().onAuthStateChanged(user => {
             if (lock) return; lock = true;
             firebase.auth().signOut()
             .catch(error => {
-                console.error('Error while signing out user: ', error);
-                UIUtils.showSnackbar('Please clear your browser cache or restart your browser, and try again.');
+                if (error.code === 'auth/network-request-failed') {
+                    UIUtils.showSnackbar('Please check your network connection and try again.');
+                } else {
+                    UIUtils.showSnackbar('Please clear your browser cache or restart your browser, and try again.');
+                }
                 lock = false;
             });
         });
@@ -55,6 +57,7 @@ firebase.auth().onAuthStateChanged(user => {
         const acc_prof_email = document.getElementById("account-profile--display-email");
         const acc_prof_email_btn = document.getElementById("account-profile--btn-email");
         const acc_prof_rst_pass_btn = document.getElementById('account-profile--btn-rst-pass');
+        const acc_prof_verify_email_btn = document.getElementById('account-profile--btn-verify-email');
 
         if (!user.emailVerified) {
             acc_prof_email_btn.disabled = true;
@@ -66,21 +69,51 @@ firebase.auth().onAuthStateChanged(user => {
             if (lock) return; lock = true;
             location.href = '/reset_email';
             lock = false;
-        })
+        });
 
         acc_prof_rst_pass_btn.addEventListener('click', () => {
             if (lock) return; lock = true;
 
             firebase.auth().sendPasswordResetEmail(user.email)
             .then(() => {
-                UIUtils.showSnackbar('An email has been sent your email. Please click on the link to reset your password.');
-                lock = false;
-            })
-            .catch(error => {
-                console.log(`Error while sending password reset email: ${error}`);
-                UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                UIUtils.showSnackbar('We have sent a link to your email. Please click on the link to reset your password.');
+            }).catch(error => {
+                if (error.code === 'auth/invalid-email' || error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired' || error.code === 'auth/user-disabled' || error.code === 'auth/user-not-found') {
+                    firebase.auth().signOut()
+                    .catch(() => {
+                        UIUtils.showSnackbar('Your have to logout and login again to perform this action.');
+                        lock = false;
+                    });
+                } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
+                    UIUtils.showSnackbar('Please check your network connection and try again.');
+                } else {
+                    UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                }
                 lock = false;
             });
+        });
+
+        acc_prof_verify_email_btn.addEventListener('click', () => {
+            if (lock) return; lock = true;
+            user.sendEmailVerification()
+            .then(() => {
+                UIUtils.showSnackbar('We have sent a link to your email. Please click on the link to verify your email.');
+                lock = false;
+            }).catch(error => {
+                if (error.code === 'auth/user-mismatch' || error.code === "auth/invalid-email" || error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired' || error.code === 'auth/user-disabled' || error.code === 'auth/user-not-found') {
+                    firebase.auth().signOut()
+                    .catch(() => {
+                        UIUtils.showSnackbar('Your have to logout and login again to perform this action.');
+                        lock = false;
+                    });
+                } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
+                    UIUtils.showSnackbar('Please check your network connection and try again.');
+                } else {
+                    UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                }
+                lock = false;
+            });
+            lock = false;
         });
         
         var displayProfile = function(user) {
