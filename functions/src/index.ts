@@ -384,9 +384,9 @@ app.post('/logs', async (request, response) => {
     }
 });
 
-// app.all('*', (request, response) => {
-//     response.status(404).send('Sorry, we can\'t find that ');
-// });
+app.all('*', (request, response) => {
+    response.status(404).send(fs.readFileSync(path.resolve(__dirname, '../404.html'), 'utf8'));
+});
 
 export const web_app = functions.https.onRequest(app);
 
