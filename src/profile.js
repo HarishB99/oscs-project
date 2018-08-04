@@ -63,6 +63,9 @@ firebase.auth().onAuthStateChanged(user => {
             acc_prof_email_btn.disabled = true;
             acc_prof_rst_pass_btn.disabled = true;
             UIUtils.showSnackbar('Please verify your email before you proceed to manage your profile.');
+        } else {
+            acc_prof_verify_email_btn.disabled = true;
+            acc_prof_verify_email_btn.style.display = 'none';
         }
         
         acc_prof_email_btn.addEventListener('click', () => {
