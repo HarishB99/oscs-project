@@ -186,13 +186,17 @@ export class InputValidator {
      * create/update a filter are valid.
      * 
      * @param blacklist a string array of URLs
-     * @param whitelist a boolean value, received as a string
+     * @param whitelist a string array of URLs
+     * @param fakeNews a boolean value received as a string
+     * @param socialMedia a boolean value received as a string
+     * @param gambling a boolean value received as a string
+     * @param pornography a boolean value received as a string
      */
-    public isValidFilter(blacklist: string[], whitelist: string[]) {
+    public isValidFilter(blacklist: string[], whitelist: string[], fakeNews: string, socialMedia: string, gambling: string, pornography: string) {
         if (blacklist.length !== 0) {
             for (const filter of blacklist) {
                 if (!this.isValidDomain(filter)) {
-                    console.error(`Received filter: Blacklist: ${blacklist}, Whitelist: ${whitelist}`);
+                    console.error(`Received filter: Blacklist: ${blacklist}, Whitelist: ${whitelist}, fakeNews: ${fakeNews}, socialMedia: ${socialMedia}, gambling: ${gambling}, pornography: ${pornography}`);
                     return null;
                 }
             }
@@ -201,13 +205,19 @@ export class InputValidator {
         if (whitelist.length !== 0) {
             for (const filter of whitelist) {
                 if (!this.isValidDomain(filter)) {
-                    console.error(`Received filter: Blacklist: ${blacklist}, Whitelist: ${whitelist}`);
+                    console.error(`Received filter: Blacklist: ${blacklist}, Whitelist: ${whitelist}, fakeNews: ${fakeNews}, socialMedia: ${socialMedia}, gambling: ${gambling}, pornography: ${pornography}`);
                     return null;
                 }
             }
         }
 
-        return new FilterInput(blacklist, whitelist);
+        if (this.isBoolean(fakeNews) && this.isBoolean(socialMedia) && 
+            this.isBoolean(gambling) && this.isBoolean(pornography)) {
+            return new FilterInput(blacklist, whitelist, fakeNews, socialMedia, gambling, pornography);
+        } else {
+            console.error(`Received filter: Blacklist: ${blacklist}, Whitelist: ${whitelist}, fakeNews: ${fakeNews}, socialMedia: ${socialMedia}, gambling: ${gambling}, pornography: ${pornography}`);
+            return null;
+        }
     }
 
     /**

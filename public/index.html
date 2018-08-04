@@ -382,7 +382,7 @@
         a, th.sort {
             cursor: pointer;
         }
-        #web-filter__white-list--title {
+        .web-filter--not-top {
             margin-top: 2.5%;
         }
         /*
@@ -493,7 +493,28 @@
                                         <input type="checkbox" id="web-filter__mode" class="mdl-switch__input web-filter__mode" checked>
                                         <span class="mdl-switch__label">Filter Using Whitelist</span>
                                     </label> -->
-                                    <div class="mdl-typography--title mdl-color-text--red">
+                                    
+                                    <div class="mdl-cell mdl-cell--12-col mdl-typography--title">
+                                        Domain Categories to be blocked
+                                    </div>
+                                    <label class="mdl-cell mdl-cell--4-col mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="web-filter__domain-grp--fake-news">
+                                        <input type="checkbox" id="web-filter__domain-grp--fake-news" class="mdl-checkbox__input">
+                                        <span class="mdl-checkbox__label">Fake News</span>
+                                    </label>
+                                    <label class="mdl-cell mdl-cell--4-col mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="web-filter__domain-grp--social-media">
+                                        <input type="checkbox" id="web-filter__domain-grp--social-media" class="mdl-checkbox__input">
+                                        <span class="mdl-checkbox__label">Social Media</span>
+                                    </label>
+                                    <label class="mdl-cell mdl-cell--4-col mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="web-filter__domain-grp--gambling">
+                                        <input type="checkbox" id="web-filter__domain-grp--gambling" class="mdl-checkbox__input">
+                                        <span class="mdl-checkbox__label">Gambling</span>
+                                    </label>
+                                    <label class="mdl-cell mdl-cell--4-col mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="web-filter__domain-grp--pornography">
+                                        <input type="checkbox" id="web-filter__domain-grp--pornography" class="mdl-checkbox__input">
+                                        <span class="mdl-checkbox__label">Pornography</span>
+                                    </label>
+
+                                    <div class="web-filter--not-top mdl-cell mdl-cell--12-col mdl-typography--title mdl-color-text--red">
                                         Domains to be blocked
                                     </div>
                                     <div class="mdl-cell mdl-cell--12-col">
@@ -512,7 +533,7 @@
                                         </tbody>
                                     </table>
                                     
-                                    <div id="web-filter__white-list--title" class="mdl-typography--title mdl-color-text--green">
+                                    <div class="web-filter--not-top mdl-cell mdl-cell--12-col mdl-typography--title mdl-color-text--green">
                                         Domains to be allowed
                                     </div>
                                     <div class="mdl-cell mdl-cell--12-col">

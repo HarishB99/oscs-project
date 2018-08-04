@@ -344,9 +344,9 @@ app.post('/filter-update', async (request, response) => {
     try {
         const { uid } = await authenticator.checkPostAccess(request.get(TOKEN));
 
-        const { blacklist, whitelist } = request.body;
+        const { blacklist, whitelist, fakeNews, socialMedia, gambling, pornography } = request.body;
 
-        const input = iv.isValidFilter(blacklist, whitelist);
+        const input = iv.isValidFilter(blacklist, whitelist, fakeNews, socialMedia, gambling, pornography);
 
         if (!input) {
             await log(logger.filterUpdateFailure(request, uid, ErrorCode.FILTER.BAD_DATA, admin.firestore.FieldValue.serverTimestamp(), input));
@@ -355,7 +355,12 @@ app.post('/filter-update', async (request, response) => {
             const writeResult = await db.doc(`/users/${uid}/filters/filter`)
             .set({
                 whitelist: input.whitelist,
-                blacklist: input.blacklist
+                blacklist: input.blacklist,
+                fakeNews: input.fakeNews,
+                socialMedia: input.socialMedia,
+                gambling: input.gambling,
+                pornography: input.pornography,
+                lastUpdated: admin.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
             await log(logger.filterUpdateSuccess(request, uid, writeResult.writeTime, input));
             response.send(SuccessCode.FILTER.UPDATE);
@@ -418,6 +423,10 @@ export const createNewUser = functions.auth.user().onCreate(async user => {
             // mode: false
             whitelist: [],
             blacklist: [],
+            fakeNews: true,
+            socialMedia: true,
+            gambling: true,
+            pornography: true,
             created: admin.firestore.FieldValue.serverTimestamp()
         }),
         db.doc(`/users/${uid}`).set({

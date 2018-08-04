@@ -206,18 +206,22 @@ firebase.auth().onAuthStateChanged(user => {
 
         // #web-filter
         let filters = '';
+        const web_filter_dg_fakenews = document.getElementById('web-filter__domain-grp--fake-news');
+        const web_filter_dg_socialmedia = document.getElementById('web-filter__domain-grp--social-media');
+        const web_filter_dg_gamble = document.getElementById('web-filter__domain-grp--gambling');
+        const web_filter_dg_pornography = document.getElementById('web-filter__domain-grp--pornography');
+
         const web_filter_list_black = document.getElementById('web-filter__tbody--black-list');
         const web_filter_domain_black = document.getElementById('web-filter__domain--black-list');
         const web_filter_btn_add_black = document.getElementById('web-filter__btn-add--black-list');
+
+        const web_filter_list_white = document.getElementById('web-filter__tbody--white-list');
+        const web_filter_domain_white = document.getElementById('web-filter__domain--white-list');
+        const web_filter_btn_add_white = document.getElementById('web-filter__btn-add--white-list');
         // const web_filter_mode_label = document.querySelector('label[for=\'web-filter__mode\']');
         // const web_filter_mode = document.getElementById('web-filter__mode');
         const web_filter_btn_publish = document.getElementById('web-filter__btn-submit');
         const web_filter_btn_cancel = document.getElementById('web-filter__btn-cancel');
-
-        
-        const web_filter_list_white = document.getElementById('web-filter__tbody--white-list');
-        const web_filter_domain_white = document.getElementById('web-filter__domain--white-list');
-        const web_filter_btn_add_white = document.getElementById('web-filter__btn-add--white-list');
 
         const checkAllInputsBlack = function() {
             UIUtils.update_text_field_ui(web_filter_domain_black, 
@@ -244,9 +248,7 @@ firebase.auth().onAuthStateChanged(user => {
             return true;
         };
 
-        // TODO: Need to be changed
         const resetFiltersList = function () {
-            // TODO: Change db structure and make client follow it.
             // UIUtils.toggleSwitch(filters.mode, web_filter_mode);
 
             // Reset web_filter_lists
@@ -291,6 +293,11 @@ firebase.auth().onAuthStateChanged(user => {
                     tr.appendChild(filter_del_btn_holder)
                 web_filter_list_black.appendChild(tr);
             });
+
+            UIUtils.toggleSwitch(filters.fakeNews, web_filter_dg_fakenews);
+            UIUtils.toggleSwitch(filters.socialMedia, web_filter_dg_socialmedia);
+            UIUtils.toggleSwitch(filters.gambling, web_filter_dg_gamble);
+            UIUtils.toggleSwitch(filters.pornography, web_filter_dg_pornography);
         }
 
         web_filter_domain_black.addEventListener('keyup', e => {
@@ -349,7 +356,6 @@ firebase.auth().onAuthStateChanged(user => {
             lock = false
         });
 
-        // TODO: Need to be changed
         web_filter_btn_publish.addEventListener('click', () => {
             if (lock) return; lock = true;
             const domains = document.querySelectorAll('.domain');
@@ -380,7 +386,12 @@ firebase.auth().onAuthStateChanged(user => {
             .then(token => {
                 return axios.post('/filter-update', {
                     blacklist: finalBlacklistDomains,
-                    whitelist: finalWhitelistDomains
+                    whitelist: finalWhitelistDomains,
+
+                    fakeNews: web_filter_dg_fakenews.parentElement.classList.contains('is-checked').toString(),
+                    socialMedia: web_filter_dg_socialmedia.parentElement.classList.contains('is-checked').toString(),
+                    gambling: web_filter_dg_gamble.parentElement.classList.contains('is-checked').toString(),
+                    pornography: web_filter_dg_pornography.parentElement.classList.contains('is-checked').toString()
                     // filters: finalFilters
                     // mode: web_filter_mode_label.classList.contains('is-checked').toString()
                 }, {

@@ -124,8 +124,10 @@ app.get('/rules.json', (request, response) => {
     const responseJson = {
         rules: [],
         webfilter: {
-            // mode: '',
-            domainGroups: [],
+            fakeNews: true,
+            socialMedia: true,
+            gambling: true,
+            pornography: true,
             blacklist: [],
             whitelist: [],
             blockAds: true,
@@ -143,12 +145,12 @@ app.get('/rules.json', (request, response) => {
     }
 
     if (filter_final) {
-        responseJson.webfilter = {
-            // mode: (filter_final.mode === 1 ? 'whitelist' : 'blacklist'),
-            domainGroups: filter_final.domainGroups,
-            blacklist: filter_final.blacklist,
-            whitelist: filter_final.whitelist
-        };
+        responseJson.webfilter.whitelist = filter_final.whitelist;
+        responseJson.webfilter.blacklist = filter_final.blacklist;
+        responseJson.webfilter.fakeNews = filter_final.fakeNews;
+        responseJson.webfilter.socialMedia = filter_final.socialMedia;
+        responseJson.webfilter.gambling = filter_final.gambling;
+        responseJson.webfilter.pornography = filter_final.pornography;
     }
 
     if (global_options_final) {
