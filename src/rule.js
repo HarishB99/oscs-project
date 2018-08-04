@@ -160,7 +160,6 @@ firebase.auth().onAuthStateChanged(user => {
                     }
                 });
             }).then(response => {
-                // console.log(response.data);
                 if (response.data.code === 'rule/creation-success') {
                     location.replace('/#firewall-rule');
                 } else {

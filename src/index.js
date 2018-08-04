@@ -393,8 +393,7 @@ firebase.auth().onAuthStateChanged(user => {
                 finalBlacklistDomains.push(filter);
             });
 
-            user.getIdToken(true)
-            .then(token => {
+            user.getIdToken(true).then(token => {
                 return axios.post('/filter-update', {
                     blacklist: finalBlacklistDomains,
                     whitelist: finalWhitelistDomains,

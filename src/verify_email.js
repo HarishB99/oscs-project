@@ -38,7 +38,6 @@ firebase.auth().onAuthStateChanged(user => {
             span.innerHTML = 'Your email has been verified. Please login to refresh your profile information.';
             form_holder_container.appendChild(span);
 
-            // buttons_holder.style.display = 'block';
             buttons_holder.classList.remove('visually-hidden');
 
             account_login_btn.addEventListener('click', () => {

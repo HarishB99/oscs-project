@@ -68,18 +68,8 @@ firebase.auth().onAuthStateChanged(user => {
                 rule_delete_btn.disabled = true;
             }
         };
-
-        // checkAllInputs();
-
-        // rule_delete_name.addEventListener('focus', e => {
-        //     UIUtils.update_text_field_ui(e.currentTarget, 
-        //         e.currentTarget.value === rule_delete_name_retrieved.innerHTML);
-        //     if (e.currentTarget.value === rule_delete_name_retrieved.innerHTML) {
-        //         rule_delete_btn.disabled = false;
-        //     } else {
-        //         rule_delete_btn.disabled = true;
-        //     }
-        // }); 
+        
+        /* ::Add keyboard event listeners to validate text fields:: */
         rule_delete_name.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.currentTarget, 
                 e.currentTarget.value === rule_delete_name_retrieved.innerHTML);
@@ -89,6 +79,7 @@ firebase.auth().onAuthStateChanged(user => {
                 rule_delete_btn.disabled = true;
             }
         });
+        /* ::Add keyboard event listeners to validate text fields:: */
         
         document.addEventListener('keyup', e => {
             if (e.keyCode === 13) rule_delete_btn.click();

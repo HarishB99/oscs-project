@@ -32,17 +32,16 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
         var checkAllInputs = function() {
             UIUtils.update_text_field_ui(acc_rst_email_pass, 
                 InputValidator.isAReasonablyStrongPassword(acc_rst_email_pass.value));
-            
             UIUtils.update_text_field_ui(acc_rst_email_new_email, 
                 InputValidator.isValidEmail(acc_rst_email_new_email.value));
             UIUtils.update_text_field_ui(acc_rst_email_new_email2, 
                 (acc_rst_email_new_email.value === acc_rst_email_new_email2.value && acc_rst_email_new_email2.value !== ''));
         };
 
+        /* ::Add keyboard event listeners to validate text fields:: */
         acc_rst_email_pass.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.target, 
                 InputValidator.isAReasonablyStrongPassword(e.target.value));
-            
         });
 
         acc_rst_email_new_email.addEventListener('keyup', e => {
@@ -54,6 +53,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
             UIUtils.update_text_field_ui(e.target, 
                 (acc_rst_email_new_email.value === e.target.value && e.target.value !== ''));
         });
+        /* ::Add keyboard event listeners to validate text fields:: */
 
         document.addEventListener('keyup', e => {
             if (e.keyCode === 13) acc_rst_email_btn.click();

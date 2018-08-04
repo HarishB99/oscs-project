@@ -45,6 +45,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                     (acc_rst_pass_new_pass.value === acc_rst_pass_new_pass2.value && acc_rst_pass_new_pass2.value !== ''));
             };
     
+            /* ::Add keyboard event listeners to validate text fields:: */
             acc_rst_pass_pass.addEventListener('keyup', e => {
                 UIUtils.update_text_field_ui(e.target, 
                     InputValidator.isAReasonablyStrongPassword(e.target.value));
@@ -59,6 +60,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                 UIUtils.update_text_field_ui(e.target, 
                     (acc_rst_pass_new_pass.value === e.target.value && e.target.value !== ''));
             });
+            /* ::Add keyboard event listeners to validate text fields:: */
     
             document.addEventListener('keyup', e => {
                 if (e.keyCode === 13 && !InputValidator.isEmpty(acc_rst_pass_btn)) acc_rst_pass_btn.click();
@@ -82,7 +84,6 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                     firebase.auth.EmailAuthProvider.credential(user.email, acc_rst_pass_pass.value)
                 ).then(() => {
                     return firebase.auth().confirmPasswordReset(actionCode, acc_rst_pass_new_pass.value);
-                    // return credential.user.updatePassword(acc_rst_pass_new_pass.value);
                 }).then(() => {
                     acc_rst_pass_status.innerHTML = 'Success!';
                     acc_rst_pass_status.parentElement.classList.remove('mdl-color-text--amber');
@@ -98,7 +99,6 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                         acc_rst_pass_btn.classList.add('visually-hidden');
                     acc_login_btn.classList.remove('visually-hidden');
                     lock = false;
-                    // location.replace('/');
                 }).catch(error => {
                     if (error.code === 'auth/wrong-password') {
                         UIUtils.showSnackbar('Invalid Credentials. Please try again.');
