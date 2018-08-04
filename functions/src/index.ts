@@ -198,12 +198,11 @@ app.post('/rule-create', async (request, response) => {
         } else {
             // Check whether user has already created 
             // a similar rule
-            const ruleWithSameNameAndPriority = await db.collection(`/users/${uid}/rules`)
-                .where('priority', '==', input.priority)
+            const ruleWithSameName = await db.collection(`/users/${uid}/rules`)
                 .where('name', '==', input.name)
             .get();
             
-            if (!ruleWithSameNameAndPriority.empty) {
+            if (!ruleWithSameName.empty) {
                 await log(logger.ruleCreateFailure(request, uid, ErrorCode.RULE.ALREADY_EXIST, admin.firestore.FieldValue.serverTimestamp(), input));
                 response.send(ErrorCode.RULE.ALREADY_EXIST);
             } else {
@@ -244,21 +243,21 @@ app.post('/rule-update', async (request, response) => {
             await log(logger.ruleUpdateFailure(request, uid, ErrorCode.RULE.BAD_DATA, admin.firestore.FieldValue.serverTimestamp(), input));
             response.send(ErrorCode.RULE.BAD_DATA);
         } else {
-            const ruleWithSameNameAndPriority = await db.collection(`/users/${uid}/rules`)
-                .where('priority', '==', input.priority)
-                .where('name', '==', input.name)
-            .get();
-
             const ruleRef = db.doc(`/users/${uid}/rules/${id}`);
-            const rule = await ruleRef.get();
+            const [ rule, ruleWithSameName ] = await Promise.all([
+                ruleRef.get(), 
+                db.collection(`/users/${uid}/rules`)
+                    .where('name', '==', input.name)
+                .get()
+            ]);
 
-            if (!ruleWithSameNameAndPriority.empty) {
-                await log(logger.ruleCreateFailure(request, uid, ErrorCode.RULE.ALREADY_EXIST, admin.firestore.FieldValue.serverTimestamp(), input));
-                response.send(ErrorCode.RULE.ALREADY_EXIST);
-            } else if (!rule.exists) {
+            if (!rule.exists) {
                 await log(logger.ruleUpdateFailure(request, uid, ErrorCode.RULE.NOT_FOUND, admin.firestore.FieldValue.serverTimestamp(), input));
                 response.send(ErrorCode.RULE.NOT_FOUND);
-            }  else {
+            } else if (rule.data().name !== input.name && !ruleWithSameName.empty) {
+                await log(logger.ruleCreateFailure(request, uid, ErrorCode.RULE.ALREADY_EXIST, admin.firestore.FieldValue.serverTimestamp(), input));
+                response.send(ErrorCode.RULE.ALREADY_EXIST);
+            } else {
                 const writeResult = await ruleRef.set({
                     name: input.name,
                     access: input.access,
@@ -270,7 +269,7 @@ app.post('/rule-update', async (request, response) => {
                     destport: input.destport,
                     state: input.state,
                     direction: input.direction,
-                    lastUpdate: admin.firestore.FieldValue.serverTimestamp()
+                    lastUpdated: admin.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
                 await log(logger.ruleUpdateSuccess(request, uid, writeResult.writeTime, input));
                 response.send(SuccessCode.RULE.UPDATE);
