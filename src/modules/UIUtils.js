@@ -6,14 +6,14 @@ UIUtils.showSnackbar = function (message, actionText, actionHandler, timeout) {
         message: message,
         timeout: 5000
     };
-    if (typeof actionText !== "undefined") {
+    if (typeof actionText !== "undefined" && actionText) {
         if (actionText) {
             data.actionText = actionText;
             data.actionHandler = actionHandler;
         }
     }
 
-    if (typeof timeout !== 'undefined') {
+    if (typeof timeout !== 'undefined' && timeout) {
         if (timeout) {
             data.timeout = timeout;
         }
