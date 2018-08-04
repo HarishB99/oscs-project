@@ -48,13 +48,22 @@ app.get("/logs", (req, res) => {
     if (err) throw err;
     var logdb = db.db("logDatabase");
     var usersCol = logdb.collection("users");
-    var log = usersCol.find({})
-
-    res.render("logs", {
-      "logs" : log
-    });
-    db.close();
+    var userLog = usersCol.find({}).toArray((err, result) => {
+      console.log(result)
+      res.render("logs", {
+        "logs" : JSON.stringify(result)
+      });
+      db.close();
+    })
   });
+});
+
+app.get("/styles/:style", (req, res) => {
+  res.sendFile(__dirname + "/styles/" + req.params.style)
+});
+
+app.get("/scripts/:script", (req, res) => {
+  res.sendFile(__dirname + "/scripts/" + req.params.script)
 });
 
 app.post('/login', (request, response) => {
