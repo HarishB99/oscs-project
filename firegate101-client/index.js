@@ -4,14 +4,8 @@ const axios = require('axios');
 const cors = require('cors')({ origin: true });
 const path = require('path');
 // const bodyParser = require('body-parser');
-const config = {
-    apiKey: "AIzaSyCUJp0rD0b9nNgA5pn4WOXtZr6mM4PxQp8",
-    authDomain: "firegate-101.firebaseapp.com",
-    databaseURL: "https://firegate-101.firebaseio.com",
-    projectId: "firegate-101",
-    storageBucket: "firegate-101.appspot.com",
-    messagingSenderId: "700794827690"
-};
+const config = require('./modules/config').config;
+const InputValidator = require('./modules/InputValidator').default;
 firebase.initializeApp(config);
 
 const app = express();
@@ -64,57 +58,63 @@ app.get("/logs", (req, res) => {
 });
 
 app.post('/login', (request, response) => {
-    // TODO: Check if user has verified phone number
-    // and email. If no, can do nothing. Else, can
-    // do something.
     response.set('Accept', 'application/json');
 
     // For POST'
     console.log(request.body)
     const { email, password } = request.body;
 
-    // For GET
-    // const email = request.query.email;
-    // const password = request.query.password;
-    console.log(`${datestring()} [+] Logging in email: ${email}`);
-    firebase.auth().signInWithEmailAndPassword(email, password)
-    .then(() => {
-        response.send('Login successful');
-    }).catch(error => {
-        console.error(`${datestring()} [-] Error while logging in: ${error}`);
-        response.send('Login failure');
-    });
+    if (InputValidator.isValidEmail(email) && InputValidator.isAReasonablyStrongPassword(password)) {
+        // For GET
+        // const email = request.query.email;
+        // const password = request.query.password;
+        console.log(`${datestring()} [+] Logging in email: ${email}`);
+        firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(() => {
+            response.send('Login successful');
+        }).catch(error => {
+            console.error(`${datestring()} [-] Error while logging in: ${error}`);
+            response.send('Login failure');
+        });
+    } else {
+        console.error(`${datestring()} [-] Error while logging in: Credentials received failed input validation: Email: ${email}, Passed Validation: ${InputValidator.isValidEmail(email)}, Password is empty, null or undefined: ${InputValidator.isEmpty(password)}, Password Passed Validation: ${InputValidator.isAReasonablyStrongPassword(password)}`);
+        response.send('Email and password failed input validation.');
+    }
 });
 
 firebase.auth().onAuthStateChanged(user => {
     console.log(`${datestring()} [+] Detected authentication state change`);
-    if (user) {
+    if (!InputValidator.isEmpty(user)) {
         console.log(`${datestring()} [+] User logged in: ${user.displayName}`);
-        const uid = user.uid;
-        db.collection('users').doc(uid).collection('rules')
-        .onSnapshot(rules => {
-            console.log(`${datestring()} [+] Retrieving rules...`);
-            const ruleJsons = [];
-            rules.forEach(rule => {
-                ruleJsons.push(rule.data());
+        if (user.emailVerified) {
+            const uid = user.uid;
+            db.collection('users').doc(uid).collection('rules')
+            .onSnapshot(rules => {
+                console.log(`${datestring()} [+] Retrieving rules...`);
+                const ruleJsons = [];
+                rules.forEach(rule => {
+                    ruleJsons.push(rule.data());
+                });
+                rules_final = ruleJsons;
+                console.log(`${datestring()} [+] Retrieved rules successfully`);
             });
-            rules_final = ruleJsons;
-            console.log(`${datestring()} [+] Retrieved rules successfully`);
-        });
-
-        db.doc(`/users/${uid}/filters/filter`)
-        .onSnapshot(filterDoc => {
-            console.log(`${datestring()} [+] Retrieving filters...`);
-            filter_final = filterDoc.data();
-            console.log(`${datestring()} [+] Retrieved filters sucessfully`);
-        });
-
-        db.doc(`/users/${uid}/options/global`)
-        .onSnapshot(optionsDoc => {
-            console.log(`${datestring()} [+] Retrieving options...`);
-            global_options_final = optionsDoc.data();
-            console.log(`${datestring()} [+] Retrieved options sucessfully`);
-        });
+    
+            db.doc(`/users/${uid}/filters/filter`)
+            .onSnapshot(filterDoc => {
+                console.log(`${datestring()} [+] Retrieving filters...`);
+                filter_final = filterDoc.data();
+                console.log(`${datestring()} [+] Retrieved filters sucessfully`);
+            });
+    
+            db.doc(`/users/${uid}/options/global`)
+            .onSnapshot(optionsDoc => {
+                console.log(`${datestring()} [+] Retrieving options...`);
+                global_options_final = optionsDoc.data();
+                console.log(`${datestring()} [+] Retrieved options sucessfully`);
+            });
+        } else {
+            console.log(`${datestring()} [-] User has not verified his/her email.`);
+        }
     } else {
         console.log(`${datestring()} [-] No user logged in.`);
     }
@@ -135,7 +135,7 @@ app.get('/rules.json', (request, response) => {
         },
         childSafety: true,
         virusScan: true,
-        message: 'If the properties of this object are empty, you probably forgot to login first before performing this query.'
+        message: 'If the properties of this object are empty, you probably forgot to login first or have not verified your email before performing this query.'
     };
 
     if (rules_final) {
