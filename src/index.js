@@ -34,8 +34,11 @@ firebase.auth().onAuthStateChanged(user => {
             if (lock) return; lock = true;
             firebase.auth().signOut()
             .catch(error => {
-                console.error('Error while signing out user: ', error);
-                UIUtils.showSnackbar('Please clear your browser cache or restart your browser, and try again.');
+                if (error.code === 'auth/network-request-failed') {
+                    UIUtils.showSnackbar('Please check your network connection and try again.');
+                } else {
+                    UIUtils.showSnackbar('Please clear your browser cache or restart your browser, and try again.');
+                }
                 lock = false;
             });
         });
@@ -147,8 +150,19 @@ firebase.auth().onAuthStateChanged(user => {
                                 user.getIdToken(true)
                                 .then(token => location.href = `/edit_rule/${token}?rule=${rule.id}`)
                                 .catch(error => {
-                                    // TODO: Handle retrieving token errors
-                                    console.error(`Error while retrieving token: ${error}`);
+                                    if (error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired') {
+                                        firebase.auth().signOut()
+                                        .catch(() => {
+                                            UIUtils.showSnackbar('You have to logout and login again to perform this action.');
+                                            lock = false;
+                                        });
+                                    } else if (error.code === 'auth/network-request-failed') {
+                                        UIUtils.showSnackbar('Please check your network connection and try again.');
+                                    } else if (error.code === 'auth/user-disabled') {
+                                        UIUtils.showSnackbar('Your account has been disabled. Please logout and login before trying again.');
+                                    } else {
+                                        UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                                    }
                                     lock = false;
                                 });
                             });
@@ -165,8 +179,19 @@ firebase.auth().onAuthStateChanged(user => {
                                 user.getIdToken(true)
                                 .then(token => location.href = `/delete_rule/${token}?rule=${rule.id}`)
                                 .catch(error => {
-                                    // TODO: Handle retrieving token errorsy
-                                    console.error(`Error while retrieving token: ${error}`);
+                                    if (error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired') {
+                                        firebase.auth().signOut()
+                                        .catch(() => {
+                                            UIUtils.showSnackbar('You have to logout and login again to perform this action.');
+                                            lock = false;
+                                        });
+                                    } else if (error.code === 'auth/network-request-failed') {
+                                        UIUtils.showSnackbar('Please check your network connection and try again.');
+                                    } else if (error.code === 'auth/user-disabled') {
+                                        UIUtils.showSnackbar('Your account has been disabled. Please logout and login before trying again.');
+                                    } else {
+                                        UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                                    }
                                     lock = false;
                                 });
                             });
@@ -195,7 +220,6 @@ firebase.auth().onAuthStateChanged(user => {
                 });
             });
         }, error => {
-            console.error('Error while retrieving data from server: ', error);
             if (error.message === "Missing or insufficient permissions.") {
                 UIUtils.showSnackbar('Please verify your email before you proceed to manage your firewall proxy.');
                 showVerifyEmail(tbody);
@@ -206,18 +230,21 @@ firebase.auth().onAuthStateChanged(user => {
 
         // #web-filter
         let filters = '';
+        const web_filter_dg_fakenews = document.getElementById('web-filter__domain-grp--fake-news');
+        const web_filter_dg_socialmedia = document.getElementById('web-filter__domain-grp--social-media');
+        const web_filter_dg_gamble = document.getElementById('web-filter__domain-grp--gambling');
+        const web_filter_dg_pornography = document.getElementById('web-filter__domain-grp--pornography');
+
         const web_filter_list_black = document.getElementById('web-filter__tbody--black-list');
         const web_filter_domain_black = document.getElementById('web-filter__domain--black-list');
         const web_filter_btn_add_black = document.getElementById('web-filter__btn-add--black-list');
-        // const web_filter_mode_label = document.querySelector('label[for=\'web-filter__mode\']');
-        // const web_filter_mode = document.getElementById('web-filter__mode');
-        const web_filter_btn_publish = document.getElementById('web-filter__btn-submit');
-        const web_filter_btn_cancel = document.getElementById('web-filter__btn-cancel');
 
-        
         const web_filter_list_white = document.getElementById('web-filter__tbody--white-list');
         const web_filter_domain_white = document.getElementById('web-filter__domain--white-list');
         const web_filter_btn_add_white = document.getElementById('web-filter__btn-add--white-list');
+        
+        const web_filter_btn_publish = document.getElementById('web-filter__btn-submit');
+        const web_filter_btn_cancel = document.getElementById('web-filter__btn-cancel');
 
         const checkAllInputsBlack = function() {
             UIUtils.update_text_field_ui(web_filter_domain_black, 
@@ -228,10 +255,6 @@ firebase.auth().onAuthStateChanged(user => {
             UIUtils.update_text_field_ui(web_filter_domain_white, 
                 InputValidator.isValidDomain(web_filter_domain_white.value));
         };
-        
-        // const checkAllInputs = function() {
-        //     checkAllInputsBlack(); checkAllInputsWhite();
-        // };
 
         const allDomainsAreValid = function(domains) {
             for (let i = 0; i < domains.length; i++) {
@@ -244,11 +267,7 @@ firebase.auth().onAuthStateChanged(user => {
             return true;
         };
 
-        // TODO: Need to be changed
         const resetFiltersList = function () {
-            // TODO: Change db structure and make client follow it.
-            // UIUtils.toggleSwitch(filters.mode, web_filter_mode);
-
             // Reset web_filter_lists
             web_filter_list_black.innerHTML = '';
             web_filter_list_white.innerHTML = '';
@@ -291,6 +310,11 @@ firebase.auth().onAuthStateChanged(user => {
                     tr.appendChild(filter_del_btn_holder)
                 web_filter_list_black.appendChild(tr);
             });
+
+            UIUtils.toggleSwitch(filters.fakeNews, web_filter_dg_fakenews);
+            UIUtils.toggleSwitch(filters.socialMedia, web_filter_dg_socialmedia);
+            UIUtils.toggleSwitch(filters.gambling, web_filter_dg_gamble);
+            UIUtils.toggleSwitch(filters.pornography, web_filter_dg_pornography);
         }
 
         web_filter_domain_black.addEventListener('keyup', e => {
@@ -311,7 +335,6 @@ firebase.auth().onAuthStateChanged(user => {
 
             const tr = document.createElement('tr');
                 const domain = document.createElement('td');
-                    // domain.id = 'domain';
                     domain.className = 'domain domain--black mdl-data-table__cell--non-numeric';
                     domain.innerHTML = web_filter_domain_black.value;
                 tr.appendChild(domain);
@@ -334,7 +357,6 @@ firebase.auth().onAuthStateChanged(user => {
 
             const tr = document.createElement('tr');
                 const domain = document.createElement('td');
-                    // domain.id = 'domain';
                     domain.className = 'domain domain--white mdl-data-table__cell--non-numeric';
                     domain.innerHTML = web_filter_domain_white.value;
                 tr.appendChild(domain);
@@ -349,7 +371,6 @@ firebase.auth().onAuthStateChanged(user => {
             lock = false
         });
 
-        // TODO: Need to be changed
         web_filter_btn_publish.addEventListener('click', () => {
             if (lock) return; lock = true;
             const domains = document.querySelectorAll('.domain');
@@ -358,8 +379,6 @@ firebase.auth().onAuthStateChanged(user => {
                 UIUtils.showSnackbar('Please check your URLs and try again.');
                 return;
             }
-
-            // const finalFilters = [];
 
             const finalWhitelistDomains = [];
             const finalBlacklistDomains = [];
@@ -380,9 +399,12 @@ firebase.auth().onAuthStateChanged(user => {
             .then(token => {
                 return axios.post('/filter-update', {
                     blacklist: finalBlacklistDomains,
-                    whitelist: finalWhitelistDomains
-                    // filters: finalFilters
-                    // mode: web_filter_mode_label.classList.contains('is-checked').toString()
+                    whitelist: finalWhitelistDomains,
+
+                    fakeNews: web_filter_dg_fakenews.parentElement.classList.contains('is-checked').toString(),
+                    socialMedia: web_filter_dg_socialmedia.parentElement.classList.contains('is-checked').toString(),
+                    gambling: web_filter_dg_gamble.parentElement.classList.contains('is-checked').toString(),
+                    pornography: web_filter_dg_pornography.parentElement.classList.contains('is-checked').toString()
                 }, {
                     headers: {
                         'Authorisation': 'Bearer ' + token
@@ -393,9 +415,20 @@ firebase.auth().onAuthStateChanged(user => {
                 resetFiltersList();
                 UIUtils.showSnackbar(payload.message);
                 lock = false;
-            }).catch(error => {
-                console.log(`Error while sending update filter request: ${error}`);
-                UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+            }).catch(error => { 
+                if (error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired') {
+                    firebase.auth().signOut()
+                    .catch(() => {
+                        UIUtils.showSnackbar('You have to logout and login again to perform this action.');
+                        lock = false;
+                    });
+                } else if (error.code === 'auth/network-request-failed') {
+                    UIUtils.showSnackbar('Please check your network connection and try again.');
+                } else if (error.code === 'auth/user-disabled') {
+                    UIUtils.showSnackbar('Your account has been disabled. Please logout and login before trying again.');
+                } else {
+                    UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                }
                 lock = false;
             });
         });
@@ -406,7 +439,6 @@ firebase.auth().onAuthStateChanged(user => {
             filters = snapshot.data();
             resetFiltersList();
         }, error => {
-            console.error('Error while retrieving data from server: ', error);
             if (error.message === "Missing or insufficient permissions.") {
                 UIUtils.showSnackbar('Please verify your email before you proceed to manage your firewall proxy.');
             } else {
@@ -417,7 +449,6 @@ firebase.auth().onAuthStateChanged(user => {
         // #global
         const block_ads = document.getElementById('web-filter__block-ads');
         const block_malicious = document.getElementById('web-filter__block-malicious');
-        // const dpi = document.getElementById('firewall-rule__dpi');
         const vs = document.getElementById('firewall-rule__vs');
         const cs = document.getElementById('firewall-rule__cs');
         const global_submit_btn = document.getElementById('global--btn-submit');
@@ -433,7 +464,6 @@ firebase.auth().onAuthStateChanged(user => {
                         'Authorisation': 'Bearer ' + token
                     },
                     data: {
-                        // dpi: dpi.parentElement.classList.contains('is-checked').toString(),
                         childSafety: cs.parentElement.classList.contains('is-checked').toString(),
                         virusScan: vs.parentElement.classList.contains('is-checked').toString(),
                         blockAds: block_ads.parentElement.classList.contains('is-checked').toString(),
@@ -445,8 +475,19 @@ firebase.auth().onAuthStateChanged(user => {
                 UIUtils.showSnackbar(payload.message);
                 lock = false;
             }).catch(error => {
-                console.error('Error while sending options update request to server: ', error);
-                UIUtils.showSnackbar('An unexpected error occurred while trying to update your firewall settings.');
+                if (error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired') {
+                    firebase.auth().signOut()
+                    .catch(() => {
+                        UIUtils.showSnackbar('You have to logout and login again to perform this action.');
+                        lock = false;
+                    });
+                } else if (error.code === 'auth/network-request-failed') {
+                    UIUtils.showSnackbar('Please check your network connection and try again.');
+                } else if (error.code === 'auth/user-disabled') {
+                    UIUtils.showSnackbar('Your account has been disabled. Please logout and login before trying again.');
+                } else {
+                    UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                }
                 lock = false;
             });
         });
@@ -476,7 +517,6 @@ firebase.auth().onAuthStateChanged(user => {
             UIUtils.toggleSwitch(opts.blockAds, block_ads);
             UIUtils.toggleSwitch(opts.blockMalicious, block_malicious);
         }, error => {
-            console.error('Error while retrieving data from server: ', error);
             if (error.message === "Missing or insufficient permissions.") {
                 UIUtils.showSnackbar('Please verify your email before you proceed to manage your firewall proxy.');
             } else {
