@@ -38,7 +38,7 @@ function securityEvents() {
     //element containing the tab content for said ip
     d = document.createElement("div");
     d.id = "security-" + i;
-    d.class = "mdl-tabs__panel";
+    d.className = "mdl-tabs__panel";
     d.innerHTML = '\
       <div class="mdl-card" id="blockedDomains">\
         <div class="mdl-card__title">\

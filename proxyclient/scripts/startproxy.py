@@ -52,7 +52,7 @@ class FiregateLogin(QWidget):
         self.passTb.setEchoMode(QLineEdit.Password)
 
         #login button, sends login request to the cloud server
-        loginBtn = QPushButton('Login', self)
+        loginBtn = QPushButton('Start Proxy', self)
         loginBtn.clicked.connect(self.login)
         loginBtn.resize(loginBtn.sizeHint())
 

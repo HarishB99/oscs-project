@@ -51,7 +51,6 @@ app.get("/logs", (req, res) => {
     var logdb = db.db("logDatabase");
     var usersCol = logdb.collection("users");
     var userLog = usersCol.find({}).toArray((err, result) => {
-      console.log(result)
       res.render("logs", {
         "logs" : JSON.stringify(result)
       });
