@@ -21,6 +21,10 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
         const acc_rst_email_new_email2 = document.getElementById('account-rst-email--new-email2');
         const acc_rst_email_btn = document.getElementById('account-rst-email--button-submit');
 
+        const acc_rst_inputs_holder = document.getElementById('account-rst-email--inputs-holder');
+        const acc_rst_buttons_holder = document.getElementById('account-rst-email--buttons-holder');
+        const form_holder = document.getElementById('form-holder');
+
         if (!user.emailVerified) {
             acc_rst_email_pass.disabled = true;
             acc_rst_email_new_email.disabled = true;
@@ -74,6 +78,11 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
             }).then(() => {
                 return user.sendEmailVerification();
             }).then(() => {
+                form_holder.removeChild(acc_rst_buttons_holder);
+                acc_rst_inputs_holder.innerHTML = '';
+                const span = document.createElement('span');
+                    span.innerHTML = 'We have sent a link to your email. Please click on the link to verify your email.';
+                acc_rst_inputs_holder.appendChild(span);
                 UIUtils.showSnackbar('We have sent a link to your email. Please click on the link to verify your email.');
                 lock = false;
             }).catch(error => {
