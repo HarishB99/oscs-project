@@ -21,18 +21,11 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
         const acc_login_email = document.getElementById("account-login--email");
         const acc_login_pass = document.getElementById("account-login--pass");
         const acc_create_btn = document.getElementById('account-create--button');
-        const acc_rst_pass_btn = document.getElementById('account-rst-pass--button');
 
         acc_create_btn.addEventListener('click', () => {
             if (lock) return; lock = true;
             location.href = '/create_account';
             lock = false
-        });
-
-        acc_rst_pass_btn.addEventListener('click', () => {
-            if (lock) return; lock = true;
-            location.href = '/forgot_password';
-            lock = false;
         });
         
         var checkAllInputs = function() {
