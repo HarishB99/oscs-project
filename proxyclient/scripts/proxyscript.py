@@ -51,7 +51,7 @@ with open("../data/proxy.config") as proxyConfigFile:
 
 #spin up mongo server
 mongoServerP = subprocess.Popen([config["mongo"], "--dbpath", "../data/mongodb"],
-    creationflags=subprocess.CREATE_NEW_CONSOLE)
+    shell=True)
 #close mongo server on exit
 import atexit
 atexit.register(mongoServerP.terminate)

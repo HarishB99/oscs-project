@@ -10,7 +10,7 @@ from PyQt5 import QtGui
 #spawn firegate client server
 os.chdir("../../firegate101-client")
 firegateClientP = subprocess.Popen(["node", "index.js"],
- creationflags=subprocess.CREATE_NEW_CONSOLE)
+ shell=True)
 atexit.register(firegateClientP.terminate)
 
 os.chdir("../proxyclient/scripts")
@@ -236,7 +236,7 @@ class FiregateLogin(QWidget):
 
         #spin up the proxy server
         self.proxyServerP = subprocess.Popen(["mitmdump", "-p", str(8080), "-s", "proxyscript.py"],
-         creationflags=subprocess.CREATE_NEW_CONSOLE)
+         shell=True)
         atexit.register(self.stopProxyServer)
         atexit.register(self.proxyServerP.terminate)
 
