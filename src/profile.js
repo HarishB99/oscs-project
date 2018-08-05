@@ -69,13 +69,13 @@ firebase.auth().onAuthStateChanged(user => {
         }
         
         acc_prof_email_btn.addEventListener('click', () => {
-            if (lock) return; lock = true;
+            if (lock || !(user.emailVerified)) return; lock = true;
             location.href = '/reset_email';
             lock = false;
         });
 
         acc_prof_rst_pass_btn.addEventListener('click', () => {
-            if (lock) return; lock = true;
+            if (lock || !(user.emailVerified)) return; lock = true;
 
             firebase.auth().sendPasswordResetEmail(user.email)
             .then(() => {
@@ -97,7 +97,7 @@ firebase.auth().onAuthStateChanged(user => {
         });
 
         acc_prof_verify_email_btn.addEventListener('click', () => {
-            if (lock) return; lock = true;
+            if (lock || user.emailVerified) return; lock = true;
             user.sendEmailVerification()
             .then(() => {
                 UIUtils.showSnackbar('We have sent a link to your email. Please click on the link to verify your email.');

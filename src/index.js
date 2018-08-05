@@ -55,7 +55,7 @@ firebase.auth().onAuthStateChanged(user => {
         const rule_add_btn = document.getElementById('firewall-rule__button--add');
 
         rule_add_btn.addEventListener('click', () => {
-            if (lock) return; lock = true;
+            if (lock || !(user.emailVerified)) return; lock = true;
             location.href = '/create_rule';
             lock = false;
         });
@@ -146,7 +146,7 @@ firebase.auth().onAuthStateChanged(user => {
                             editBtn.innerHTML = "<i class=\"material-icons\">edit</i> Edit";
                             editBtn.style.width = "100%";
                             editBtn.addEventListener('click', () => {
-                                if (lock) return; lock = true;
+                                if (lock || !(user.emailVerified)) return; lock = true;
                                 user.getIdToken(true)
                                 .then(token => location.href = `/edit_rule/${token}?rule=${rule.id}`)
                                 .catch(error => {
@@ -173,7 +173,7 @@ firebase.auth().onAuthStateChanged(user => {
                             deleteBtn.innerHTML = "<i class=\"material-icons\">delete</i> Delete";
                             deleteBtn.style.width = "100%";
                             deleteBtn.addEventListener('click', () => {
-                                if (lock) return; lock = true;
+                                if (lock || !(user.emailVerified)) return; lock = true;
                                 user.getIdToken(true)
                                 .then(token => location.href = `/delete_rule/${token}?rule=${rule.id}`)
                                 .catch(error => {
@@ -451,7 +451,7 @@ firebase.auth().onAuthStateChanged(user => {
         const global_submit_btn = document.getElementById('global--btn-submit');
 
         global_submit_btn.addEventListener('click', () => {
-            if (lock) return; lock = true;
+            if (lock || !(user.emailVerified)) return; lock = true;
             user.getIdToken(true)
             .then(token => {
                 return axios({

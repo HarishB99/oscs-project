@@ -64,7 +64,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
         });
 
         acc_rst_email_btn.addEventListener('click', () => {
-            if (lock) return; lock = true;
+            if (lock || !(user.emailVerified)) return; lock = true;
             checkAllInputs()
 
             if (UIUtils.stillAnyInvalid()) return;

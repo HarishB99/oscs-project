@@ -125,7 +125,7 @@ firebase.auth().onAuthStateChanged(user => {
         });
         
         rule_create_btn.addEventListener('click', () => {
-            if (lock) return; lock = true;
+            if (lock || !(user.emailVerified)) return; lock = true;
             checkAllInputs();
             
             if (UIUtils.stillAnyInvalid()) return;
