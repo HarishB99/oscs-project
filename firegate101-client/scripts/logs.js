@@ -29,7 +29,7 @@ function securityEvents() {
     var ip = logs[i]["_id"];
     //add a tab for this ip
     a = document.createElement("a");
-    a.class = "mdl-tabs__tab";
+    a.className = "mdl-tabs__tab";
     a["data-toggle"] = "tab";
     a.href = "#security-" + i;
     a.appendChild(document.createTextNode(ip));
