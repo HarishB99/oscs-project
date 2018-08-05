@@ -12,8 +12,11 @@ firebase.initializeApp(config);
 const InputValidator = require('./modules/InputValidator').default;
 const UIUtils = require('./modules/UIUtils').default;
 
+let wasAlreadyLoggedIn = false;
+
 firebase.auth().onAuthStateChanged(user => {
     if (!InputValidator.isEmpty(user)) {
+        wasAlreadyLoggedIn = true;
         let lock = false;
         const actionCode = document.querySelector('.id').id;
 
@@ -23,11 +26,11 @@ firebase.auth().onAuthStateChanged(user => {
             restoredEmail = info.data.email;
 
             return firebase.auth().applyActionCode(actionCode);
-        }).then(() => user.reload()).then(() => {
+        }).then(() => firebase.auth().signOut()).then(() => {
             const form_holder_container = document.getElementById('form-holder--container');
             const acc_rst_pass_status = document.getElementById('account-rst-pass--status');
             const buttons_holder = document.getElementById('buttons-holder');
-            const firewall_btn = document.getElementById('account-firewall--button');
+            const acc_login_btn = document.getElementById('account-login--button');
 
             acc_rst_pass_status.innerHTML = 'Success!';
             acc_rst_pass_status.parentElement.classList.remove('mdl-color-text--amber');
@@ -41,8 +44,17 @@ firebase.auth().onAuthStateChanged(user => {
                     .then(() => {
                         UIUtils.showSnackbar('An email has been sent to your email. Please click on the link to reset your password.');
                     }).catch(error => {
-                        console.error(`Error while sending password reset email: ${error}`);
-                        UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                        if (error.code === 'auth/invalid-email' || error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired' || error.code === 'auth/user-disabled' || error.code === 'auth/user-not-found') {
+                            firebase.auth().signOut()
+                            .catch(() => {
+                                UIUtils.showSnackbar('Your have to logout and login again to perform this action.');
+                                lock = false;
+                            });
+                        } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
+                            UIUtils.showSnackbar('Please check your network connection and try again.');
+                        } else {
+                            UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                        }
                     });
                 });
             form_holder_container.appendChild(span);
@@ -50,14 +62,29 @@ firebase.auth().onAuthStateChanged(user => {
             // buttons_holder.style.display = 'block';
             buttons_holder.classList.remove('visually-hidden');
 
-            firewall_btn.addEventListener('click', () => {
+            acc_login_btn.addEventListener('click', () => {
                 if (lock) return; lock = true;
-                location.href = '/';
+                location.href = '/login';
                 lock = false
             });
         }).catch(error => {
-            console.error(`Error while recovering email: ${error}`);
-            UIUtils.showSnackbar('The link has expired. Please try again.');
+            if (error.code === 'auth/expired-action-code' || error.code === 'auth/invalid-action-code') {
+                UIUtils.showSnackbar('The link has expired. Please try again.');
+            } else if (error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired' || error.code === 'auth/user-disabled' || error.code === 'auth/user-not-found') {
+                firebase.auth().signOut()
+                .catch(() => {
+                    UIUtils.showSnackbar('Your have to logout and login again to perform this action.');
+                    lock = false;
+                });
+            } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
+                UIUtils.showSnackbar('Please check your network connection and try again.');
+            } else {
+                UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+            }
         });
-    } else { UIUtils.logoutUI(); }
+    } else { 
+        if (!wasAlreadyLoggedIn) {
+            UIUtils.logoutUI();
+        }
+    }
 });

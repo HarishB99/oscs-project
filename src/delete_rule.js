@@ -33,8 +33,11 @@ firebase.auth().onAuthStateChanged(user => {
             if (lock) return; lock = true;
             firebase.auth().signOut()
             .catch(error => {
-                console.error('Error while signing out user: ', error);
-                UIUtils.showSnackbar('Please clear your browser cache or restart your browser, and try again.');
+                if (error.code === 'auth/network-request-failed') {
+                    UIUtils.showSnackbar('Please check your network connection and try again.');
+                } else {
+                    UIUtils.showSnackbar('Please clear your browser cache or restart your browser, and try again.');
+                }
                 lock = false;
             });
         });
@@ -65,18 +68,8 @@ firebase.auth().onAuthStateChanged(user => {
                 rule_delete_btn.disabled = true;
             }
         };
-
-        // checkAllInputs();
-
-        // rule_delete_name.addEventListener('focus', e => {
-        //     UIUtils.update_text_field_ui(e.currentTarget, 
-        //         e.currentTarget.value === rule_delete_name_retrieved.innerHTML);
-        //     if (e.currentTarget.value === rule_delete_name_retrieved.innerHTML) {
-        //         rule_delete_btn.disabled = false;
-        //     } else {
-        //         rule_delete_btn.disabled = true;
-        //     }
-        // }); 
+        
+        /* ::Add keyboard event listeners to validate text fields:: */
         rule_delete_name.addEventListener('keyup', e => {
             UIUtils.update_text_field_ui(e.currentTarget, 
                 e.currentTarget.value === rule_delete_name_retrieved.innerHTML);
@@ -86,13 +79,14 @@ firebase.auth().onAuthStateChanged(user => {
                 rule_delete_btn.disabled = true;
             }
         });
+        /* ::Add keyboard event listeners to validate text fields:: */
         
         document.addEventListener('keyup', e => {
             if (e.keyCode === 13) rule_delete_btn.click();
         });
 
         rule_delete_btn.addEventListener('click', () => {
-            if (lock) return; lock = true;
+            if (lock || !(user.emailVerified)) return; lock = true;
             checkAllInputs();
             
             if (UIUtils.stillAnyInvalid()) return;
@@ -120,11 +114,16 @@ firebase.auth().onAuthStateChanged(user => {
                 }
                 lock = false;
             }).catch(error => {
-                console.error('Error while performing rule deletion request: ', error);
-                if (error.message === "Network Error") {
-                    UIUtils.showSnackbar("Please check your network connection and try again.");
+                if (error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired' || error.code === 'auth/user-disabled') {
+                    firebase.auth().signOut()
+                    .catch(() => {
+                        UIUtils.showSnackbar('Your have to logout and login again to perform this action.');
+                        lock = false;
+                    });
+                } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
+                    UIUtils.showSnackbar('Please check your network connection and try again.');
                 } else {
-                    UIUtils.showSnackbar("An unexpected error occurred. Please try again later.");
+                    UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
                 }
                 lock = false;
             });

@@ -21,18 +21,11 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
         const acc_login_email = document.getElementById("account-login--email");
         const acc_login_pass = document.getElementById("account-login--pass");
         const acc_create_btn = document.getElementById('account-create--button');
-        const acc_rst_pass_btn = document.getElementById('account-rst-pass--button');
 
         acc_create_btn.addEventListener('click', () => {
             if (lock) return; lock = true;
             location.href = '/create_account';
             lock = false
-        });
-
-        acc_rst_pass_btn.addEventListener('click', () => {
-            if (lock) return; lock = true;
-            location.href = '/forgot_password';
-            lock = false;
         });
         
         var checkAllInputs = function() {
@@ -69,14 +62,29 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
             firebase.auth().signInWithEmailAndPassword(
                 acc_login_email.value, acc_login_pass.value)
             .then(() => location.replace('/')).catch(error => {
-                console.error(error);
                 if (error.code === 'auth/user-not-found') {
                     UIUtils.showSnackbar("Your email does not match our records.", "Create Account", () => {
                         location.href = '/create_account';
                     });
+                } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
+                    UIUtils.showSnackbar('Please check your network connection and try again.');
                 } else if (error.code === "auth/user-disabled") {
                     UIUtils.showSnackbar('Your account has been disabled. Please try again later.');
                 } else if (error.code === "auth/wrong-password" || error.code === "auth/invalid-email") {
+                    acc_login_email.value = '';
+                    if (acc_login_email.parentElement.classList.contains('is-dirty'))
+                        acc_login_email.parentElement.classList.remove('is-dirty');
+                    if (acc_login_email.parentElement.classList.contains('is-focused'))
+                        acc_login_email.parentElement.classList.remove('is-focused');
+                    if (!acc_login_email.parentElement.classList.contains('is-invalid'))
+                        acc_login_email.parentElement.classList.add('is-invalid');
+                    acc_login_pass.value = '';
+                    if (acc_login_pass.parentElement.classList.contains('is-dirty'))
+                        acc_login_pass.parentElement.classList.remove('is-dirty');
+                    if (acc_login_pass.parentElement.classList.contains('is-focused'))
+                        acc_login_pass.parentElement.classList.remove('is-focused');
+                    if (!acc_login_pass.parentElement.classList.contains('is-invalid'))
+                        acc_login_pass.parentElement.classList.add('is-invalid');
                     UIUtils.showSnackbar("Invalid Credentials. Please try again.");
                 } else {
                     UIUtils.showSnackbar("An unexpected error occurred. Please try again later.");

@@ -18,8 +18,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
 
         const actionCode = document.querySelector('.id').id;
 
-        firebase.auth().verifyPasswordResetCode(actionCode)
-        .then(() => {
+        firebase.auth().verifyPasswordResetCode(actionCode).then(() => {
             const form_holder_container = document.getElementById('form-holder--container');
             const acc_rst_pass_status = document.getElementById('account-rst-pass--status');
             const acc_rst_pass_pass = document.getElementById('account-rst-pass--password');
@@ -36,7 +35,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                 acc_login_btn.disabled = true;
                 UIUtils.showSnackbar('Please verify your email before you proceed.');
             }
-    
+
             var checkAllInputs = function() {
                 UIUtils.update_text_field_ui(acc_rst_pass_pass, 
                     InputValidator.isAReasonablyStrongPassword(acc_rst_pass_pass.value));
@@ -45,22 +44,24 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                 UIUtils.update_text_field_ui(acc_rst_pass_new_pass2, 
                     (acc_rst_pass_new_pass.value === acc_rst_pass_new_pass2.value && acc_rst_pass_new_pass2.value !== ''));
             };
-    
+
+            /* ::Add keyboard event listeners to validate text fields:: */
             acc_rst_pass_pass.addEventListener('keyup', e => {
                 UIUtils.update_text_field_ui(e.target, 
                     InputValidator.isAReasonablyStrongPassword(e.target.value));
             });
-    
+
             acc_rst_pass_new_pass.addEventListener('keyup', e => {
                 UIUtils.update_text_field_ui(e.target, 
                     InputValidator.isAReasonablyStrongPassword(e.target.value));
             });
-    
+
             acc_rst_pass_new_pass2.addEventListener('keyup', e => {
                 UIUtils.update_text_field_ui(e.target, 
                     (acc_rst_pass_new_pass.value === e.target.value && e.target.value !== ''));
             });
-    
+            /* ::Add keyboard event listeners to validate text fields:: */
+
             document.addEventListener('keyup', e => {
                 if (e.keyCode === 13 && !InputValidator.isEmpty(acc_rst_pass_btn)) acc_rst_pass_btn.click();
             });
@@ -70,20 +71,19 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                 location.replace('/login');
                 lock = false
             });
-    
+
             acc_rst_pass_btn.addEventListener('click', () => {
-                if (lock) return; lock = true;
+                if (lock || !(user.emailVerified)) return; lock = true;
                 checkAllInputs();
-    
+
                 if (UIUtils.stillAnyInvalid()) return;
-    
+
                 unsubscribe();
-    
+
                 user.reauthenticateAndRetrieveDataWithCredential(
                     firebase.auth.EmailAuthProvider.credential(user.email, acc_rst_pass_pass.value)
                 ).then(() => {
                     return firebase.auth().confirmPasswordReset(actionCode, acc_rst_pass_new_pass.value);
-                    // return credential.user.updatePassword(acc_rst_pass_new_pass.value);
                 }).then(() => {
                     acc_rst_pass_status.innerHTML = 'Success!';
                     acc_rst_pass_status.parentElement.classList.remove('mdl-color-text--amber');
@@ -99,23 +99,86 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                         acc_rst_pass_btn.classList.add('visually-hidden');
                     acc_login_btn.classList.remove('visually-hidden');
                     lock = false;
-                    // location.replace('/');
                 }).catch(error => {
-                    console.log(`Error while updating password: ${error}`);
-                    UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                    if (error.code === 'auth/wrong-password') {
+                        acc_rst_pass_pass.value = '';
+                        if (acc_rst_pass_pass.parentElement.classList.contains('is-dirty') || acc_rst_pass_pass.parentElement.classList.contains('is-focused')) {
+                            acc_rst_pass_pass.parentElement.classList.remove('is-dirty');
+                            acc_rst_pass_pass.parentElement.classList.remove('is-focused');
+                        }
+                        if (!acc_rst_pass_pass.parentElement.classList.contains('is-invalid'))
+                            acc_rst_pass_pass.parentElement.classList.add('is-invalid');
+                        acc_rst_pass_new_pass.value = '';
+                        acc_rst_pass_new_pass.parentElement.classList.remove('is-dirty');
+                        acc_rst_pass_new_pass2.value = '';
+                        acc_rst_pass_new_pass2.parentElement.classList.remove('is-dirty');
+                        UIUtils.showSnackbar('Invalid Credentials. Please try again.');
+                    } else if (error.code === 'auth/user-mismatch' || error.code === "auth/invalid-email" || error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired' || error.code === 'auth/user-disabled' || error.code === 'auth/user-not-found') {
+                        firebase.auth().signOut()
+                        .catch(() => {
+                            UIUtils.showSnackbar('Your have to logout and login again to perform this action.');
+                            lock = false;
+                        });
+                    } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
+                        UIUtils.showSnackbar('Please check your network connection and try again.');
+                    } else if (error.code === 'auth/weak-password') {
+                        UIUtils.showSnackbar('Please check your input and try again.');
+                    } else if (error.code === 'auth/expired-action-code' || error.code === 'auth/invalid-action-code') {
+                        firebase.auth().sendPasswordResetEmail(user.email)
+                        .then(() => {
+                            UIUtils.showSnackbar('The link has expired. We have just sent you another link to your email. Please click on it to reset your password.');
+                        }).catch(err => {
+                            if (err.code === 'auth/invalid-email' || err.code === 'auth/invalid-user-token' || err.code === 'auth/user-token-expired' || err.code === 'auth/user-disabled' || err.code === 'auth/user-not-found') {
+                                firebase.auth().signOut()
+                                .catch(() => {
+                                    UIUtils.showSnackbar('Your have to logout and login again to perform this action.');
+                                    lock = false;
+                                });
+                            } else if (err.code === 'auth/network-request-failed' || err.message === 'Network Error') {
+                                UIUtils.showSnackbar('Please check your network connection and try again.');
+                            } else {
+                                console.log(error);
+                                UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                            }
+                            lock = false;
+                        });
+                    } else {
+                        UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                    }
                     lock = false;
                 });
             });
         }).catch(error => {
-            console.error(`Error while resetting password: ${error}`);
-            firebase.auth().sendPasswordResetEmail(user.email)
-            .then(() => {
-                // TODO: Check error code first!!!
-                UIUtils.showSnackbar('The link has expired. We have just sent you another link to your email. Please click on it to reset your password.');
-            }).catch(err => {
-                console.error(`Error while sending password reset email: ${err}`);
+            if (error.code === 'auth/expired-action-code' || error.code === 'auth/invalid-action-code') {
+                firebase.auth().sendPasswordResetEmail(user.email)
+                .then(() => {
+                    UIUtils.showSnackbar('The link has expired. We have just sent you another link to your email. Please click on it to reset your password.');
+                }).catch(err => {
+                    if (err.code === 'auth/invalid-email' || err.code === 'auth/invalid-user-token' || err.code === 'auth/user-token-expired' || err.code === 'auth/user-disabled' || err.code === 'auth/user-not-found') {
+                        firebase.auth().signOut()
+                        .catch(() => {
+                            UIUtils.showSnackbar('Your have to logout and login again to perform this action.');
+                            lock = false;
+                        });
+                    } else if (err.code === 'auth/network-request-failed' || err.message === 'Network Error') {
+                        UIUtils.showSnackbar('Please check your network connection and try again.');
+                    } else {
+                        UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
+                    }
+                    lock = false;
+                });
+            } else if (error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired' || error.code === 'auth/user-disabled' || error.code === 'auth/user-not-found') {
+                firebase.auth().signOut()
+                .catch(() => {
+                    UIUtils.showSnackbar('Your have to logout and login again to perform this action.');
+                    lock = false;
+                });
+            } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
+                UIUtils.showSnackbar('Please check your network connection and try again.');
+            } else {
                 UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
-            });
+            }
+            lock = false;
         });
     } else { UIUtils.logoutUI(); }
 });

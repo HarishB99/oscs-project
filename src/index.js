@@ -55,7 +55,7 @@ firebase.auth().onAuthStateChanged(user => {
         const rule_add_btn = document.getElementById('firewall-rule__button--add');
 
         rule_add_btn.addEventListener('click', () => {
-            if (lock) return; lock = true;
+            if (lock || !(user.emailVerified)) return; lock = true;
             location.href = '/create_rule';
             lock = false;
         });
@@ -146,20 +146,18 @@ firebase.auth().onAuthStateChanged(user => {
                             editBtn.innerHTML = "<i class=\"material-icons\">edit</i> Edit";
                             editBtn.style.width = "100%";
                             editBtn.addEventListener('click', () => {
-                                if (lock) return; lock = true;
+                                if (lock || !(user.emailVerified)) return; lock = true;
                                 user.getIdToken(true)
                                 .then(token => location.href = `/edit_rule/${token}?rule=${rule.id}`)
                                 .catch(error => {
-                                    if (error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired') {
+                                    if (error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired' || error.code === 'auth/user-disabled') {
                                         firebase.auth().signOut()
                                         .catch(() => {
-                                            UIUtils.showSnackbar('You have to logout and login again to perform this action.');
+                                            UIUtils.showSnackbar('Your have to logout and login again to perform this action.');
                                             lock = false;
                                         });
                                     } else if (error.code === 'auth/network-request-failed') {
                                         UIUtils.showSnackbar('Please check your network connection and try again.');
-                                    } else if (error.code === 'auth/user-disabled') {
-                                        UIUtils.showSnackbar('Your account has been disabled. Please logout and login before trying again.');
                                     } else {
                                         UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
                                     }
@@ -175,7 +173,7 @@ firebase.auth().onAuthStateChanged(user => {
                             deleteBtn.innerHTML = "<i class=\"material-icons\">delete</i> Delete";
                             deleteBtn.style.width = "100%";
                             deleteBtn.addEventListener('click', () => {
-                                if (lock) return; lock = true;
+                                if (lock || !(user.emailVerified)) return; lock = true;
                                 user.getIdToken(true)
                                 .then(token => location.href = `/delete_rule/${token}?rule=${rule.id}`)
                                 .catch(error => {
@@ -395,8 +393,7 @@ firebase.auth().onAuthStateChanged(user => {
                 finalBlacklistDomains.push(filter);
             });
 
-            user.getIdToken(true)
-            .then(token => {
+            user.getIdToken(true).then(token => {
                 return axios.post('/filter-update', {
                     blacklist: finalBlacklistDomains,
                     whitelist: finalWhitelistDomains,
@@ -422,7 +419,7 @@ firebase.auth().onAuthStateChanged(user => {
                         UIUtils.showSnackbar('You have to logout and login again to perform this action.');
                         lock = false;
                     });
-                } else if (error.code === 'auth/network-request-failed') {
+                } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
                     UIUtils.showSnackbar('Please check your network connection and try again.');
                 } else if (error.code === 'auth/user-disabled') {
                     UIUtils.showSnackbar('Your account has been disabled. Please logout and login before trying again.');
@@ -454,7 +451,7 @@ firebase.auth().onAuthStateChanged(user => {
         const global_submit_btn = document.getElementById('global--btn-submit');
 
         global_submit_btn.addEventListener('click', () => {
-            if (lock) return; lock = true;
+            if (lock || !(user.emailVerified)) return; lock = true;
             user.getIdToken(true)
             .then(token => {
                 return axios({
@@ -469,7 +466,7 @@ firebase.auth().onAuthStateChanged(user => {
                         blockAds: block_ads.parentElement.classList.contains('is-checked').toString(),
                         blockMalicious: block_malicious.parentElement.classList.contains('is-checked').toString()
                     }
-                })
+                });
             }).then(response => {
                 const payload = response.data;
                 UIUtils.showSnackbar(payload.message);
@@ -481,7 +478,7 @@ firebase.auth().onAuthStateChanged(user => {
                         UIUtils.showSnackbar('You have to logout and login again to perform this action.');
                         lock = false;
                     });
-                } else if (error.code === 'auth/network-request-failed') {
+                } else if (error.code === 'auth/network-request-failed' || error.message === 'Network Error') {
                     UIUtils.showSnackbar('Please check your network connection and try again.');
                 } else if (error.code === 'auth/user-disabled') {
                     UIUtils.showSnackbar('Your account has been disabled. Please logout and login before trying again.');
@@ -512,10 +509,12 @@ firebase.auth().onAuthStateChanged(user => {
         db.doc(`/users/${user.uid}/options/global`)
         .onSnapshot(options => {
             const opts = options.data();
-            UIUtils.toggleSwitch(opts.childSafety, cs);
-            UIUtils.toggleSwitch(opts.virusScan, vs);
-            UIUtils.toggleSwitch(opts.blockAds, block_ads);
-            UIUtils.toggleSwitch(opts.blockMalicious, block_malicious);
+            if (opts) {
+                UIUtils.toggleSwitch(opts.childSafety, cs);
+                UIUtils.toggleSwitch(opts.virusScan, vs);
+                UIUtils.toggleSwitch(opts.blockAds, block_ads);
+                UIUtils.toggleSwitch(opts.blockMalicious, block_malicious);
+            }
         }, error => {
             if (error.message === "Missing or insufficient permissions.") {
                 UIUtils.showSnackbar('Please verify your email before you proceed to manage your firewall proxy.');
