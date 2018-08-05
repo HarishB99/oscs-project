@@ -50,11 +50,12 @@ with open("../data/proxy.config") as proxyConfigFile:
     config = json.load(proxyConfigFile)
 
 #spin up mongo server
-mongoServerP = subprocess.Popen([config["mongo"], "--dbpath", "../data/mongodb"],
-    shell=True)
-#close mongo server on exit
-import atexit
-atexit.register(mongoServerP.terminate)
+if not sys.platform.startswith('linux'):
+    mongoServerP = subprocess.Popen([config["mongo"], "--dbpath", "../data/mongodb"],
+        shell=True)
+    #close mongo server on exit
+    import atexit
+    atexit.register(mongoServerP.terminate)
 
 
 checkedDomains = {}
