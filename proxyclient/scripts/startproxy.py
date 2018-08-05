@@ -247,12 +247,15 @@ class FiregateLogin(QWidget):
 
     #edit registry keys again and stop proxy server
     def stopProxyServer(self):
-        subprocess.run(["reg", "add",
-        "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
-        "/v", "ProxyEnable", "/t", "REG_DWORD", "/d", "0", "/f"])
-        subprocess.run(["reg", "add",
-        "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
-        "/v", "AutoDetect", "/t", "REG_DWORD", "/d", "0", "/f"])
+        if sys.platform == 'win32':
+            subprocess.run(["reg", "add",
+            "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+            "/v", "ProxyEnable", "/t", "REG_DWORD", "/d", "0", "/f"])
+            subprocess.run(["reg", "add",
+            "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+            "/v", "AutoDetect", "/t", "REG_DWORD", "/d", "0", "/f"])
+        elif sys.platform.startswith('linux'):
+            ()
         ps = self.proxyServerP
         if ps is not None: ps.terminate()
 
