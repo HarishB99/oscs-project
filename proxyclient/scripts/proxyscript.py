@@ -125,7 +125,13 @@ def load(l):
         options["virus-scan"] = False
 
     #get domain groups
-    if "domainGroups" in r: addDomainGroup(r["domainGroups"])
+    #reformat data again
+    domainGroups = [];
+    if "fakeNews" in r and r["fakeNews"]: domainGroups.append("fakeNews")
+    if "gambling" in r and r["gambling"]: domainGroups.append("gambling")
+    if "socialMedia" in r and r["socialMedia"]: domainGroups.append("socialMedia")
+    if "pornography" in r and r["pornography"]: domainGroups.append("pornography")
+    addDomainGroup(domainGroups)
     #add user-defined domains
     if "blacklist" in r:
         for domain in r["blacklist"]:
@@ -252,7 +258,7 @@ def request(flow):
             for reason in sc["reason"]:
                 r += reason
             b = {"reason" : r}
-            flow.request.url = "http://localhost:3000/blocked?" + urllib.parse.urlencode(b)
+            flow.request.url = "http://" + config["nodeClientSocket"] + "/blocked?" + urllib.parse.urlencode(b)
     else:
         print("SAFE DOMAIN-----------"+d)
 

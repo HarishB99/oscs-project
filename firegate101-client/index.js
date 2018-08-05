@@ -13,6 +13,8 @@ const config = {
     messagingSenderId: "700794827690"
 };
 firebase.initializeApp(config);
+var dbc = require('fs').readFileSync('proxy.config');
+var dbConfig = JSON.parse(dbc);
 
 const app = express();
 const db = firebase.firestore();
@@ -49,7 +51,7 @@ app.get("/images/:picture", (req, res) => {
 
 app.get("/logs", (req, res) => {
   var MongoClient = require('mongodb').MongoClient;
-  var url = "mongodb://localhost:27017/";
+  var url = dbConfig.proxyDBUrl;
   MongoClient.connect(url, function(err, db) {
     if (err) throw err;
     var logdb = db.db("logDatabase");
@@ -70,6 +72,21 @@ app.get("/styles/:style", (req, res) => {
 
 app.get("/scripts/:script", (req, res) => {
   res.sendFile(__dirname + "/scripts/" + req.params.script)
+});
+
+app.get("/clearlogs", (req, res) => {
+  var MongoClient = require('mongodb').MongoClient;
+  var url = dbConfig["proxyDBUrl"];
+  MongoClient.connect(url, function(err, db) {
+    if(err) throw err;
+    var logdb = db.db("logDatabase");
+    var usersCol = logdb.collection("users");
+    //clear logs
+    usersCol.remove({}, (err, noRemoved) => {
+      if(err) res.send("failure");
+      else res.send("success");
+    });
+  });
 });
 
 app.post('/login', (request, response) => {

@@ -194,6 +194,9 @@ class FiregateLogin(QWidget):
             "/v", "ProxyOverride", "/t", "REG_SZ", "/d",
             "localhost;www.virustotal.com;*.googleapis.com;*.mywot.com",
             "/f"])
+            subprocess.run(["reg", "add",
+            "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+            "/v", "AutoDetect", "/t", "REG_DWORD", "/d", "1", "/f"])
 
 
         #firewallRules
@@ -236,6 +239,7 @@ class FiregateLogin(QWidget):
         #spin up the proxy server
         self.proxyServerP = subprocess.Popen(["mitmdump", "-p", str(8080), "-s", "proxyscript.py"],
          creationflags=subprocess.CREATE_NEW_CONSOLE)
+        atexit.register(self.stopProxyServer)
         atexit.register(self.proxyServerP.terminate)
 
         #update display
@@ -247,7 +251,9 @@ class FiregateLogin(QWidget):
         subprocess.run(["reg", "add",
         "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
         "/v", "ProxyEnable", "/t", "REG_DWORD", "/d", "0", "/f"])
-
+        subprocess.run(["reg", "add",
+        "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+        "/v", "AutoDetect", "/t", "REG_DWORD", "/d", "0", "/f"])
         ps = self.proxyServerP
         if ps is not None: ps.terminate()
 
