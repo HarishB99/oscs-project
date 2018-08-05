@@ -227,7 +227,7 @@ class FiregateLogin(QWidget):
                 IptablesHandler.initialize(8080)
                 #sort rules according to priority
                 r.sort((a, b) => {
-                    return b["priority"] - a["priority"]
+                    return a["priority"] - b["priority"]
                 })
                 for r in firewallRules:
                     if r["direction"]:
