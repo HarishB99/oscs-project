@@ -1,6 +1,7 @@
 **/node_modules/
 **/lib/
 proxyclient/data/apiKeys.json
+proxyclient/data/mongodb/**
 proxyclient/logs
 **/bac/
 public/scripts/**
