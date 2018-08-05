@@ -9,9 +9,10 @@ from PyQt5 import QtGui
 
 #spawn firegate client server
 os.chdir("../../firegate101-client")
-firegateClientP = subprocess.Popen(["node", "index.js"],
- shell=True)
-atexit.register(firegateClientP.terminate)
+if !sys.platform.startswith('linux'):
+    firegateClientP = subprocess.Popen(["node", "index.js"],
+     shell=True)
+    atexit.register(firegateClientP.terminate)
 
 os.chdir("../proxyclient/scripts")
 class FiregateLogin(QWidget):
@@ -223,7 +224,7 @@ class FiregateLogin(QWidget):
             #configuring firewall according to rules
             if sys.platform.startswith('linux'): #iptables for linux
                 print("Linux machine detected. Configuring iptables...")
-                IptablesHandler.initialize(port)
+                IptablesHandler.initialize(8080)
                 for r in rules["firewallRules"]:
                     if r["direction"]:
                         IptablesHandler.createRule(r, True)
