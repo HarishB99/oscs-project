@@ -30,7 +30,7 @@ console.log(`Timezone: ${dateString.substring(dateString.indexOf("GMT"))}`);
 
 app.set('view engine', 'pug')
 app.get('/blocked', (req, res) => {
-  res.redirect('http://localhost:3000/b?reason=' + encodeURIComponent(req.query.reason));
+  res.redirect('http://' + dbConfig["proxyAddress"] + ':3000/b?reason=' + encodeURIComponent(req.query.reason));
 });
 
 app.get("/b", (req, res) => {

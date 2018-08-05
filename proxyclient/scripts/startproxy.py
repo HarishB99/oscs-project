@@ -236,7 +236,7 @@ class FiregateLogin(QWidget):
                 WindowsFirewallHandler.setRules(rules)
 
         #spin up the proxy server
-        self.proxyServerP = subprocess.Popen(["mitmdump", "-p", str(8080), "-s", "proxyscript.py"],
+        self.proxyServerP = subprocess.Popen(["mitmdump", "-s", "proxyscript.py"],
          shell=True)
         atexit.register(self.stopProxyServer)
         atexit.register(self.proxyServerP.terminate)
