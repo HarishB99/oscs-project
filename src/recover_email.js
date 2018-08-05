@@ -12,8 +12,11 @@ firebase.initializeApp(config);
 const InputValidator = require('./modules/InputValidator').default;
 const UIUtils = require('./modules/UIUtils').default;
 
+let wasAlreadyLoggedIn = false;
+
 firebase.auth().onAuthStateChanged(user => {
     if (!InputValidator.isEmpty(user)) {
+        wasAlreadyLoggedIn = true;
         let lock = false;
         const actionCode = document.querySelector('.id').id;
 
@@ -79,5 +82,9 @@ firebase.auth().onAuthStateChanged(user => {
                 UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
             }
         });
-    } else { UIUtils.logoutUI(); }
+    } else { 
+        if (!wasAlreadyLoggedIn) {
+            UIUtils.logoutUI();
+        }
+    }
 });
