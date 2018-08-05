@@ -136,6 +136,7 @@ app.get('/account', async (request, response) => {
                     } else {
                         const html = data;
                         const finalHtml = html.replace('::CODE::', oobCode);
+                        await log(logger.emailHandlerSuccess('/account', admin.firestore.FieldValue.serverTimestamp()));
                         response.send(finalHtml);
                     }
                 });
@@ -147,6 +148,7 @@ app.get('/account', async (request, response) => {
                     } else {
                         const html = data;
                         const finalHtml = html.replace('::CODE::', oobCode);
+                        await log(logger.emailHandlerSuccess('/account', admin.firestore.FieldValue.serverTimestamp()));
                         response.send(finalHtml);
                     }
                 });
@@ -158,6 +160,7 @@ app.get('/account', async (request, response) => {
                     } else {
                         const html = data;
                         const finalHtml = html.replace('::CODE::', oobCode);
+                        await log(logger.emailHandlerSuccess('/account', admin.firestore.FieldValue.serverTimestamp()));
                         response.send(finalHtml);
                     }
                 });
