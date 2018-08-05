@@ -78,6 +78,20 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                 } else if (error.code === "auth/user-disabled") {
                     UIUtils.showSnackbar('Your account has been disabled. Please try again later.');
                 } else if (error.code === "auth/wrong-password" || error.code === "auth/invalid-email") {
+                    acc_login_email.value = '';
+                    if (acc_login_email.parentElement.classList.contains('is-dirty'))
+                        acc_login_email.parentElement.classList.remove('is-dirty');
+                    if (acc_login_email.parentElement.classList.contains('is-focused'))
+                        acc_login_email.parentElement.classList.remove('is-focused');
+                    if (!acc_login_email.parentElement.classList.contains('is-invalid'))
+                        acc_login_email.parentElement.classList.add('is-invalid');
+                    acc_login_pass.value = '';
+                    if (acc_login_pass.parentElement.classList.contains('is-dirty'))
+                        acc_login_pass.parentElement.classList.remove('is-dirty');
+                    if (acc_login_pass.parentElement.classList.contains('is-focused'))
+                        acc_login_pass.parentElement.classList.remove('is-focused');
+                    if (!acc_login_pass.parentElement.classList.contains('is-invalid'))
+                        acc_login_pass.parentElement.classList.add('is-invalid');
                     UIUtils.showSnackbar("Invalid Credentials. Please try again.");
                 } else {
                     UIUtils.showSnackbar("An unexpected error occurred. Please try again later.");

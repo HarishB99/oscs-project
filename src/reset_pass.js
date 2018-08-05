@@ -35,7 +35,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                 acc_login_btn.disabled = true;
                 UIUtils.showSnackbar('Please verify your email before you proceed.');
             }
-    
+
             var checkAllInputs = function() {
                 UIUtils.update_text_field_ui(acc_rst_pass_pass, 
                     InputValidator.isAReasonablyStrongPassword(acc_rst_pass_pass.value));
@@ -44,24 +44,24 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                 UIUtils.update_text_field_ui(acc_rst_pass_new_pass2, 
                     (acc_rst_pass_new_pass.value === acc_rst_pass_new_pass2.value && acc_rst_pass_new_pass2.value !== ''));
             };
-    
+
             /* ::Add keyboard event listeners to validate text fields:: */
             acc_rst_pass_pass.addEventListener('keyup', e => {
                 UIUtils.update_text_field_ui(e.target, 
                     InputValidator.isAReasonablyStrongPassword(e.target.value));
             });
-    
+
             acc_rst_pass_new_pass.addEventListener('keyup', e => {
                 UIUtils.update_text_field_ui(e.target, 
                     InputValidator.isAReasonablyStrongPassword(e.target.value));
             });
-    
+
             acc_rst_pass_new_pass2.addEventListener('keyup', e => {
                 UIUtils.update_text_field_ui(e.target, 
                     (acc_rst_pass_new_pass.value === e.target.value && e.target.value !== ''));
             });
             /* ::Add keyboard event listeners to validate text fields:: */
-    
+
             document.addEventListener('keyup', e => {
                 if (e.keyCode === 13 && !InputValidator.isEmpty(acc_rst_pass_btn)) acc_rst_pass_btn.click();
             });
@@ -71,15 +71,15 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                 location.replace('/login');
                 lock = false
             });
-    
+
             acc_rst_pass_btn.addEventListener('click', () => {
                 if (lock || !(user.emailVerified)) return; lock = true;
                 checkAllInputs();
-    
+
                 if (UIUtils.stillAnyInvalid()) return;
-    
+
                 unsubscribe();
-    
+
                 user.reauthenticateAndRetrieveDataWithCredential(
                     firebase.auth.EmailAuthProvider.credential(user.email, acc_rst_pass_pass.value)
                 ).then(() => {
@@ -101,6 +101,17 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                     lock = false;
                 }).catch(error => {
                     if (error.code === 'auth/wrong-password') {
+                        acc_rst_pass_pass.value = '';
+                        if (acc_rst_pass_pass.parentElement.classList.contains('is-dirty') || acc_rst_pass_pass.parentElement.classList.contains('is-focused')) {
+                            acc_rst_pass_pass.parentElement.classList.remove('is-dirty');
+                            acc_rst_pass_pass.parentElement.classList.remove('is-focused');
+                        }
+                        if (!acc_rst_pass_pass.parentElement.classList.contains('is-invalid'))
+                            acc_rst_pass_pass.parentElement.classList.add('is-invalid');
+                        acc_rst_pass_new_pass.value = '';
+                        acc_rst_pass_new_pass.parentElement.classList.remove('is-dirty');
+                        acc_rst_pass_new_pass2.value = '';
+                        acc_rst_pass_new_pass2.parentElement.classList.remove('is-dirty');
                         UIUtils.showSnackbar('Invalid Credentials. Please try again.');
                     } else if (error.code === 'auth/user-mismatch' || error.code === "auth/invalid-email" || error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired' || error.code === 'auth/user-disabled' || error.code === 'auth/user-not-found') {
                         firebase.auth().signOut()
@@ -126,6 +137,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                             } else if (err.code === 'auth/network-request-failed' || err.message === 'Network Error') {
                                 UIUtils.showSnackbar('Please check your network connection and try again.');
                             } else {
+                                console.log(error);
                                 UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
                             }
                             lock = false;

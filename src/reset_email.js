@@ -93,6 +93,17 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                 lock = false;
             }).catch(error => {
                 if (error.code === 'auth/wrong-password') {
+                    acc_rst_email_pass.value = '';
+                    if (acc_rst_email_pass.parentElement.classList.contains('is-dirty') || acc_rst_email_pass.parentElement.classList.contains('is-focused')) {
+                        acc_rst_email_pass.parentElement.classList.remove('is-dirty');
+                        acc_rst_email_pass.parentElement.classList.remove('is-focused');
+                    }
+                    if (!acc_rst_email_pass.parentElement.classList.contains('is-invalid'))
+                        acc_rst_email_pass.parentElement.classList.add('is-invalid');
+                    acc_rst_email_new_email.value = '';
+                    acc_rst_email_new_email.parentElement.classList.remove('is-dirty');
+                    acc_rst_email_new_email2.value = '';
+                    acc_rst_email_new_email2.parentElement.classList.remove('is-dirty');
                     UIUtils.showSnackbar('Invalid Credentials. Please try again.');
                 } else if (error.code === 'auth/user-mismatch' || error.code === "auth/invalid-email" || error.code === 'auth/invalid-user-token' || error.code === 'auth/user-token-expired' || error.code === 'auth/user-disabled' || error.code === 'auth/user-not-found') {
                     firebase.auth().signOut()
