@@ -23,7 +23,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
 
         const acc_rst_inputs_holder = document.getElementById('account-rst-email--inputs-holder');
         const acc_rst_buttons_holder = document.getElementById('account-rst-email--buttons-holder');
-        const form_holder = document.getElementById('form-holder');
+        const mdl_card_holder = document.getElementById('mdl-card-holder');
 
         if (!user.emailVerified) {
             acc_rst_email_pass.disabled = true;
@@ -69,6 +69,12 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
 
             if (UIUtils.stillAnyInvalid()) return;
 
+            if (acc_rst_email_new_email.value.toLowerCase() === user.email.toLowerCase()) {
+                UIUtils.showSnackbar('The email you have entered is your current email.');
+                lock = false;
+                return;
+            }
+
             unsubscribe();
 
             user.reauthenticateAndRetrieveDataWithCredential(
@@ -78,7 +84,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
             }).then(() => {
                 return user.sendEmailVerification();
             }).then(() => {
-                form_holder.removeChild(acc_rst_buttons_holder);
+                mdl_card_holder.removeChild(acc_rst_buttons_holder);
                 acc_rst_inputs_holder.innerHTML = '';
                 const span = document.createElement('span');
                     span.innerHTML = 'We have sent a link to your email. Please click on the link to verify your email.';
