@@ -4,7 +4,7 @@ const axios = require('axios');
 const cors = require('cors')({ origin: true });
 const path = require('path');
 // const bodyParser = require('body-parser');
-const config = require('./modules/config').config;
+const config = require('./modules/config.js').config;
 const InputValidator = require('./modules/InputValidator').default;
 firebase.initializeApp(config);
 var dbc = require('fs').readFileSync('proxy.config');
@@ -124,14 +124,14 @@ firebase.auth().onAuthStateChanged(user => {
                 rules_final = ruleJsons;
                 console.log(`${datestring()} [+] Retrieved rules successfully`);
             });
-    
+
             db.doc(`/users/${uid}/filters/filter`)
             .onSnapshot(filterDoc => {
                 console.log(`${datestring()} [+] Retrieving filters...`);
                 filter_final = filterDoc.data();
                 console.log(`${datestring()} [+] Retrieved filters sucessfully`);
             });
-    
+
             db.doc(`/users/${uid}/options/global`)
             .onSnapshot(optionsDoc => {
                 console.log(`${datestring()} [+] Retrieving options...`);

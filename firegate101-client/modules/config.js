@@ -1,4 +1,4 @@
-export const config = {
+module.exports.config = {
     apiKey: "AIzaSyCUJp0rD0b9nNgA5pn4WOXtZr6mM4PxQp8",
     authDomain: "firegate-101.firebaseapp.com",
     databaseURL: "https://firegate-101.firebaseio.com",

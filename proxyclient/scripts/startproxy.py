@@ -225,12 +225,10 @@ class FiregateLogin(QWidget):
                 print("Linux machine detected. Configuring iptables...")
                 IptablesHandler.initialize(port)
                 for r in rules["firewallRules"]:
-                    if r["direction"] == "incoming":
+                    if r["direction"]:
                         IptablesHandler.createRule(r, True)
-                    elif r["direction"] == "outgoing":
-                        IptablesHandler.createRule(r, False)
                     else:
-                        print("Error: Unrecognized firewall rule direction")
+                        IptablesHandler.createRule(r, False)
             elif sys.platform == 'win32': #windows firewall for windows
                 print("Windows detected. Configuring windows firewall...\n" +
                  "Note that windows firewall behaves differently from regular firewalls, and can lead to weird behaviour")
