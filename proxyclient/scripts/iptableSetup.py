@@ -19,6 +19,7 @@ class IptablesHandler:
         #Redirect HTTP and HTTPS traffic to mitmdump
         subprocess.run(["sudo", "sysctl", "-w", "net.ipv4.ip_forward=1"])
         subprocess.run(["sudo", "sysctl", "-w", "net.ipv4.conf.all.route_localnet=1"])
+        subprocess.run(["sudo", "iptables", "-A", "INPUT", "-p", "tcp", "--dport", "8080", "-j", "ACCEPT"])
         subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "PREROUTING", "-p",
          "tcp", "--dport", "80", "-j", "REDIRECT", "--to-ports", str(port)])
         subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "PREROUTING", "-p",
@@ -32,4 +33,5 @@ class IptablesHandler:
         if r is None: return None
         rule = FirewallRule(incoming, r["name"], r["allow"], r["priority"], r["sourceip"],
          r["sourceport"], r["destip"], r["destport"], r["protocol"], r["state"])
+        print(rule.asAppendCommand)
         subprocess.run(rule.asAppendCommand())
