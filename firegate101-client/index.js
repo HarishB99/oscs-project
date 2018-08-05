@@ -7,7 +7,7 @@ const path = require('path');
 const config = require('./modules/config.js').config;
 const InputValidator = require('./modules/InputValidator').default;
 firebase.initializeApp(config);
-var dbc = require('fs').readFileSync('proxy.config');
+var dbc = require('fs').readFileSync('../proxy.config');
 var dbConfig = JSON.parse(dbc);
 
 const app = express();
@@ -30,7 +30,7 @@ console.log(`Timezone: ${dateString.substring(dateString.indexOf("GMT"))}`);
 
 app.set('view engine', 'pug')
 app.get('/blocked', (req, res) => {
-  res.redirect('http://' + dbConfig["proxyAddress"] + ':3000/b?reason=' + encodeURIComponent(req.query.reason));
+  res.redirect('http://' + dbConfig["nodeClientAddress"] + ':'+ dbConfig["nodeClientPort"] + '/b?reason=' + encodeURIComponent(req.query.reason));
 });
 
 app.get("/b", (req, res) => {

@@ -38,7 +38,6 @@ function securityEvents() {
     //element containing the tab content for said ip
     d = document.createElement("div");
     d.id = "security-" + i;
-    d.className = "mdl-tabs__panel";
     d.innerHTML = '\
       <div class="mdl-card" id="blockedDomains">\
         <div class="mdl-card__title">\
@@ -64,6 +63,7 @@ function securityEvents() {
           </div>\
           <div id="security-download-file-' + i + '"\
       </div>\
+      <hr>\
     ';
     //add it to the webpage
     document.getElementById("security-events-tab").appendChild(d);

@@ -46,12 +46,12 @@ categories = {
     '501': 'Positive: Good site'
 }
 
-with open("../data/proxy.config") as proxyConfigFile:
+with open("../../proxy.config") as proxyConfigFile:
     config = json.load(proxyConfigFile)
 
 #spin up mongo server
 if not sys.platform.startswith('linux'):
-    mongoServerP = subprocess.Popen([config["mongo"], "--dbpath", "../data/mongodb"],
+    mongoServerP = subprocess.Popen([config["winMongoPath"], "--dbpath", "../data/mongodb"],
         shell=True)
     #close mongo server on exit
     import atexit
@@ -260,7 +260,7 @@ def request(flow):
             for reason in sc["reason"]:
                 r += reason
             b = {"reason" : r}
-            flow.request.url = "http://" + config["nodeClientSocket"] + "/blocked?" + urllib.parse.urlencode(b)
+            flow.request.url = "http://" + config["nodeClientAddress"] + ":" + config["nodeClientPort"] + "/blocked?" + urllib.parse.urlencode(b)
     else:
         print("SAFE DOMAIN-----------"+d)
 
