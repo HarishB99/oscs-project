@@ -225,6 +225,10 @@ class FiregateLogin(QWidget):
             if sys.platform.startswith('linux'): #iptables for linux
                 print("Linux machine detected. Configuring iptables...")
                 IptablesHandler.initialize(8080)
+                #sort rules according to priority
+                r.sort((a, b) => {
+                    return b["priority"] - a["priority"]
+                })
                 for r in firewallRules:
                     if r["direction"]:
                         IptablesHandler.createRule(r, True)
