@@ -9,7 +9,7 @@ from PyQt5 import QtGui
 
 #spawn firegate client server
 os.chdir("../../firegate101-client")
-if !sys.platform.startswith('linux'):
+if not sys.platform.startswith('linux'):
     firegateClientP = subprocess.Popen(["node", "index.js"],
      shell=True)
     atexit.register(firegateClientP.terminate)
