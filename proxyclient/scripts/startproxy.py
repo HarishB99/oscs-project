@@ -42,12 +42,12 @@ class FiregateLogin(QWidget):
         logoLabel.setPixmap(logo.scaledToHeight(100))
         #textbox for email
         self.emailLabel = QLabel("Email:", self)
-        self.emailTb = QLineEdit("angjinkuan@hotmail.sg", self)
+        self.emailTb = QLineEdit("", self)
         self.emailTb.setToolTip("Your Firegate login email")
 
         #textbox for password
         self.passLabel = QLabel("Password:", self)
-        self.passTb = QLineEdit("POpopo09!", self)
+        self.passTb = QLineEdit("", self)
         self.passTb.setToolTip("Your Firegate login password")
         self.passTb.setEchoMode(QLineEdit.Password)
 
@@ -159,7 +159,7 @@ class FiregateLogin(QWidget):
             }
             try:
                 r = requests.post('http://localhost:3000/login', json=loginDetail);
-                if r.text == "Login failure":
+                if r.text != "Login successful":
                     print("Login failure")
                     FiregateLogin.errorState(True, self.emailLabel, self.passLabel)
                     FiregateLogin.errorState(False, self.emailTb, self.passTb)
@@ -238,7 +238,7 @@ class FiregateLogin(QWidget):
                 WindowsFirewallHandler.setRules(rules)
 
         #spin up the proxy server
-        self.proxyServerP = subprocess.Popen(["mitmdump", "-s", "proxyscript.py"])
+        self.proxyServerP = subprocess.Popen(["mitmdump", "-s", "proxyscript.py", "--no-http2"])
         atexit.register(self.stopProxyServer)
         atexit.register(self.proxyServerP.terminate)
 

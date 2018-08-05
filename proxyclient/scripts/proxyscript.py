@@ -52,7 +52,7 @@ with open("../../proxy.config") as proxyConfigFile:
 #spin up mongo server
 if not sys.platform.startswith('linux'):
     mongoServerP = subprocess.Popen([config["winMongoPath"], "--dbpath", "../data/mongodb"],
-        shell=True)
+        creationflags=subprocess.CREATE_NEW_CONSOLE)
     #close mongo server on exit
     import atexit
     atexit.register(mongoServerP.terminate)
@@ -84,7 +84,7 @@ test_rules = False
 def load(l):
     #build hash table of domains to block
     addDomainsF("../data/ad-domains-full.txt", "ad")
-    addDomainsF("../data/malicious-domains-list.txt", "malicious")
+    addDomainsF("../data/malicious-domains.txt", "malicious")
 
     #load user defined domains
     if test_rules:
@@ -124,6 +124,8 @@ def load(l):
         options["virus-scan"] = True
     else:
         options["virus-scan"] = False
+
+    print(json.dumps(options, indent=4))
 
     #get domain groups
     #reformat data again
