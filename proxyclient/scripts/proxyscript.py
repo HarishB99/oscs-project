@@ -153,6 +153,7 @@ def request(flow):
         return
 
     #get ip of requester
+    print(flow.client_conn.ip_address)
     ip = flow.client_conn.ip_address[0][7:]
     LogDatabase.request(ip, d)
 
