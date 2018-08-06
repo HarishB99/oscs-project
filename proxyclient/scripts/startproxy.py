@@ -9,9 +9,10 @@ from PyQt5 import QtGui
 
 #spawn firegate client server
 os.chdir("../../firegate101-client")
-firegateClientP = subprocess.Popen(["node", "index.js"],
- creationflags=subprocess.CREATE_NEW_CONSOLE)
-atexit.register(firegateClientP.terminate)
+if not sys.platform.startswith('linux'):
+    firegateClientP = subprocess.Popen(["node", "index.js"],
+     shell=True)
+    atexit.register(firegateClientP.terminate)
 
 os.chdir("../proxyclient/scripts")
 class FiregateLogin(QWidget):
@@ -41,17 +42,17 @@ class FiregateLogin(QWidget):
         logoLabel.setPixmap(logo.scaledToHeight(100))
         #textbox for email
         self.emailLabel = QLabel("Email:", self)
-        self.emailTb = QLineEdit("angjinkuan@hotmail.sg", self)
+        self.emailTb = QLineEdit("", self)
         self.emailTb.setToolTip("Your Firegate login email")
 
         #textbox for password
         self.passLabel = QLabel("Password:", self)
-        self.passTb = QLineEdit("POpopo09!", self)
+        self.passTb = QLineEdit("", self)
         self.passTb.setToolTip("Your Firegate login password")
         self.passTb.setEchoMode(QLineEdit.Password)
 
         #login button, sends login request to the cloud server
-        loginBtn = QPushButton('Login', self)
+        loginBtn = QPushButton('Start Proxy', self)
         loginBtn.clicked.connect(self.login)
         loginBtn.resize(loginBtn.sizeHint())
 
@@ -158,7 +159,7 @@ class FiregateLogin(QWidget):
             }
             try:
                 r = requests.post('http://localhost:3000/login', json=loginDetail);
-                if r.text == "Login failure":
+                if r.text != "Login successful":
                     print("Login failure")
                     FiregateLogin.errorState(True, self.emailLabel, self.passLabel)
                     FiregateLogin.errorState(False, self.emailTb, self.passTb)
@@ -194,6 +195,9 @@ class FiregateLogin(QWidget):
             "/v", "ProxyOverride", "/t", "REG_SZ", "/d",
             "localhost;www.virustotal.com;*.googleapis.com;*.mywot.com",
             "/f"])
+            subprocess.run(["reg", "add",
+            "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+            "/v", "AutoDetect", "/t", "REG_DWORD", "/d", "1", "/f"])
 
 
         #firewallRules
@@ -220,22 +224,22 @@ class FiregateLogin(QWidget):
             #configuring firewall according to rules
             if sys.platform.startswith('linux'): #iptables for linux
                 print("Linux machine detected. Configuring iptables...")
-                IptablesHandler.initialize(port)
-                for r in rules["firewallRules"]:
-                    if r["direction"] == "incoming":
+                IptablesHandler.initialize(8080)
+                #sort rules according to priority
+                firewallRules = sorted(firewallRules, key=lambda rule: rule["priority"])
+                for r in firewallRules:
+                    if r["direction"]:
                         IptablesHandler.createRule(r, True)
-                    elif r["direction"] == "outgoing":
-                        IptablesHandler.createRule(r, False)
                     else:
-                        print("Error: Unrecognized firewall rule direction")
+                        IptablesHandler.createRule(r, False)
             elif sys.platform == 'win32': #windows firewall for windows
                 print("Windows detected. Configuring windows firewall...\n" +
                  "Note that windows firewall behaves differently from regular firewalls, and can lead to weird behaviour")
                 WindowsFirewallHandler.setRules(rules)
 
         #spin up the proxy server
-        self.proxyServerP = subprocess.Popen(["mitmdump", "-p", str(8080), "-s", "proxyscript.py"],
-         creationflags=subprocess.CREATE_NEW_CONSOLE)
+        self.proxyServerP = subprocess.Popen(["mitmdump", "-s", "proxyscript.py", "--no-http2"])
+        atexit.register(self.stopProxyServer)
         atexit.register(self.proxyServerP.terminate)
 
         #update display
@@ -244,10 +248,15 @@ class FiregateLogin(QWidget):
 
     #edit registry keys again and stop proxy server
     def stopProxyServer(self):
-        subprocess.run(["reg", "add",
-        "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
-        "/v", "ProxyEnable", "/t", "REG_DWORD", "/d", "0", "/f"])
-
+        if sys.platform == 'win32':
+            subprocess.run(["reg", "add",
+            "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+            "/v", "ProxyEnable", "/t", "REG_DWORD", "/d", "0", "/f"])
+            subprocess.run(["reg", "add",
+            "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings",
+            "/v", "AutoDetect", "/t", "REG_DWORD", "/d", "0", "/f"])
+        elif sys.platform.startswith('linux'):
+            ()
         ps = self.proxyServerP
         if ps is not None: ps.terminate()
 

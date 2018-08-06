@@ -4,9 +4,11 @@ const axios = require('axios');
 const cors = require('cors')({ origin: true });
 const path = require('path');
 // const bodyParser = require('body-parser');
-const config = require('./modules/config').config;
+const config = require('./modules/config.js').config;
 const InputValidator = require('./modules/InputValidator').default;
 firebase.initializeApp(config);
+var dbc = require('fs').readFileSync('../proxy.config');
+var dbConfig = JSON.parse(dbc);
 
 const app = express();
 const db = firebase.firestore();
@@ -28,7 +30,7 @@ console.log(`Timezone: ${dateString.substring(dateString.indexOf("GMT"))}`);
 
 app.set('view engine', 'pug')
 app.get('/blocked', (req, res) => {
-  res.redirect('http://localhost:3000/b?reason=' + encodeURIComponent(req.query.reason));
+  res.redirect('http://' + dbConfig["nodeClientAddress"] + ':'+ dbConfig["nodeClientPort"] + '/b?reason=' + encodeURIComponent(req.query.reason));
 });
 
 app.get("/b", (req, res) => {
@@ -43,13 +45,12 @@ app.get("/images/:picture", (req, res) => {
 
 app.get("/logs", (req, res) => {
   var MongoClient = require('mongodb').MongoClient;
-  var url = "mongodb://localhost:27017/";
+  var url = dbConfig.proxyDBUrl;
   MongoClient.connect(url, function(err, db) {
     if (err) throw err;
     var logdb = db.db("logDatabase");
     var usersCol = logdb.collection("users");
     var userLog = usersCol.find({}).toArray((err, result) => {
-      console.log(result)
       res.render("logs", {
         "logs" : JSON.stringify(result)
       });
@@ -64,6 +65,21 @@ app.get("/styles/:style", (req, res) => {
 
 app.get("/scripts/:script", (req, res) => {
   res.sendFile(__dirname + "/scripts/" + req.params.script)
+});
+
+app.get("/clearlogs", (req, res) => {
+  var MongoClient = require('mongodb').MongoClient;
+  var url = dbConfig["proxyDBUrl"];
+  MongoClient.connect(url, function(err, db) {
+    if(err) throw err;
+    var logdb = db.db("logDatabase");
+    var usersCol = logdb.collection("users");
+    //clear logs
+    usersCol.remove({}, (err, noRemoved) => {
+      if(err) res.send("failure");
+      else res.send("success");
+    });
+  });
 });
 
 app.post('/login', (request, response) => {
@@ -107,14 +123,14 @@ firebase.auth().onAuthStateChanged(user => {
                 rules_final = ruleJsons;
                 console.log(`${datestring()} [+] Retrieved rules successfully`);
             });
-    
+
             db.doc(`/users/${uid}/filters/filter`)
             .onSnapshot(filterDoc => {
                 console.log(`${datestring()} [+] Retrieving filters...`);
                 filter_final = filterDoc.data();
                 console.log(`${datestring()} [+] Retrieved filters sucessfully`);
             });
-    
+
             db.doc(`/users/${uid}/options/global`)
             .onSnapshot(optionsDoc => {
                 console.log(`${datestring()} [+] Retrieving options...`);

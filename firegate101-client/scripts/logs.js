@@ -1,14 +1,35 @@
+function clearLogs() {
+  if(confirm("Are you sure? There is no way to recover the logs")) {
+    //send html request
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open("GET", "/clearlogs",false);
+    xmlHttp.send(null);
+    if(xmlHttp.responseText == "success") {
+      alert("Logs cleared!");
+      location.reload(true);
+    } else {
+      alert("Something went wrong...Logs not cleared");
+    }
+  };
+}
+
 window.onload = function () {
   domainsVisited();
   securityEvents();
+  //no timeline implementation because it's the Saturday before the final presentation
+  //and I am so done with everything related to this project already
 }
 
 function securityEvents() {
+  if(logs.length <= 0) {
+    document.getElementById("visited-domains-container").innerHTML = "<div style='margin:auto;width:50%;padding:10px;'>No logs found!</div>";
+    return;
+  }
   for(var i = 0; i < logs.length; i++) {
     var ip = logs[i]["_id"];
     //add a tab for this ip
     a = document.createElement("a");
-    a.class = "mdl-tabs__tab";
+    a.className = "mdl-tabs__tab";
     a["data-toggle"] = "tab";
     a.href = "#security-" + i;
     a.appendChild(document.createTextNode(ip));
@@ -17,7 +38,6 @@ function securityEvents() {
     //element containing the tab content for said ip
     d = document.createElement("div");
     d.id = "security-" + i;
-    d.class = "mdl-tabs__panel";
     d.innerHTML = '\
       <div class="mdl-card" id="blockedDomains">\
         <div class="mdl-card__title">\
@@ -33,16 +53,17 @@ function securityEvents() {
       </div>\
       <div class="mdl-card" id="childUnsafe">\
           <div class="mdl-card__title">\
-              <p class="mdl-card__title-text">Domains deemed child unsafe by our checks (if enabled)</h2>\
+              <p class="mdl-card__title-text">Child unfriendly sites</h2>\
           </div>\
           <div class="mdl-card__supporting-text" id="security-cud-text-' + i +'"></div>\
       </div>\
       <div class="mdl-card" id="downloadedFile">\
           <div class="mdl-card__title">\
-              <p class="mdl-card__title-text">Times a file was downloaded</h2>\
+              <p class="mdl-card__title-text">Files downloaded</h2>\
           </div>\
           <div id="security-download-file-' + i + '"\
       </div>\
+      <hr>\
     ';
     //add it to the webpage
     document.getElementById("security-events-tab").appendChild(d);
@@ -90,11 +111,16 @@ function securityEvents() {
     cudt.innerHTML = cudt2;
 
     //downloaded files. different from the rest
-    for(de in e["downloadedFile"]) {
-      deo = e["downloadedFile"][de];
+    //combine downloadedFile and maliciousFile because I can't be assed any more
+    var adf = [];
+    adf  = adf.concat(e.downloadedFile).concat(e.maliciousFile).sort((a, b) => {
+      return a.time - b.time
+    });
+
+    for(de in adf) {
+      deo = adf[de];
       //create a new card for each download
       var dec = document.createElement("div");
-      dec.class = "mdl-card";
       //adding data as text display
       var datetime = new Date(deo.time);
       display = ""
@@ -103,6 +129,22 @@ function securityEvents() {
       display += "Domain: " + deo.domain + "<br>";
       display += "Safe: " + ((deo.safe)? "Yes" : "No") + "<br>";
       dec.innerHTML = display;
+      dec.id = "security-download-file-div";
+      dec.style["background-color"] = deo.safe? "#d1ffc1": "#ffc1cc";
+      dec.style.padding = "10px";
+      dec.style.margin = "10px";
+      dec.style.width = "80%";
+
+      var safeImg = document.createElement("img");
+      safeImg.style.width = "50px";
+      safeImg.style.height = "50px";
+      safeImg.style.float = "right";
+      if(deo.safe) {
+        safeImg.src = "/images/safe.png";
+      } else {
+        safeImg.src = "/images/unsafe.png"
+      }
+      dec.prepend(safeImg);
 
       //add to DOM
       document.getElementById("security-download-file-" + i).appendChild(dec);
@@ -111,6 +153,10 @@ function securityEvents() {
 }
 
 function domainsVisited() {
+  if(logs.length <= 0) {
+    document.getElementById("visited-domains-container").innerHTML = "<div style='margin:auto;width:50%;padding:10px;'>No logs found!</div>";
+    return;
+  }
   for (var i = 0; i < logs.length; i++) {
     //set values
     var ip = logs[i]["_id"];

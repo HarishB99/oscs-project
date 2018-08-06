@@ -46,15 +46,16 @@ categories = {
     '501': 'Positive: Good site'
 }
 
-with open("../data/proxy.config") as proxyConfigFile:
+with open("../../proxy.config") as proxyConfigFile:
     config = json.load(proxyConfigFile)
 
 #spin up mongo server
-mongoServerP = subprocess.Popen([config["mongo"], "--dbpath", "../data/mongodb"],
-    creationflags=subprocess.CREATE_NEW_CONSOLE)
-#close mongo server on exit
-import atexit
-atexit.register(mongoServerP.terminate)
+if not sys.platform.startswith('linux'):
+    mongoServerP = subprocess.Popen([config["winMongoPath"], "--dbpath", "../data/mongodb"],
+        creationflags=subprocess.CREATE_NEW_CONSOLE)
+    #close mongo server on exit
+    import atexit
+    atexit.register(mongoServerP.terminate)
 
 
 checkedDomains = {}
@@ -83,7 +84,7 @@ test_rules = False
 def load(l):
     #build hash table of domains to block
     addDomainsF("../data/ad-domains-full.txt", "ad")
-    addDomainsF("../data/malicious-domains-list.txt", "malicious")
+    addDomainsF("../data/malicious-domains.txt", "malicious")
 
     #load user defined domains
     if test_rules:
@@ -124,8 +125,16 @@ def load(l):
     else:
         options["virus-scan"] = False
 
+    print(json.dumps(options, indent=4))
+
     #get domain groups
-    if "domainGroups" in r: addDomainGroup(r["domainGroups"])
+    #reformat data again
+    domainGroups = [];
+    if "fakeNews" in r and r["fakeNews"]: domainGroups.append("fakeNews")
+    if "gambling" in r and r["gambling"]: domainGroups.append("gambling")
+    if "socialMedia" in r and r["socialMedia"]: domainGroups.append("socialMedia")
+    if "pornography" in r and r["pornography"]: domainGroups.append("pornography")
+    addDomainGroup(domainGroups)
     #add user-defined domains
     if "blacklist" in r:
         for domain in r["blacklist"]:
@@ -146,6 +155,7 @@ def request(flow):
         return
 
     #get ip of requester
+    print(flow.client_conn.ip_address)
     ip = flow.client_conn.ip_address[0][7:]
     LogDatabase.request(ip, d)
 
@@ -252,7 +262,7 @@ def request(flow):
             for reason in sc["reason"]:
                 r += reason
             b = {"reason" : r}
-            flow.request.url = "http://localhost:3000/blocked?" + urllib.parse.urlencode(b)
+            flow.request.url = "http://" + config["nodeClientAddress"] + ":" + config["nodeClientPort"] + "/blocked?" + urllib.parse.urlencode(b)
     else:
         print("SAFE DOMAIN-----------"+d)
 

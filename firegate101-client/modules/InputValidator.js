@@ -14,10 +14,10 @@ InputValidator.isAReasonablyStrongPassword = function(input) {
     const has2Digits = input.match(/[0-9]/g) ? input.match(/[0-9]/g).length >= 2 : false;
     const has1Symbol = input.match(/[!@#$%^&*]/g) ? input.match(/[!@#$%^&*]/g).length >= 1 : false;
     const is8CharsLong = input ? input.length >= 8 : false;
-    return has2Caps && 
-            has2Smalls && 
-            has2Digits && 
-            has1Symbol && 
+    return has2Caps &&
+            has2Smalls &&
+            has2Digits &&
+            has1Symbol &&
             is8CharsLong;
 };
 InputValidator.isValidOrgName = function(input) {
@@ -78,4 +78,4 @@ InputValidator.isValidDomain = function(input) {
     return toBeValidated.startsWith('.') ? domainStartWithDot.test(toBeValidated) : domain.test(toBeValidated);
 };
 
-export default InputValidator;
+module.exports.default = InputValidator;
