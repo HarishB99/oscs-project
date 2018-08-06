@@ -137,7 +137,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged(user => {
                             } else if (err.code === 'auth/network-request-failed' || err.message === 'Network Error') {
                                 UIUtils.showSnackbar('Please check your network connection and try again.');
                             } else {
-                                console.log(error);
+                                // console.log(error);
                                 UIUtils.showSnackbar('An unexpected error occurred. Please try again later.');
                             }
                             lock = false;
