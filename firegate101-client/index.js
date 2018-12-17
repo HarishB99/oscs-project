@@ -86,7 +86,7 @@ app.post('/login', (request, response) => {
     response.set('Accept', 'application/json');
 
     // For POST'
-    console.log(request.body)
+    // console.log(request.body)
     const { email, password } = request.body;
 
     if (InputValidator.isValidEmail(email) && InputValidator.isAReasonablyStrongPassword(password)) {
