@@ -7,12 +7,19 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot, Qt
 from PyQt5 import QtGui
 
-#spawn firegate client server
 os.chdir("../../firegate101-client")
+def killnode():
+    subprocess.run(["killall","node"])
+    subprocess.run(["killall","mongod"])
+
+#spawn firegate client server
 if not sys.platform.startswith('linux'):
     firegateClientP = subprocess.Popen(["node", "index.js"],
-     shell=True)
+    shell=True)
     atexit.register(firegateClientP.terminate)
+else:
+    atexit.register(killnode)
+
 
 os.chdir("../proxyclient/scripts")
 class FiregateLogin(QWidget):
@@ -105,6 +112,11 @@ class FiregateLogin(QWidget):
 
         self.proxyToggle.addWidget(self.startProxy)
         self.proxyToggle.addWidget(self.stopProxy)
+
+        #Restart button
+        self.restartProxyB = QPushButton("Restart Proxy", self)
+        self.restartProxyB.clicked.connect(self.restartProxy)
+	
         #Hbox for the two buttons
         bottomRow = QHBoxLayout()
         bottomRow.addWidget(self.editRules)
@@ -114,8 +126,13 @@ class FiregateLogin(QWidget):
         loginSuccessLayout = QVBoxLayout()
         loginSuccessLayout.addWidget(self.imageStack, Qt.AlignCenter)
         loginSuccessLayout.addWidget(lsText)
+        # IMPORTANT Comment these two lines if need 
+        # to remove these buttons
         loginSuccessLayout.addWidget(self.editRules)
         loginSuccessLayout.addWidget(self.proxyToggle)
+        # IMPORTANT Comment these two lines if need 
+        # to remove these buttons
+        loginSuccessLayout.addWidget(self.restartProxyB)
 
 
         self.loginSuccess.setLayout(loginSuccessLayout)
@@ -132,6 +149,12 @@ class FiregateLogin(QWidget):
         self.stack.setCurrentIndex(0)
         self.show()
 
+
+    #Restart proxy function
+    def restartProxy(self): 
+        self.stopProxyServer()
+        time.sleep(5)
+        self.startProxyServer()
 
     #center application in the middle of the screen
     def center(self):
